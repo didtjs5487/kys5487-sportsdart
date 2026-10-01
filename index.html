@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0F766E">
+<title>스포츠다트 리그</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="다트리그">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EEF3F2; --panel:#FFFFFF; --soft:#E3ECEA; --line:#C9D6D3;
+    --ink:#14211F; --sub:#4A5D59; --pri:#0F766E; --pri2:#0B5E58; --priSoft:#D5EEEA;
+    --cu:#C2410C; --cuSoft:#FDE6D8; --x3:#1D4ED8; --x3Soft:#DCE6FD;
+    --good:#15803D; --bad:#B91C1C; --warn:#A16207; --warnSoft:#FEF3C7;
+    --r1:#B8860B; --r1Soft:#FFF1C2;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg); color:var(--ink); font-family:"Noto Sans KR",system-ui,sans-serif; font-size:18px; line-height:1.5;
+    -webkit-text-size-adjust:100%; padding-bottom:40px}
+  button,input,select,textarea{font:inherit; color:inherit}
+  button{cursor:pointer}
+  .wrap{max-width:1100px; margin:0 auto; padding:0 16px}
+
+  header{background:var(--pri); color:#fff; position:sticky; top:0; z-index:20; box-shadow:0 2px 8px rgba(0,0,0,.15)}
+  header .wrap{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding-top:10px; padding-bottom:10px}
+  header h1{margin:0; font-size:24px; font-weight:800; white-space:nowrap}
+  header select{background:#fff; color:var(--ink); border:0; border-radius:12px; font-size:20px; font-weight:800; padding:8px 12px; min-height:50px}
+  #status{margin-left:auto; font-size:15px; background:rgba(255,255,255,.16); border-radius:999px; padding:6px 14px; white-space:nowrap}
+
+  nav{display:flex; gap:6px; overflow-x:auto; padding:12px 0 0}
+  nav button{flex:1 0 auto; min-height:54px; border:0; border-radius:14px 14px 0 0; background:var(--soft); color:var(--sub);
+    font-size:18px; font-weight:800; padding:0 18px}
+  nav button.on{background:var(--panel); color:var(--pri)}
+  main{background:var(--panel); border-radius:0 0 16px 16px; padding:18px 16px 24px; min-height:60vh}
+
+  h2{font-size:23px; margin:4px 0 12px}
+  h3{font-size:20px; margin:18px 0 10px}
+  .hint{color:var(--sub); font-size:16px; margin:6px 0 12px}
+  .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+  .sp{flex:1}
+  .btn{min-height:52px; border:0; border-radius:14px; padding:0 18px; font-size:18px; font-weight:800; background:var(--soft); color:var(--ink)}
+  .btn.pri{background:var(--pri); color:#fff}
+  .btn.ghost{background:transparent; border:2px solid var(--line)}
+  .btn.danger{background:#FDE2E2; color:var(--bad)}
+  .btn.big{min-height:60px; font-size:20px; padding:0 26px}
+  .btn:disabled{opacity:.4; cursor:default}
+  input[type=text],input[type=number],select,textarea{border:2px solid var(--line); border-radius:12px; background:#fff; padding:10px 12px; font-size:18px; min-height:52px}
+  textarea{width:100%; min-height:150px; font-size:16px; line-height:1.45}
+  .card{border:2px solid var(--line); border-radius:16px; padding:14px; background:#fff}
+  .note{background:var(--warnSoft); border-radius:12px; padding:12px 14px; font-size:16px; margin:10px 0}
+  .ok{color:var(--good)} .bad{color:var(--bad)}
+
+  /* 스테이지·라운드 고르기 */
+  .seg{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px}
+  .seg button{min-height:54px; border:2px solid var(--line); background:#fff; border-radius:14px; padding:0 20px; font-size:19px; font-weight:800; color:var(--sub)}
+  .seg button.on.cu{background:var(--cu); border-color:var(--cu); color:#fff}
+  .seg button.on.x3{background:var(--x3); border-color:var(--x3); color:#fff}
+  .seg button.on.plain{background:var(--pri); border-color:var(--pri); color:#fff}
+  .seg button .done{font-size:15px; font-weight:600; margin-left:6px; opacity:.85}
+
+  /* 명렬 */
+  .stuGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:10px}
+  .stu{display:flex; align-items:center; gap:8px; border:2px solid var(--line); border-radius:14px; background:#fff; min-height:60px; padding:6px 6px 6px 12px}
+  .stu .nm{flex:1; text-align:left; border:0; background:transparent; font-size:19px; font-weight:800; min-height:50px; padding:0}
+  .stu .nm small{display:block; font-size:14px; font-weight:600; color:var(--sub)}
+  .stu.abs{background:#F3F4F6; border-style:dashed}
+  .stu.abs .nm{color:#9CA3AF; text-decoration:line-through}
+  .star{width:50px; height:50px; border-radius:12px; border:0; background:var(--soft); font-size:22px; color:#9CA3AF}
+  .star.on{background:var(--r1Soft); color:var(--r1)}
+
+  /* 조 */
+  .grpGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px}
+  .grp{border:2px solid var(--line); border-radius:16px; padding:12px; background:#fff}
+  .grp.cu{border-color:#F3C3A4} .grp.x3{border-color:#AFC4F7}
+  .grp h4{margin:0 0 8px; font-size:21px; display:flex; align-items:center; gap:8px}
+  .tag{font-size:15px; font-weight:800; border-radius:8px; padding:2px 8px; background:var(--soft); color:var(--sub)}
+  .chips{display:flex; flex-direction:column; gap:6px}
+  .chip{display:flex; align-items:center; gap:8px; min-height:52px; border:2px solid var(--line); border-radius:12px; background:#fff;
+    padding:0 12px; font-size:19px; font-weight:800; text-align:left; width:100%}
+  .sx{display:inline-block; font-size:14px; font-weight:800; color:#BE185D; background:#FCE7F3; border-radius:6px; padding:0 6px; margin-left:4px; vertical-align:2px}
+.boards{display:grid; grid-template-columns:repeat(10,1fr); gap:6px}
+  .bd{min-height:58px; border:2px solid var(--line); border-radius:12px; background:#fff; font-size:22px; font-weight:800; color:#9CA3AF; line-height:1.1; padding:2px}
+  .bd small{display:block; font-size:13px; font-weight:600}
+  .bd.on{background:var(--pri); border-color:var(--pri); color:#fff}
+  .bd.clash{background:var(--bad); border-color:var(--bad)}
+  .bd.dead{background:#F3F4F6; color:#C4C9CF; border-style:dashed; text-decoration:line-through}
+  .bd.pw.on{background:var(--good); border-color:var(--good); color:#fff}
+  .bd.pw.off{background:#F3F4F6; color:#9CA3AF; border-style:dashed}
+  @media (max-width:560px){ .boards{grid-template-columns:repeat(5,1fr)!important} }
+.go{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px}
+  .go .btn{min-height:68px; font-size:22px}
+  .btn.alt{background:var(--cu)}
+  details.setup{margin-bottom:14px}
+  details.setup summary{cursor:pointer; min-height:52px; display:flex; align-items:center; font-size:18px; font-weight:800; color:var(--sub); border:2px dashed var(--line); border-radius:14px; padding:0 14px; margin-bottom:10px; list-style:none}
+  details.setup[open] summary{color:var(--pri)}
+  .banner{display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:#DCFCE7; border:2px solid var(--good); border-radius:14px; padding:12px 14px; margin-bottom:12px; font-size:19px; font-weight:800; color:var(--good)}
+  .banner .btn{margin-left:auto}
+  .ecard.focus{box-shadow:0 0 0 4px var(--cu); border-color:var(--cu)}
+.selBar{position:sticky; top:76px; z-index:10; display:flex; gap:10px; align-items:center; flex-wrap:wrap; background:var(--priSoft); border:2px solid var(--pri); border-radius:14px; padding:10px 12px; margin-bottom:12px; font-size:17px}
+  .selBar b:first-child{font-size:19px}
+.absGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px}
+  .absBtn{min-height:52px; border:2px solid var(--line); border-radius:12px; background:#fff; font-size:17px; font-weight:800; text-align:left; padding:4px 10px}
+  .absBtn small{display:block; font-size:14px; color:var(--bad)}
+  .absBtn.out{background:#FDE2E2; border-color:var(--bad); color:var(--bad); text-decoration:line-through}
+  .chip .no{color:var(--sub); font-weight:600; min-width:28px}
+  .chip .info{margin-left:auto; font-size:15px; font-weight:600; color:var(--sub)}
+  .chip.sel{border-color:var(--pri); background:var(--priSoft); box-shadow:0 0 0 3px var(--priSoft)}
+  .chip.abs{color:#9CA3AF; border-style:dashed}
+  .moveHere{margin-top:8px; width:100%}
+
+  /* 경기 입력 */
+  .entryGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(330px,1fr)); gap:14px}
+  .ecard{border:2px solid var(--line); border-radius:16px; padding:12px; background:#fff}
+  .ecard.done{border-color:var(--good); box-shadow:0 0 0 2px #CDEBD6 inset}
+  .ecard h4{margin:0 0 6px; font-size:21px; display:flex; align-items:center; gap:8px}
+  .ecard h4 .st{margin-left:auto; font-size:15px; font-weight:800}
+  .prow{display:grid; grid-template-columns:1fr 104px; grid-template-rows:auto auto; gap:6px 8px; padding:8px 0; border-top:1px solid var(--soft)}
+  .prow:first-of-type{border-top:0}
+  .prow .who{font-size:19px; font-weight:800; align-self:center}
+  .prow .who small{font-weight:600; color:var(--sub); font-size:15px; margin-right:4px}
+  .prow input{width:104px; text-align:center; font-size:22px; font-weight:800; padding:6px}
+  .ranks{grid-column:1 / -1; display:flex; gap:6px; align-items:center}
+  .ranks button{flex:1; min-height:50px; border:2px solid var(--line); border-radius:12px; background:#fff; font-size:18px; font-weight:800; color:var(--sub)}
+  .ranks button.on{background:var(--pri); border-color:var(--pri); color:#fff}
+  .ranks button.on.r1{background:var(--r1); border-color:var(--r1)}
+  .ranks .pts{min-width:62px; text-align:right; font-size:16px; font-weight:800; color:var(--pri)}
+  .prow.abs .who{color:#9CA3AF}
+  .prow.abs .ranks{display:none}
+  .ecard .foot{display:flex; gap:8px; margin-top:8px; flex-wrap:wrap}
+  .ecard .foot .btn{min-height:50px; font-size:16px; padding:0 14px}
+  .pickList{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0}
+  .pickList button{min-height:50px; border:2px dashed var(--warn); background:var(--warnSoft); border-radius:12px; padding:0 14px; font-size:17px; font-weight:800}
+
+  /* 순위·성적 */
+  .tblWrap{overflow-x:auto; border:2px solid var(--line); border-radius:14px}
+  table{border-collapse:collapse; width:100%; font-size:17px; white-space:nowrap}
+  th,td{border-bottom:1px solid var(--soft); padding:8px 8px; text-align:center}
+  th{background:var(--soft); font-size:16px; position:sticky; top:0}
+  th.cu{background:var(--cuSoft)} th.x3{background:var(--x3Soft)}
+  td.nm{text-align:left; font-weight:800}
+  td.miss{background:var(--warnSoft); color:var(--warn); font-weight:800}
+  td.sum{font-weight:800}
+  td.grade{font-weight:800; font-size:20px; color:var(--pri)}
+  .tk{min-width:50px; min-height:46px; border:2px solid var(--line); border-radius:10px; background:#fff; font-size:15px; font-weight:800; color:#9CA3AF; margin:0 2px}
+  .tk.on{background:var(--good); border-color:var(--good); color:#fff}
+
+  /* 크게 보기 */
+  #big{position:fixed; inset:0; background:#0B1A18; color:#fff; z-index:50; overflow:auto; padding:20px 16px; display:none}
+  #big.show{display:block}
+  #big h2{font-size:34px; margin:0 0 16px; display:flex; align-items:center; gap:12px}
+  #big .bgGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px}
+  #big .bg{background:#15302C; border-radius:16px; padding:14px 16px}
+  #big .bg b{display:block; font-size:28px; color:#5EEAD4; margin-bottom:6px}
+  #big .bg div{font-size:28px; font-weight:800; line-height:1.45}
+  #big .close{margin-left:auto; background:#fff; color:#000}
+  #big .bigTop{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:12px}
+  #big .bigTop h2{margin:0; font-size:32px}
+  #big .bigTop button{min-height:50px; border-radius:12px; border:2px solid #2C5C55; background:transparent; color:#CFE9E4; font-size:18px; font-weight:800; padding:0 14px}
+  #big .bigTop button.on{background:#5EEAD4; border-color:#5EEAD4; color:#062A25}
+  #big .arena{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; min-height:calc(100vh - 120px); grid-auto-rows:1fr}
+  #big .bd2{background:#15302C; border-radius:18px; padding:12px 14px; display:flex; flex-direction:column; min-width:0; border:3px solid transparent}
+  #big .bd2.empty{opacity:.35}
+  #big .bd2[data-act]{cursor:pointer}
+  #big .bd2[data-act]:hover{border-color:#5EEAD4}
+  #big .bd2.clash{border-color:#F87171}
+  #big .bd2 .hd{display:flex; align-items:center; gap:10px; margin-bottom:6px}
+  #big .bd2 .n{width:58px; height:58px; border-radius:50%; background:#5EEAD4; color:#062A25; font-size:32px; font-weight:800; display:flex; align-items:center; justify-content:center; flex:none}
+  #big .bd2 .c{font-size:20px; font-weight:800; color:#FCD34D; line-height:1.2}
+  #big .bd2 .nm{font-size:clamp(22px,2.3vw,36px); font-weight:800; line-height:1.35; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  #big .bd2 .nm .sx{font-size:16px; vertical-align:4px}
+  #big .bd2 .nx{margin-top:auto; padding-top:8px; border-top:2px dashed #2C5C55; font-size:18px; font-weight:700; color:#FCD34D; line-height:1.4}
+  @media (max-width:900px){ #big .arena{grid-template-columns:repeat(2,1fr); min-height:0} }
+
+  #toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:#14211F; color:#fff; padding:14px 22px; border-radius:14px;
+    font-size:18px; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; max-width:90vw; text-align:center}
+  #toast.show{opacity:1}
+  .qr{background:#fff; padding:10px; display:inline-block; border-radius:12px; border:2px solid var(--line)}
+  code{background:var(--soft); padding:2px 6px; border-radius:6px; font-size:15px}
+  pre{background:var(--soft); padding:12px; border-radius:12px; font-size:15px; overflow-x:auto}
+  .rules td,.rules th{white-space:normal}
+  @media (max-width:560px){
+    header h1{font-size:20px}
+    #status{margin-left:0}
+    .entryGrid{grid-template-columns:1fr}
+  }
+  @media print{
+    header,nav,.noprint{display:none!important}
+    main{padding:0}
+    body{background:#fff}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>🎯 스포츠다트 리그</h1>
+    <select id="clsSel" aria-label="반 선택"></select>
+    <span id="status">⚪ 연결 중…</span>
+  </div>
+</header>
+<div class="wrap">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+<div id="big"></div>
+<div id="toast"></div>
+
+<script type="module">
+/* =========================================================
+   스포츠다트 리그 — 1학년 체육2 (2026-2학기)
+   다트 기계 태블릿은 게스트 경기라 결과가 남지 않는다.
+   경기가 끝나면 태블릿 화면의 점수·순위를 여기에 옮겨 적고,
+   조 편성·승점·평가 점수까지 한 번에 관리한다.
+
+   기준: 2026학년도 2학기 교수학습 및 평가운영 계획(1학년 체육2) — 3) 스포츠다트
+   ========================================================= */
+const CFG = {
+  size: 4,                 // 최대 4명씩 조 편성
+  rounds: 3,               // 3라운드 실시하여 승점 합산
+  boards: 10,              // 다트기 기본 대수 — 설정은 S.settings.count / 고장·미설치는 S.settings.off
+  maxGroup: 5,             // 다트가 모자랄 때만 5명 조까지
+  // 조별 순위 승점 — 1등 4점·꼴찌 1점은 몇 명 조든 같게, 가운데는 고르게 나눠 반올림.
+  // 3명 4·3·1 / 4명 4·3·2·1(평가계획서) / 5명 4·3·3·2·1. 결석으로 인원이 줄어도 실제 던진 인원 기준.
+  // 합산 승점 → 영역 점수 (Ⓐ·Ⓑ 같음)
+  conv: [[10, 10], [8, 8], [6, 6], [4, 4], [0, 2]],
+  // Ⓐ+Ⓑ+Ⓒ → 최종 점수 (기본 점수 8점)
+  total: [[16, 20], [14, 18], [12, 16], [10, 14], [8, 12], [5, 10], [0, 8]],
+};
+const STAGES = {
+  cu: { name: "카운트 업", mark: "Ⓐ", better: "high", vLabel: "점수", hint: "태블릿에 나온 최종 점수를 적으면 순위가 자동으로 매겨집니다." },
+  x3: { name: "301 게임", mark: "Ⓑ", better: "low", vLabel: "남은점수", hint: "태블릿의 최종 순위를 누르세요. 남은 점수는 적어도 되고 안 적어도 됩니다." },
+};
+const TASKS = [["p", "준비·정리"], ["j", "경기 진행"], ["s", "심판"]];
+
+/* 스포츠다트 전용 Firebase 프로젝트 (kys5487-darts, 2026-10-01 생성). 기록은 darts 아래에 저장 */
+const FB_CFG = {
+  apiKey: "AIzaSyDit6lr3mUwAhQuOixwvnIJKIddW89dtss",
+  authDomain: "kys5487-darts.firebaseapp.com",
+  databaseURL: "https://kys5487-darts-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "kys5487-darts",
+  storageBucket: "kys5487-darts.firebasestorage.app",
+  messagingSenderId: "425504185432",
+  appId: "1:425504185432:web:be6f66478a1202fdf33e2d",
+};
+const ROOT = "darts";
+
+/* ---------- 작은 도구 ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const lsGet = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const numSort = (a, b) => String(a).localeCompare(String(b), "ko", { numeric: true });
+let toastT;
+function toast(msg) { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2200); }
+
+/* ---------- 상태 ----------
+   S.rosters[반] = [{no,name,sex,seed}]
+   S.classes[반] = { absent:{sid:true}, groups:{cu|x3:{list:[{m:[sid],tag}],method,ts}},
+                    games:{cu|x3:{r1:{g0:{sid:{v,r,m}}, mk:{…}}}}, task:{sid:{p,j,s}} }   */
+const TEST = new URLSearchParams(location.search).has("local") ? "-test" : "";
+const LS = "darts-v1" + TEST, LSP = "darts-pending-v1" + TEST, LSU = "darts-ui-v1" + TEST;
+let S = lsGet(LS) || {};
+S.rosters ||= {}; S.classes ||= {}; S.settings ||= {};
+let pending = new Set(lsGet(LSP) || []);
+const params = new URLSearchParams(location.search);
+const VIEW = params.has("view");                 // 학생용 보기 전용
+const GRP = params.get("grp");                   // 조 입력 전용 링크 (?cls=1-3&grp=2)
+const ui = Object.assign({ tab: "groups", cls: "", stage: "cu", round: 1, sel: null, method: { cu: "seed", x3: "grank" }, split: false, sort: "no", gsort: "best" }, lsGet(LSU) || {});
+ui.sel = null; ui.open = {};   // 접는 칸(오늘 빠지는 학생·편성 설정)을 열어 둔 채로 고를 수 있게
+if (params.get("cls")) ui.cls = params.get("cls");
+if (VIEW) ui.tab = ui.tab === "roster" || ui.tab === "set" ? "groups" : ui.tab;
+if (GRP != null) ui.tab = "entry";
+const saveUI = () => lsSet(LSU, { tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gsort: ui.gsort, bigCls: ui.bigCls, fit: ui.fit });
+
+function getAt(o, path) { for (const k of path.split("/")) { if (o == null) return undefined; o = o[k]; } return o; }
+function setAt(o, path, v) {
+  const ks = path.split("/"), last = ks.pop();
+  for (const k of ks) { if (o[k] == null || typeof o[k] !== "object") o[k] = {}; o = o[k]; }
+  if (v == null) delete o[last]; else o[last] = v;
+}
+const clean = v => v == null ? null : JSON.parse(JSON.stringify(v));
+
+/* 모든 저장은 put 하나로 — 먼저 이 기기에 저장하고, 서버로 보낸다.
+   서버에 못 가면 pending 에 남겨 두었다가 연결되면 다시 보낸다. */
+function put(path, v, quiet) {
+  setAt(S, path, clean(v));
+  lsSet(LS, S);
+  pending.add(path); lsSet(LSP, [...pending]);
+  push(path);
+  if (!quiet) render();
+}
+function push(path) {
+  if (!fdb) return;
+  const v = clean(getAt(S, path));
+  fmod.set(fmod.ref(fdb, ROOT + "/" + path), v === undefined ? null : v)
+    .then(() => { pending.delete(path); lsSet(LSP, [...pending]); updStatus(); })
+    .catch(() => { serverDenied = true; updStatus(); });
+}
+
+/* ---------- Firebase ---------- */
+let fdb = null, fmod = null, online = false, serverDenied = false, serverSeen = false;
+function updStatus() {
+  const el = $("status");
+  if (!fdb) { el.textContent = "🟡 이 기기에만 저장 중"; return; }
+  if (serverDenied) { el.textContent = "🟡 서버 규칙 필요 · 이 기기에 저장 중"; return; }
+  if (!online) { el.textContent = "🟠 오프라인 · 연결되면 자동 전송"; return; }
+  el.textContent = pending.size ? `🟢 서버 연결 · 전송 중 ${pending.size}` : "🟢 실시간 저장됨";
+}
+async function initFB() {
+  try {
+    const appM = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+    fmod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
+    fdb = fmod.getDatabase(appM.initializeApp(FB_CFG, "darts"));
+    [...pending].forEach(push);
+    fmod.onValue(fmod.ref(fdb, ".info/connected"), s => { online = !!s.val(); updStatus(); });
+    fmod.onValue(fmod.ref(fdb, ROOT), snap => {
+      serverSeen = true; serverDenied = false;
+      const v = snap.val() || {};
+      S = { rosters: v.rosters || {}, classes: v.classes || {}, settings: v.settings || {} };
+      lsSet(LS, S);
+      updStatus(); safeRender();
+    }, () => { serverDenied = true; updStatus(); });
+  } catch (e) { fdb = null; }
+  updStatus();
+}
+/* 입력 중에 다른 기기 결과가 들어와도 글자가 날아가지 않게, 입력칸을 벗어난 뒤 다시 그린다. */
+let renderLater = false;
+function safeRender() {
+  const a = document.activeElement;
+  if (a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && $("main").contains(a)) { renderLater = true; return; }
+  render();
+}
+document.addEventListener("focusout", () => setTimeout(() => { if (renderLater) { renderLater = false; safeRender(); } }, 50));
+
+/* ---------- 명렬 ---------- */
+const classNames = () => Object.keys(S.rosters).sort(numSort);
+const sidOf = st => "s" + String(st.no).padStart(2, "0");
+function roster(cls) { return (S.rosters[cls] || []).slice().sort((a, b) => numSort(a.no, b.no)); }
+function stuMap(cls) { const m = {}; roster(cls).forEach(st => m[sidOf(st)] = st); return m; }
+const C = cls => S.classes[cls] || {};
+const today = () => new Date().toLocaleDateString("sv");   // 2026-10-01
+const absMap = cls => C(cls).absentDay === today() ? (C(cls).absent || {}) : {};
+const isAbs = (cls, sid) => !!absMap(cls)[sid];
+function setAbs(cls, sid, on) {
+  const m = { ...absMap(cls) };
+  if (on) m[sid] = true; else delete m[sid];
+  put(P(cls, "absentDay"), today(), true);
+  put(P(cls, "absent"), Object.keys(m).length ? m : null);
+}
+const P = (...a) => "classes/" + a.join("/");
+
+function parseSimple(text) {
+  const out = [];
+  text.split(/\r?\n/).forEach(line => {
+    const parts = line.trim().split(/[\t,]+|\s+/).filter(Boolean);
+    if (!parts.length) return;
+    let sex = "", seed = false;
+    for (let i = parts.length - 1; i >= 1; i--) {
+      const p = parts[i];
+      if (p === "남" || p === "여") { sex = p; parts.splice(i, 1); }
+      else if (/^(시드|Y|★|\*)$/i.test(p)) { seed = true; parts.splice(i, 1); }
+    }
+    if (parts.length >= 2 && /^\d+$/.test(parts[0])) out.push({ no: parts[0], name: parts.slice(1).join(" "), sex, seed });
+    else out.push({ no: String(out.length + 1), name: parts.join(" "), sex, seed });
+  });
+  return out;
+}
+/* 학년 전체 명렬표(엑셀 복사) — 타바타 앱과 같은 방식: '성명' 열을 기준으로 반을 나눈다 */
+const STATUS_WORDS = ["자퇴", "전출", "위탁", "공석", "휴학"];
+function parseBulk(text) {
+  const rows = text.split(/\r?\n/).map(l => l.split("\t").map(c => c.trim()));
+  const norm = s => (s || "").replace(/\s+/g, "");
+  let hr = -1, nameCols = [];
+  rows.forEach((row, r) => { const cols = []; row.forEach((c, i) => { if (norm(c) === "성명") cols.push(i); }); if (cols.length > nameCols.length) { nameCols = cols; hr = r; } });
+  if (hr < 0) return null;
+  const hdr = rows[hr], noCols = [];
+  hdr.forEach((c, i) => { if (norm(c) === "번호") noCols.push(i); });
+  const res = {};
+  nameCols.forEach(nc => {
+    let noCol = -1; noCols.forEach(c => { if (c < nc && (noCol < 0 || c > noCol)) noCol = c; });
+    const sexCol = norm(hdr[nc + 1]) === "성별" ? nc + 1 : -1;
+    let cls = "";
+    for (let up = hr - 1; up >= 0 && !cls; up--) for (let c = nc; c >= Math.max(0, nc - 2); c--) {
+      const v = (rows[up] && rows[up][c]) || ""; if (/^\s*\d+\s*[-–—]\s*\d+/.test(v)) { cls = norm(v).match(/^\d+[-–—]\d+/)[0].replace(/[–—]/, "-"); break; }
+    }
+    if (!cls) return;
+    const list = [];
+    for (let r = hr + 1; r < rows.length; r++) {
+      const name = (rows[r][nc] || "").trim(), no = noCol >= 0 ? (rows[r][noCol] || "").trim() : "";
+      if (!name && !no) break;
+      if (!name || name === "-") continue;
+      const sx = sexCol >= 0 ? (rows[r][sexCol] || "").trim() : "";
+      if (STATUS_WORDS.includes(sx)) continue;
+      list.push({ no: no || String(list.length + 1), name, sex: sx === "남" || sx === "여" ? sx : "", seed: false });
+    }
+    if (list.length) res[cls] = list;
+  });
+  return Object.keys(res).length ? res : null;
+}
+
+/* ---------- 경기 결과 계산 ---------- */
+const groupsOf = (cls, stage) => (((C(cls).groups || {})[stage] || {}).list || []).map(g => ({ m: (g.m || []).slice(), tag: g.tag || "" }));
+const roundRes = (cls, stage, r) => (((C(cls).games || {})[stage] || {})["r" + r]) || {};
+function ptsOf(rank, n) {
+  if (!(rank >= 1)) return 0;
+  n = Math.max(n || 4, rank);
+  if (n === 1) return 4;
+  return Math.floor(1 + 3 * (n - rank) / (n - 1) + 0.5);
+}
+const ptsRow = n => Array.from({ length: n }, (_, i) => ptsOf(i + 1, n)).join("·");
+/* 이 결과 칸에서 실제로 순위가 매겨진 인원 (보충 경기는 함께 던진 조 인원 n) */
+const playedIn = (res, gk, x) => gk === "mk" ? (x.n || 4) : Object.values(res || {}).filter(y => y && y.r >= 1).length;
+const convArea = sum => CFG.conv.find(([min]) => sum >= min)[1];
+const convTotal = t => CFG.total.find(([min]) => t >= min)[1];
+
+/* 학생 한 명의 영역 기록: 라운드마다 {rank, pts, v} */
+function record(cls, stage, sid) {
+  const rounds = [];
+  for (let r = 1; r <= CFG.rounds; r++) {
+    const rr = roundRes(cls, stage, r);
+    let hit = null;
+    for (const gk in rr) { const x = (rr[gk] || {})[sid]; if (x && x.r >= 1) { const n = playedIn(rr[gk], gk, x); hit = { rank: x.r, n, pts: ptsOf(x.r, n), v: x.v, gk }; break; } }
+    rounds.push(hit);
+  }
+  const played = rounds.filter(Boolean).length;
+  const sum = rounds.reduce((a, x) => a + (x ? x.pts : 0), 0);
+  const vsum = rounds.reduce((a, x) => a + (x && typeof x.v === "number" ? x.v : 0), 0);
+  return { rounds, played, sum, vsum, area: played ? convArea(sum) : 0 };
+}
+function taskPts(cls, sid) { const t = (C(cls).task || {})[sid] || {}; return TASKS.filter(([k]) => t[k]).length; }
+
+/* 한 조 결과의 자동 순위: 점수가 있는 사람끼리 비교, 같은 점수는 같은 순위.
+   직접 누른 순위(m)는 건드리지 않는다. */
+function autoRank(res, better) {
+  const auto = Object.entries(res).filter(([, x]) => !x.m && typeof x.v === "number");
+  auto.forEach(([sid, x]) => {
+    const beat = auto.filter(([, y]) => better === "high" ? y.v > x.v : y.v < x.v).length;
+    x.r = beat + 1;
+  });
+  Object.values(res).forEach(x => { if (!x.m && typeof x.v !== "number") delete x.r; });
+  return res;
+}
+
+/* ---------- 조 편성 ---------- */
+function sizes(n, size, boards, fit) {
+  if (!n) return [];
+  let k = Math.ceil(n / size);
+  if (fit && boards && k > boards) k = Math.max(boards, Math.ceil(n / CFG.maxGroup));   // 다트 수에 맞춰 5명 조 허용
+  const base = Math.floor(n / k), extra = n % k;
+  return Array.from({ length: k }, (_, i) => base + (i < extra ? 1 : 0));
+}
+const fitOn = () => ui.fit !== false;
+function chunk(list, sz) { const out = []; let i = 0; sz.forEach(s => { out.push(list.slice(i, i + s)); i += s; }); return out; }
+/* 카운트업 성적 순으로 줄 세우기 (합산 승점 → 총점 → 무작위) */
+function byCU(cls, list) {
+  const rec = {}; list.forEach(st => rec[sidOf(st)] = record(cls, "cu", sidOf(st)));
+  return shuffle(list).sort((a, b) => { const A = rec[sidOf(a)], B = rec[sidOf(b)]; return B.sum - A.sum || B.vsum - A.vsum; });
+}
+/* 카운트업 '조별 순위'끼리 (각 조 1위끼리, 2위끼리 …) */
+function byGroupRank(cls, list) {
+  const ids = new Set(list.map(sidOf)), place = {};
+  groupsOf(cls, "cu").forEach(g => {
+    const mem = g.m.filter(s => ids.has(s)).map(s => ({ s, ...record(cls, "cu", s) }));
+    shuffle(mem).sort((a, b) => b.sum - a.sum || b.vsum - a.vsum).forEach((x, i) => place[x.s] = i + 1);
+  });
+  const rec = {}; list.forEach(st => rec[sidOf(st)] = record(cls, "cu", sidOf(st)));
+  return shuffle(list).sort((a, b) => (place[sidOf(a)] || 9) - (place[sidOf(b)] || 9) || rec[sidOf(b)].sum - rec[sidOf(a)].sum || rec[sidOf(b)].vsum - rec[sidOf(a)].vsum);
+}
+function makeGroups(cls, stage, method) {
+  const present = roster(cls).filter(st => !isAbs(cls, sidOf(st)));
+  const pools = [["", present]];   // 남녀 구분 없이 편성 — 여학생은 투구거리로 핸디캡
+  const out = [];
+  pools.forEach(([tag, list]) => {
+    const sz = sizes(list.length, CFG.size, boardsOf(cls).length, fitOn());
+    let gs;
+    if (method === "seed") {
+      gs = sz.map(() => []);
+      shuffle(list.filter(s => s.seed)).forEach((s, i) => gs[i % gs.length].push(s));
+      const rest = shuffle(list.filter(s => !s.seed));
+      gs.forEach((g, i) => { while (g.length < sz[i] && rest.length) g.push(rest.pop()); });
+      gs = shuffle(gs);
+    } else {
+      const ordered = method === "random" ? shuffle(list) : method === "no" ? list : method === "rank" ? byCU(cls, list) : byGroupRank(cls, list);
+      gs = chunk(ordered, sz);
+    }
+    gs.forEach(g => out.push({ m: g.map(sidOf), tag }));
+  });
+  return out;
+}
+const METHODS = {
+  seed: ["시드 분산", "★ 시드 학생을 조마다 한 명씩 흩어 놓고 나머지는 무작위"],
+  random: ["완전 랜덤", "모두 무작위로 섞기"],
+  no: ["번호순", "1번부터 차례로 4명씩"],
+  grank: ["카운트업 조별 순위끼리", "카운트업 각 조 1위끼리, 2위끼리… 비슷한 실력끼리 모인다 (평가계획)"],
+  rank: ["카운트업 전체 순위순", "카운트업 합산 승점 순으로 줄 세워 4명씩"],
+};
+
+/* ---------- 화면 ---------- */
+// 명렬·출석은 학기 초에 한 번 쓰는 일이라 맨 뒤로 (2026-10-01 선생님 요청)
+const TABS = [["groups", "① 조 편성"], ["entry", "② 경기 결과"], ["stand", "③ 순위·성적"], ["grade", "🏆 학년 순위"], ["roster", "명렬·출석"], ["set", "⚙ 설정"]];
+function render() {
+  const names = classNames();
+  if (!names.includes(ui.cls)) ui.cls = names[0] || "";
+  $("clsSel").innerHTML = names.length ? names.map(c => `<option ${c === ui.cls ? "selected" : ""}>${esc(c)}</option>`).join("") : `<option>반 없음</option>`;
+  let tabs = TABS;
+  if (VIEW) tabs = [["groups", "조 편성"], ["entry", "경기 결과"], ["stand", "승점 순위"], ["grade", "🏆 학년 순위"]];
+  if (GRP != null) tabs = [["entry", `${grpLabel(ui.cls, +GRP)} 결과 입력`]];
+  $("nav").innerHTML = tabs.map(([k, l]) => `<button data-act="tab" data-v="${k}" class="${ui.tab === k ? "on" : ""}">${l}</button>`).join("");
+  const fn = { roster: scRoster, groups: scGroups, entry: scEntry, stand: scStand, grade: scGrade, set: scSet }[ui.tab] || scRoster;
+  $("main").innerHTML = (!ui.cls && ui.tab !== "roster" && ui.tab !== "set" && ui.tab !== "grade") ? `<h2>먼저 반을 등록하세요</h2><p class="hint">맨 뒤 <b>명렬·출석</b> 탭에서 명렬표를 붙여넣으면 됩니다.</p><button class="btn pri big" data-act="tab" data-v="roster">명렬 등록하러 가기</button>` : fn();
+  if (ui.tab === "set") drawQR();
+  saveUI();
+}
+function stageSeg() {
+  return `<div class="seg">${Object.entries(STAGES).map(([k, s]) => `<button class="${k} ${ui.stage === k ? "on" : ""}" data-act="stage" data-v="${k}">${s.mark} ${s.name}</button>`).join("")}</div>`;
+}
+
+/* ① 명렬·출석 */
+function scRoster() {
+  const cls = ui.cls, list = roster(cls);
+  const abs = list.filter(st => isAbs(cls, sidOf(st))).length;
+  let h = `<h2>명렬·출석</h2>`;
+  if (cls) {
+    h += `<div class="row"><b style="font-size:20px">${esc(cls)}반 — 출석 ${list.length - abs}명${abs ? ` · <span class="bad">결석 ${abs}명</span>` : ""}</b><span class="sp"></span>
+      ${abs ? `<button class="btn" data-act="allIn">모두 출석으로</button>` : ""}</div>
+      <p class="hint">이름을 누르면 <b>오늘 결석</b>으로 바뀝니다(조 편성에서 빠짐, 다음 날 자동으로 출석). ★ 는 <b>시드</b>(잘하는 학생) — '시드 분산' 편성 때 조마다 흩어 놓습니다.</p>
+      <div class="stuGrid">${list.map(st => { const s = sidOf(st), a = isAbs(cls, s); return `
+        <div class="stu ${a ? "abs" : ""}"><button class="nm" data-act="abs" data-v="${s}">${esc(st.no)}. ${esc(st.name)}<small>${a ? "결석" : "출석"}${st.sex ? " · " + st.sex : ""}</small></button>
+        <button class="star ${st.seed ? "on" : ""}" data-act="seed" data-v="${esc(st.no)}" aria-label="시드">★</button></div>`; }).join("")}</div>`;
+  }
+  h += `<h3>${cls ? "명렬표 다시 등록 / 다른 반 추가" : "명렬표 등록"}</h3>
+    <p class="hint"><b>엑셀 학년 전체 명렬표</b>(반·번호·성명·성별 머리글 포함)를 그대로 복사해 붙여넣으면 모든 반이 한 번에 등록됩니다.<br>
+    한 반만 넣을 땐 반 이름을 적고 <code>1 김민준 남</code> 처럼 한 줄에 한 명씩 붙여넣으세요. 끝에 <code>★</code>를 붙이면 시드.</p>
+    <div class="row" style="margin-bottom:8px"><input type="text" id="newCls" placeholder="반 이름 (예: 1-3)" value="${esc(cls)}" style="width:180px"></div>
+    <textarea id="paste" placeholder="여기에 붙여넣기"></textarea>
+    <div class="row" style="margin-top:8px"><button class="btn pri big" data-act="import">등록하기</button>
+    ${cls ? `<span class="sp"></span><button class="btn danger" data-act="delCls">${esc(cls)}반 삭제</button>` : ""}</div>
+    <p class="hint">다시 등록해도 같은 번호의 경기 기록은 그대로 남습니다.</p>`;
+  return h;
+}
+
+/* ② 조 편성 */
+function scGroups() {
+  const cls = ui.cls, st = ui.stage, sm = stuMap(cls), gs = groupsOf(cls, st);
+  const info = (C(cls).groups || {})[st];
+  let h = stageSeg();
+  if (!VIEW && gs.length) h += `<div class="go noprint"><button class="btn pri big" data-act="big">📺 화면에 띄우기</button><button class="btn pri big alt" data-act="goEntry">✏️ 경기 결과 입력 →</button></div>`;
+  if (!VIEW) h += absPicker(cls, !gs.length);
+  if (!VIEW) {
+    const opts = st === "cu" ? ["seed", "random", "no"] : ["grank", "rank", "seed", "random"];
+    if (!opts.includes(ui.method[st])) ui.method[st] = opts[0];
+    h += `<details class="setup noprint" data-k="setup" ${(ui.open.setup ?? !gs.length) ? "open" : ""}><summary>${gs.length ? "⚙ 다트 위치 · 편성 방법 · 다시 편성" : "다트 위치와 편성 방법을 고르고 [조 편성하기]"}</summary>${boardPicker(cls)}
+    <div class="card noprint" style="margin-bottom:14px">
+      <div class="seg" style="margin-bottom:6px">${opts.map(k => `<button class="plain ${ui.method[st] === k ? "on" : ""}" data-act="method" data-v="${k}">${METHODS[k][0]}</button>`).join("")}</div>
+      <p class="hint" style="margin-top:0">${METHODS[ui.method[st]][1]}. 결석 학생은 빠집니다.</p>
+      <div class="seg" style="margin-bottom:6px"><button class="plain ${fitOn() ? "" : "on"}" data-act="fit" data-v="0">4명 조 (남으면 3명 조)</button><button class="plain ${fitOn() ? "on" : ""}" data-act="fit" data-v="1">다트 수에 맞추기 (5명 조 허용)</button></div>
+      <p class="hint" style="margin-top:0">${(() => { const n = roster(cls).filter(s => !isAbs(cls, sidOf(s))).length, sz = sizes(n, CFG.size, boardsOf(cls).length, fitOn());
+        return n ? `출석 ${n}명 · 다트 ${boardsOf(cls).length}대 → <b>${sz.length}개 조 (${sz.join("·")}명)</b>${sz.length > boardsOf(cls).length ? " — 2차 경기 생김" : ""}` : ""; })()}</p>
+      <div class="row"><span class="sp"></span><button class="btn pri big" data-act="make">${gs.length ? "다시 편성" : "조 편성하기"}</button></div>
+      ${st === "x3" && !hasAny(cls, "cu") ? `<div class="note">카운트업 결과가 아직 없어 순위 편성은 무작위와 같습니다.</div>` : ""}
+    </div></details>`;
+  }
+  if (!gs.length) return h + `<p class="hint">아직 ${STAGES[st].name} 조가 없습니다.</p>`;
+  const wait = gs.length - boardsOf(cls).length;
+  if (wait > 0 && !VIEW) h += `<div class="note">다트 위치(${boardsOf(cls).length}대)보다 조(${gs.length}개)가 많아 <b>${wait}개 조는 2차 경기</b>입니다 — 1차가 끝난 같은 다트에서 이어서 합니다.</div>`;
+  h += `<div class="row noprint" style="margin-bottom:10px"><b>${gs.length}개 조 · ${gs.reduce((a, g) => a + g.m.length, 0)}명</b>${info && info.method ? ` <span class="tag">${METHODS[info.method] ? METHODS[info.method][0] : ""}</span>` : ""}
+    <span class="sp"></span>${VIEW ? `<button class="btn" data-act="big">📺 크게 보기</button>` : `<button class="btn" data-act="addGrp">＋ 빈 조</button>`}</div>`;
+  if (!VIEW && ui.sel) {
+    const x = sm[ui.sel] || { name: "?" };
+    h += `<div class="selBar noprint"><b>✋ ${esc(x.name)} 선택됨</b><span>다른 학생을 누르면 <b>자리 바꾸기</b> · 다른 조의 <b>[여기로 이동]</b></span>
+      <span class="sp"></span><button class="btn" data-act="newGrpWith">새 조로 빼기</button><button class="btn danger" data-act="selAbs">${isAbs(cls, ui.sel) ? "출석으로" : "결석 처리"}</button><button class="btn ghost" data-act="selCancel">취소</button></div>`;
+  } else if (!VIEW) h += `<p class="hint noprint">✋ <b>조 바꾸기</b>: 학생을 누르고 → 다른 학생을 누르면 자리 바꾸기, 다른 조의 [여기로 이동]을 누르면 옮기기. 결과를 입력한 뒤에 옮겨도 그 학생의 기록은 남습니다.</p>`;
+  h += `<div class="grpGrid">${gs.map((g, gi) => `
+    <div class="grp ${st}"><h4>${grpLabel(cls, gi)} ${g.tag ? `<span class="tag">${g.tag}</span>` : ""}<span class="tag" style="margin-left:auto">${g.m.length}명</span></h4>
+    <div class="chips">${g.m.map(s => { const x = sm[s] || { no: "?", name: "(명렬 없음)" }, a = isAbs(cls, s);
+      const extra = st === "x3" ? (() => { const r = record(cls, "cu", s); return r.played ? `카운트업 ${r.sum}점` : ""; })() : (x.seed ? "★" : "");
+      return `<button class="chip ${ui.sel === s ? "sel" : ""} ${a ? "abs" : ""}" ${VIEW ? "disabled" : `data-act="pick" data-v="${s}"`}><span class="no">${esc(x.no)}</span>${esc(x.name)}${sexBadge(x)}<span class="info">${a ? "결석" : extra}</span></button>`; }).join("")}</div>
+    ${!g.m.length ? `<p class="hint" style="margin:4px 0">비어 있음</p>${VIEW ? "" : `<button class="btn ghost moveHere" data-act="delGrp" data-v="${gi}">이 빈 조 지우기</button>`}` : ""}
+    ${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn moveHere" data-act="moveTo" data-v="${gi}">여기로 이동</button>` : ""}
+    </div>`).join("")}</div>`;
+  return h;
+}
+/* 오늘 참여하지 못하는 학생 — 고르면 조 편성에서 빠진다. 날짜가 바뀌면 자동으로 모두 출석 */
+function absPicker(cls, open) {
+  const list = roster(cls), out = list.filter(st => isAbs(cls, sidOf(st)));
+  return `<details class="setup noprint" data-k="abs" ${(ui.open.abs ?? open) ? "open" : ""}><summary>🙋 오늘 빠지는 학생 — ${out.length ? `<span style="color:var(--bad)">${out.map(st => esc(st.name)).join(", ")} (${out.length}명)</span>` : "없음"} · 참여 ${list.length - out.length}명</summary>
+    <div class="card" style="margin-bottom:14px"><p class="hint" style="margin-top:0">결석·견학 등으로 오늘 경기를 못 하는 학생을 누르세요. <b>참여하는 학생만으로</b> 조를 짭니다. 내일이 되면 자동으로 모두 참여로 돌아갑니다.</p>
+    <div class="absGrid">${list.map(st => { const s = sidOf(st), a = isAbs(cls, s); return `<button class="absBtn ${a ? "out" : ""}" data-act="abs" data-v="${s}">${esc(st.no)}. ${esc(st.name)}${a ? "<small>빠짐</small>" : ""}</button>`; }).join("")}</div>
+    ${out.length ? `<div class="row" style="margin-top:10px"><button class="btn" data-act="allIn">모두 참여로</button></div>` : ""}</div></details>`;
+}
+/* 여학생은 투구거리를 다르게(핸디캡) — 심판이 투구선을 확인할 수 있게 표시만 한다 */
+const sexBadge = x => x.sex === "여" ? ` <span class="sx">여</span>` : "";
+/* 다트 위치 — 반마다 쓸 다트기를 고른다(두 반이 동시에 수업하면 1~5번 / 6~10번처럼 나눠 쓴다).
+   조 순서대로 고른 위치에 하나씩 배정하고, 위치보다 조가 많으면 나머지는 대기. */
+const boardCount = () => Math.min(20, Math.max(1, +((S.settings || {}).count) || CFG.boards));
+const allBoards = () => Array.from({ length: boardCount() }, (_, i) => i + 1);
+const isOff = n => !!((S.settings || {}).off || {})["b" + n];
+/* 켜진 다트 — 고장 났거나 오늘 안 쓰는 다트는 꺼 두면 조 배정·화면에서 빠진다 */
+function onBoards() { const on = allBoards().filter(n => !isOff(n)); return on.length ? on : allBoards(); }
+function boardsOf(cls) {
+  const on = onBoards();
+  const b = (C(cls).boards || []).map(Number).filter(n => on.includes(n));
+  return b.length ? [...new Set(b)].sort((x, y) => x - y) : on;
+}
+const boardOf = (cls, gi) => { const b = boardsOf(cls); return b[gi % b.length]; };
+const waveOf = (cls, gi) => Math.floor(gi / boardsOf(cls).length) + 1;
+const waves = (cls, st) => Math.ceil((groupsOf(cls, st || ui.stage).length || 1) / boardsOf(cls).length);
+const grpLabel = (cls, gi) => `${boardOf(cls, gi)}번 다트${waves(cls) > 1 ? ` · ${waveOf(cls, gi)}차` : ""}`;
+function boardPicker(cls) {
+  const mine = boardsOf(cls), explicit = !!(C(cls).boards || []).length, on = onBoards(), power = ui.bmode === "power";
+  const others = {};   // 다른 반이 직접 고른 위치
+  classNames().filter(c => c !== cls && (C(c).boards || []).length).forEach(c => boardsOf(c).forEach(b => (others[b] ||= []).push(c)));
+  const half = Math.ceil(on.length / 2), A = on.slice(0, half), B = on.slice(half);
+  const rng = a => !a.length ? "" : a.length === 1 ? `${a[0]}번` : a[a.length - 1] - a[0] === a.length - 1 ? `${a[0]}~${a[a.length - 1]}번` : `${a.join("·")}번`;
+  const cols = Math.min(10, allBoards().length);
+  let h = `<div class="card noprint" style="margin-bottom:14px">
+    <div class="seg" style="margin-bottom:8px"><button class="plain ${power ? "" : "on"}" data-act="bmode" data-v="pick">🎯 ${esc(cls)}반 다트 위치</button><button class="plain ${power ? "on" : ""}" data-act="bmode" data-v="power">🔌 다트기 켜기·끄기</button></div>`;
+  if (power) {
+    h += `<div class="boards" style="grid-template-columns:repeat(${cols},1fr)">${allBoards().map(n => `<button class="bd pw ${isOff(n) ? "off" : "on"}" data-act="power" data-v="${n}">${n}<small>${isOff(n) ? "꺼짐" : "켜짐"}</small></button>`).join("")}</div>
+      <div class="row" style="margin-top:10px"><b>다트기 수</b><button class="btn" data-act="bcount" data-v="-1" aria-label="한 대 빼기">－</button><b style="font-size:24px;min-width:40px;text-align:center">${allBoards().length}</b><button class="btn" data-act="bcount" data-v="1" aria-label="한 대 더하기">＋</button></div>
+      <p class="hint" style="margin-bottom:0">고장 났거나 오늘 쓰지 않는 다트기를 누르면 <b>꺼짐</b> — 모든 반의 조 배정과 프로젝터 화면에서 빠집니다. 지금 켜진 다트 <b>${on.length}대</b>.</p>`;
+  } else {
+    h += `<div class="row" style="margin-bottom:8px">${B.length ? `<button class="btn" data-act="boardsSet" data-v="${A.join(",")}">${rng(A)}</button><button class="btn" data-act="boardsSet" data-v="${B.join(",")}">${rng(B)}</button>` : ""}<button class="btn" data-act="boardsSet" data-v="">켜진 다트 전체</button></div>
+      <div class="boards" style="grid-template-columns:repeat(${cols},1fr)">${allBoards().map(n => isOff(n) ? `<button class="bd dead" disabled>${n}<small>꺼짐</small></button>` : `<button class="bd ${mine.includes(n) ? "on" : ""} ${mine.includes(n) && others[n] ? "clash" : ""}" data-act="board" data-v="${n}">${n}${others[n] ? `<small>${others[n].map(esc).join(",")}</small>` : ""}</button>`).join("")}</div>
+      <p class="hint" style="margin-bottom:0">${explicit ? "" : `지금은 켜진 다트 ${on.length}대 모두 사용. `}두 반이 함께 수업하면 반마다 위치를 나눠 고르세요 — 조가 고른 위치에 차례로 배정되고 남은 조는 2차 경기. 작은 글씨는 다른 반이 고른 위치.</p>`;
+  }
+  return h + `</div>`;
+}
+function hasAny(cls, stage) { const g = (C(cls).games || {})[stage] || {}; return Object.values(g).some(r => Object.values(r || {}).some(x => Object.values(x || {}).some(y => y && y.r >= 1))); }
+
+/* ③ 경기 결과 입력 */
+/* 아직 다 입력하지 않은 첫 라운드 — 결과 입력 화면에 들어올 때 거기서 시작한다 */
+function openRound(cls, st) {
+  const gs = groupsOf(cls, st);
+  for (let r = 1; r <= CFG.rounds; r++) { const res = roundRes(cls, st, r); if (!gs.length || gs.some((g, gi) => !cardDone(cls, g, res, "g" + gi))) return r; }
+  return CFG.rounds;
+}
+function scEntry() {
+  const cls = ui.cls, st = ui.stage, gs = groupsOf(cls, st), rr = roundRes(cls, st, ui.round);
+  let h = "";
+  const pair = (ui.bigCls || []).filter(c => S.rosters[c]);
+  if (GRP == null && pair.length > 1 && pair.includes(cls)) h += `<div class="seg">${pair.map(c => `<button class="plain ${c === cls ? "on" : ""}" data-act="cls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div>`;
+  h += stageSeg();
+  h += `<div class="seg">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => {
+    const res = roundRes(cls, st, r), done = gs.filter((g, gi) => cardDone(cls, g, res, "g" + gi)).length;
+    return `<button class="plain ${ui.round === r ? "on" : ""}" data-act="round" data-v="${r}">${r}라운드<span class="done">${done}/${gs.length}</span></button>`; }).join("")}</div>`;
+  if (!gs.length) return h + `<p class="hint">${STAGES[st].name} 조 편성을 먼저 하세요 (① 조 편성).</p>`;
+  const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi));
+  if (!VIEW && GRP == null && allDone) {
+    if (ui.round < CFG.rounds) h += `<div class="banner">✔ ${ui.round}라운드 입력 끝!<button class="btn pri big" data-act="round" data-v="${ui.round + 1}">${ui.round + 1}라운드 입력 →</button></div>`;
+    else if (st === "cu") h += `<div class="banner">✔ 카운트 업 ${CFG.rounds}라운드 모두 끝!<button class="btn pri big" data-act="toX3">301 조 편성하기 →</button></div>`;
+    else h += `<div class="banner">✔ 301 게임 ${CFG.rounds}라운드 모두 끝!<button class="btn pri big" data-act="tab" data-v="stand">순위·성적 보기 →</button></div>`;
+  }
+  if (!VIEW && !allDone) h += `<p class="hint">${STAGES[st].hint} 순위가 다르면 순위 단추를 직접 누르면 됩니다.</p>`;
+  let cards = gs.map((g, gi) => ({ g, gi }));
+  if (GRP != null) cards = cards.filter(c => c.gi === +GRP);
+  h += `<div class="entryGrid">${cards.map(({ g, gi }) => card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}${g.tag ? " · " + g.tag : ""}`)).join("")}`;
+  if (GRP == null) {
+    const mk = rr.mk || {};
+    if (Object.keys(mk).length) h += card(cls, st, "mk", Object.keys(mk), mk, "보충 경기");
+  }
+  h += `</div>`;
+  if (GRP == null && !VIEW) h += missingBox(cls, st, gs, rr);
+  return h;
+}
+/* 이 조 카드 입력이 끝났나 — 결석생, 같은 라운드를 다른 다트에서 이미 기록한(옮긴) 학생은 빼고 본다. 빈 조는 끝난 것으로 */
+function cardDone(cls, g, rr, gk) {
+  const res = (rr || {})[gk] || {};
+  const elsewhere = s => !res[s] && Object.keys(rr || {}).some(k => k !== gk && rr[k] && rr[k][s] && rr[k][s].r >= 1);
+  const live = g.m.filter(s => !elsewhere(s) && (!isAbs(cls, s) || (res[s] && res[s].r)));
+  return live.every(s => res[s] && res[s].r >= 1);
+}
+function card(cls, st, gk, members, res, title) {
+  const focus = ui.focus === (gk === "mk" ? "mk" : "g" + gk);
+  const sm = stuMap(cls), key = gk === "mk" ? "mk" : "g" + gk;
+  const ids = [...new Set([...members, ...Object.keys(res)])];
+  const rrAll = roundRes(cls, st, ui.round), elsewhere = {};
+  ids.forEach(s => { if (res[s]) return; for (const k in rrAll) if (k !== key && rrAll[k] && rrAll[k][s] && rrAll[k][s].r >= 1) elsewhere[s] = k; });
+  const kName = k => k === "mk" ? "보충 경기" : grpLabel(cls, +k.slice(1));
+  const live = ids.filter(s => !elsewhere[s] && (!isAbs(cls, s) || res[s]));
+  const n = gk === "mk" ? CFG.maxGroup : Math.max(live.length, 1);
+  const done = live.length && live.every(s => res[s] && res[s].r >= 1);
+  const rows = ids.map(s => {
+    const x = sm[s] || { no: "?", name: "(명렬 없음)" }, r = res[s] || {};
+    if (elsewhere[s]) return `<div class="prow abs"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)} · 이번 라운드는 ${esc(kName(elsewhere[s]))}에서 기록</div></div>`;
+    const a = isAbs(cls, s) && !res[s];
+    const rk = Array.from({ length: n }, (_, i) => i + 1).map(k => `<button class="${r.r === k ? "on" : ""} ${k === 1 ? "r1" : ""}" ${VIEW ? "disabled" : `data-act="rank" data-g="${key}" data-s="${s}" data-v="${k}"`}>${k}위</button>`).join("");
+    return `<div class="prow ${a ? "abs" : ""}"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)}${sexBadge(x)}${a ? " · 결석" : ""}</div>
+      <input type="number" inputmode="numeric" placeholder="${STAGES[st].vLabel}" value="${typeof r.v === "number" ? r.v : ""}" ${VIEW || a ? "disabled" : ""} data-g="${key}" data-s="${s}" class="vin">
+      <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
+      ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${VIEW ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
+  }).join("");
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${gk === "mk" && !VIEW ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
+    ${VIEW ? "" : `<div class="foot"><button class="btn ghost" data-act="clearCard" data-g="${key}">지우기</button>${gk !== "mk" && Object.values(res).some(x => x.m) ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 다시</button>` : ""}</div>`}</div>`;
+}
+/* 이번 라운드에 기록이 없는 학생 — 결석했다가 보충 경기를 하는 경우 */
+function missingBox(cls, st, gs, rr) {
+  const sm = stuMap(cls), have = new Set();
+  Object.values(rr).forEach(res => Object.entries(res || {}).forEach(([s, x]) => { if (x && x.r >= 1) have.add(s); }));
+  const inMk = new Set(Object.keys(rr.mk || {}));
+  const miss = roster(cls).map(sidOf).filter(s => !have.has(s) && !inMk.has(s) && isAbs(cls, s));
+  const notInGroup = roster(cls).map(sidOf).filter(s => !have.has(s) && !inMk.has(s) && !isAbs(cls, s) && !gs.some(g => g.m.includes(s)));
+  const all = [...miss, ...notInGroup];
+  if (!all.length) return "";
+  return `<h3>보충 경기</h3><p class="hint">결석했던 학생이 나중에 경기하면, 이름을 눌러 <b>보충 경기</b> 칸에 넣고 결과를 적으세요. (평가계획: 결석 미응시자는 별도 평가 실시)</p>
+    <div class="pickList">${all.map(s => `<button data-act="toMk" data-v="${s}">${esc(sm[s].no)}. ${esc(sm[s].name)}</button>`).join("")}</div>`;
+}
+
+/* ④ 순위·성적 */
+function scStand() {
+  const cls = ui.cls, list = roster(cls);
+  const rows = list.map(st => {
+    const s = sidOf(st), a = record(cls, "cu", s), b = record(cls, "x3", s), c = taskPts(cls, s);
+    const tot = a.area + b.area + c;
+    return { st, s, a, b, c, tot, grade: convTotal(tot), full: a.played === CFG.rounds && b.played === CFG.rounds };
+  });
+  if (ui.sort === "score") rows.sort((x, y) => (y.a.sum + y.b.sum) - (x.a.sum + x.b.sum) || numSort(x.st.no, y.st.no));
+  const done = rows.filter(r => r.full).length;
+  const cell = r => r ? `<td title="${r.rank}위">${r.pts}</td>` : `<td class="miss">·</td>`;
+  let h = `<div class="row noprint" style="margin-bottom:10px"><h2 style="margin:0">${esc(cls)}반 ${VIEW ? "승점 순위" : "순위·성적"}</h2><span class="sp"></span>
+    <div class="seg" style="margin:0"><button class="plain ${ui.sort === "no" ? "on" : ""}" data-act="sort" data-v="no">번호순</button><button class="plain ${ui.sort === "score" ? "on" : ""}" data-act="sort" data-v="score">승점순</button></div></div>`;
+  if (!VIEW) h += `<p class="hint noprint">칸의 숫자는 그 라운드 <b>승점</b>(4명 조 4·3·2·1, 3명 조 4·3·1, 5명 조 4·3·3·2·1). 노란 칸 = 기록 없음. 6라운드 모두 끝난 학생 ${done}/${rows.length}명.
+    Ⓒ 과제수행은 단추를 눌러 체크하세요.</p>
+    <div class="row noprint" style="margin-bottom:10px"><button class="btn pri" data-act="xlsx">⬇ 엑셀 내려받기 (반별 시트)</button><button class="btn" data-act="print">🖨 인쇄</button></div>`;
+  h += `<div class="tblWrap"><table><thead><tr><th rowspan="2">번호</th><th rowspan="2">이름</th>
+    <th class="cu" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓐ 카운트 업</th><th class="x3" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓑ 301 게임</th>
+    ${VIEW ? "" : `<th rowspan="2">Ⓒ 과제수행</th><th rowspan="2">Ⓐ+Ⓑ+Ⓒ</th><th rowspan="2">점수</th>`}</tr><tr>
+    ${["cu", "x3"].map(k => Array.from({ length: CFG.rounds }, (_, i) => `<th class="${k}">${i + 1}R</th>`).join("") + `<th class="${k}">합</th>` + (VIEW ? "" : `<th class="${k}">${STAGES[k].mark}</th>`)).join("")}
+    </tr></thead><tbody>${rows.map(r => `<tr>
+      <td>${esc(r.st.no)}</td><td class="nm">${esc(r.st.name)}</td>
+      ${r.a.rounds.map(cell).join("")}<td class="sum">${r.a.sum}</td>${VIEW ? "" : `<td class="sum">${r.a.played ? r.a.area : "-"}</td>`}
+      ${r.b.rounds.map(cell).join("")}<td class="sum">${r.b.sum}</td>${VIEW ? "" : `<td class="sum">${r.b.played ? r.b.area : "-"}</td>`}
+      ${VIEW ? "" : `<td>${TASKS.map(([k, l]) => `<button class="tk ${((C(cls).task || {})[r.s] || {})[k] ? "on" : ""}" data-act="task" data-v="${r.s}" data-k="${k}">${l}</button>`).join("")}</td>
+      <td class="sum">${r.tot}</td><td class="grade">${r.grade}${r.full ? "" : `<span style="font-size:14px;color:var(--warn)"> 진행중</span>`}</td>`}
+    </tr>`).join("")}</tbody></table></div>`;
+  if (!VIEW) h += rulesTable();
+  return h;
+}
+/* 🏆 학년 전체 카운트 업 순위 — 반을 넘어 같은 학년 모두를 점수로 줄 세운다.
+   최고 점수 = 한 라운드 최고 기록, 합계 = 3라운드 점수 합. 같은 기록은 같은 등수. */
+let gradeRows = [];
+function scGrade() {
+  const gradeOf = c => String(c).split("-")[0];
+  const g = gradeOf(ui.cls || classNames()[0] || "1");
+  const rows = [];
+  classNames().filter(c => gradeOf(c) === g).forEach(c => roster(c).forEach(st => {
+    const s = sidOf(st), r = record(c, "cu", s);
+    const vs = r.rounds.filter(x => x && typeof x.v === "number").map(x => x.v);
+    if (!vs.length) return;
+    rows.push({ c, st, best: Math.max(...vs), total: vs.reduce((a, b) => a + b, 0), n: vs.length, avg: vs.reduce((a, b) => a + b, 0) / vs.length });
+  }));
+  const key = ui.gsort === "total" ? "total" : ui.gsort === "avg" ? "avg" : "best";
+  rows.sort((a, b) => b[key] - a[key] || b.best - a.best || numSort(a.c, b.c) || numSort(a.st.no, b.st.no));
+  rows.forEach(r => r.rank = 1 + rows.filter(x => x[key] > r[key]).length);
+  gradeRows = rows;
+  const total = classNames().filter(c => gradeOf(c) === g).reduce((a, c) => a + roster(c).length, 0);
+  const shown = VIEW ? rows.filter(r => r.rank <= 10) : rows;
+  const medal = k => k === 1 ? "🥇" : k === 2 ? "🥈" : k === 3 ? "🥉" : k;
+  let h = `<div class="row" style="margin-bottom:6px"><h2 style="margin:0">${esc(g)}학년 카운트 업 순위</h2><span class="sp"></span>
+    <div class="seg" style="margin:0"><button class="plain ${key === "best" ? "on" : ""}" data-act="gsort" data-v="best">최고 점수</button><button class="plain ${key === "total" ? "on" : ""}" data-act="gsort" data-v="total">3R 합계</button><button class="plain ${key === "avg" ? "on" : ""}" data-act="gsort" data-v="avg">평균</button></div></div>
+    <p class="hint">${esc(g)}학년 ${total}명 중 ${rows.length}명 기록. 카운트 업 결과에 <b>점수</b>를 적은 라운드만 들어갑니다.${VIEW ? " (10위까지 표시)" : " 지금 보고 있는 반은 색칠됩니다."}</p>`;
+  if (!rows.length) return h + `<p class="hint">아직 카운트 업 점수 기록이 없습니다.</p>`;
+  h += `<div class="tblWrap"><table><thead><tr><th>순위</th><th>반</th><th>번호</th><th>이름</th><th class="cu">최고 점수</th><th class="cu">3R 합계</th><th class="cu">평균</th><th>라운드</th></tr></thead><tbody>
+    ${shown.map(r => `<tr ${r.c === ui.cls ? 'style="background:var(--priSoft)"' : ""}><td class="sum" style="font-size:20px">${medal(r.rank)}</td><td>${esc(r.c)}</td><td>${esc(r.st.no)}</td><td class="nm">${esc(r.st.name)}${sexBadge(r.st)}</td>
+      <td class="sum">${r.best}</td><td>${r.total}</td><td>${r.avg.toFixed(1)}</td><td>${r.n}/${CFG.rounds}</td></tr>`).join("")}
+    </tbody></table></div>`;
+  if (!VIEW) h += `<div class="row" style="margin-top:10px"><button class="btn" data-act="gcsv">⬇ 학년 순위 CSV</button></div>`;
+  return h;
+}
+function rulesTable() {
+  return `<h3>채점 기준 (평가계획서)</h3><div class="tblWrap rules" style="margin-bottom:10px"><table>
+    <tr><th>조 인원</th><th>1위</th><th>2위</th><th>3위</th><th>4위</th><th>5위</th></tr>
+    ${[3, 4, 5].map(n => `<tr><th>${n}명 조${n === 4 ? " (계획서)" : ""}</th>${[1, 2, 3, 4, 5].map(k => `<td>${k <= n ? `<b>${ptsOf(k, n)}</b>` : "—"}</td>`).join("")}</tr>`).join("")}</table></div>
+    <p class="hint">1등 4점·꼴찌 1점은 몇 명 조든 같게, 가운데 순위는 고르게 나눠 반올림합니다. 결석으로 인원이 줄면 실제 던진 인원 기준.</p><div class="tblWrap rules"><table>
+    <tr><th>Ⓐ·Ⓑ 3라운드 합산 승점</th>${CFG.conv.slice().reverse().map(([m], i, arr) => `<td>${i === 0 ? "3점" : i === arr.length - 1 ? m + "점 이상" : m + "~" + (m + 1) + "점"}</td>`).join("")}</tr>
+    <tr><th>영역 점수</th>${CFG.conv.slice().reverse().map(([, p]) => `<td><b>${p}</b></td>`).join("")}</tr></table></div>
+    <div class="tblWrap rules" style="margin-top:10px"><table>
+    <tr><th>Ⓐ+Ⓑ+Ⓒ</th><td>4점</td><td>5~7</td><td>8~9</td><td>10~11</td><td>12~13</td><td>14~15</td><td>16점 이상</td></tr>
+    <tr><th>최종 점수</th>${CFG.total.slice().reverse().map(([, p]) => `<td><b>${p}</b></td>`).join("")}</tr></table></div>
+    <p class="hint">기본 점수 8점 · Ⓒ 과제수행: 준비·정리(다트핀, 태블릿) / 경기 진행(투구순서 안내) / 심판(투구선, 투구자세) 각 +1, 최대 3점.</p>`;
+}
+
+/* ⚙ 설정 */
+function scSet() {
+  const base = location.origin + location.pathname;
+  const cls = ui.cls;
+  const viewUrl = `${base}?view=1&cls=${encodeURIComponent(cls)}`;
+  const gs = groupsOf(cls, ui.stage);
+  return `<h2>설정 · 공유</h2>
+    <div class="card"><h3 style="margin-top:0">저장 상태</h3>
+    <p style="margin:0">${$("status").textContent}</p>
+    ${serverDenied || !fdb ? `<div class="note">지금은 <b>이 기기에만</b> 저장됩니다. 다른 기기와 함께 쓰려면 Firebase 콘솔(<b>kys5487-darts</b>) → Realtime Database → <b>규칙</b>에 아래 내용을 넣고 게시하세요.
+      <pre>{
+  "rules": {
+    "darts": { ".read": true, ".write": true }
+  }
+}</pre>게시한 뒤 이 화면을 새로고침하면, 이 기기에 저장된 기록이 자동으로 서버에 올라갑니다.</div>` : `<p class="hint">기록은 서버에 저장되어 휴대폰·태블릿·교실 PC 어디서 열어도 같습니다.</p>`}
+    </div>
+    ${cls ? `<div class="card" style="margin-top:14px"><h3 style="margin-top:0">${esc(cls)}반 학생용 보기 링크</h3>
+    <p class="hint">조 편성과 경기 결과(승점)만 보이고 고칠 수 없습니다. 평가 점수는 보이지 않습니다.</p>
+    <div class="row"><input type="text" readonly value="${esc(viewUrl)}" style="flex:1;min-width:240px" id="viewUrl"><button class="btn" data-act="copy" data-v="viewUrl">복사</button></div>
+    <div class="qr" id="qr" style="margin-top:10px"></div>
+    ${gs.length ? `<h3>조별 입력 링크 (${STAGES[ui.stage].name})</h3><p class="hint">조장이 자기 조 결과만 입력하게 할 때 씁니다. 순위·성적은 보이지 않습니다.</p>
+    <div class="row">${gs.map((g, i) => `<button class="btn" data-act="copyGrp" data-v="${i}">${grpLabel(cls, i)} 링크</button>`).join("")}</div>` : ""}
+    </div>` : ""}
+    <div class="card" style="margin-top:14px"><h3 style="margin-top:0">백업</h3>
+    <div class="row"><button class="btn" data-act="backup">⬇ 전체 백업(JSON)</button><label class="btn" style="display:inline-flex;align-items:center">⬆ 백업 불러오기<input type="file" accept=".json" id="restore" hidden></label></div>
+    ${cls ? `<h3>${esc(cls)}반 초기화</h3><div class="row"><button class="btn danger" data-act="resetGames">경기 결과·과제수행 지우기</button><button class="btn danger" data-act="resetGroups">조 편성 지우기</button></div>` : ""}
+    </div>`;
+}
+let qrLib = null;
+async function drawQR() {
+  const box = $("qr"); if (!box) return;
+  try {
+    if (!qrLib) { await new Promise((ok, no) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); qrLib = window.QRCode; }
+    box.innerHTML = ""; new qrLib(box, { text: $("viewUrl").value, width: 200, height: 200 });
+  } catch (e) { box.style.display = "none"; }
+}
+
+/* 크게 보기 (프로젝터) */
+/* 화면 띄우기 — 지난번 함께 띄운 반(같은 시간 수업)이 있으면 같이 띄운다 */
+function openBig(cls) {
+  const prev = (ui.bigCls || []).filter(c => c !== cls && S.rosters[c] && groupsOf(c, ui.stage).length);
+  ui.bigCls = [cls, ...prev]; ui.wave = 1; saveUI(); showBig();
+}
+/* 10대 경기장 전체를 한 화면에 — 같이 수업하는 반을 골라 함께 띄운다 */
+function showBig() {
+  const st = ui.stage, show = (ui.bigCls || [ui.cls]).filter(c => S.rosters[c]);
+  const maxW = Math.max(1, ...show.map(c => waves(c, st)));
+  if (!(ui.wave >= 1 && ui.wave <= maxW)) ui.wave = 1;
+  const wv = ui.wave, slot = {}, next = {};
+  show.forEach(c => {
+    const sm = stuMap(c);
+    groupsOf(c, st).forEach((g, gi) => {
+      const names = g.m.filter(s => !isAbs(c, s)).map(s => { const x = sm[s] || { name: "?" }; return esc(x.name) + sexBadge(x); });
+      const b = boardOf(c, gi), w = waveOf(c, gi);
+      if (w === wv) (slot[b] ||= []).push({ c, names, gi });
+      else if (w === wv + 1) (next[b] ||= []).push({ c, names });
+    });
+  });
+  const pick = classNames().filter(c => groupsOf(c, st).length);
+  $("big").innerHTML = `<div class="bigTop"><h2>🎯 ${STAGES[st].name}${maxW > 1 ? ` · ${wv}차 경기` : ""}</h2>
+    ${Object.entries(STAGES).map(([k, s]) => `<button class="${st === k ? "on" : ""}" data-act="bigStage" data-v="${k}">${s.mark} ${s.name}</button>`).join("")}
+    ${maxW > 1 ? `<span style="width:12px"></span>` + Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("") : ""}
+    <span style="width:12px"></span>${pick.map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}
+    <button class="btn close" data-act="closeBig">닫기</button><button class="btn" style="background:#F97316;color:#fff;border:0" data-act="bigEntry">✏️ 결과 입력</button></div>
+    <div class="arena" style="grid-template-columns:repeat(${onBoards().length <= 5 ? onBoards().length : Math.ceil(onBoards().length / 2)},1fr)">${onBoards().map(b => { const g = slot[b] || [];
+      return `<div class="bd2 ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}${g.length > 1 ? "<br>⚠ 겹침" : ""}</span>` : `<span class="c" style="color:#7A9C96">비어 있음</span>`}</div>
+        ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
+        ${next[b] ? `<div class="nx">다음 ${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
+  $("big").classList.add("show");
+}
+
+/* ---------- 동작 ---------- */
+function saveGroups(cls, st, list, method) {
+  const prev = (C(cls).groups || {})[st] || {};
+  put(P(cls, "groups", st), { list, method: method || prev.method || "", ts: Date.now() });
+}
+function writeCard(gk, res) {
+  // 보충 경기는 다른 조에 끼어 던진 순위를 선생님이 직접 누른다 — 혼자 1위가 되지 않게 자동 순위를 쓰지 않는다
+  if (gk !== "mk") autoRank(res, STAGES[ui.stage].better);
+  Object.keys(res).forEach(s => { const x = res[s]; if (x.r == null && typeof x.v !== "number" && gk !== "mk") delete res[s]; });
+  put(P(ui.cls, "games", ui.stage, "r" + ui.round, gk), Object.keys(res).length ? res : null);
+}
+const curCard = gk => JSON.parse(JSON.stringify(roundRes(ui.cls, ui.stage, ui.round)[gk] || {}));
+
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const act = b.dataset.act, v = b.dataset.v, cls = ui.cls;
+  switch (act) {
+    case "tab": ui.tab = v; ui.sel = null; ui.focus = null; if (v === "entry") ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
+    case "stage": ui.stage = v; ui.sel = null; ui.focus = null; ui.round = openRound(cls, v); render(); break;
+    case "cls": ui.open = {}; ui.cls = v; ui.focus = null; ui.round = openRound(v, ui.stage); render(); break;
+    case "goEntry": ui.tab = "entry"; ui.focus = null; ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
+    case "toX3": ui.tab = "groups"; ui.stage = "x3"; render(); scrollTo(0, 0); break;
+    case "bigEntry": $("big").classList.remove("show"); ui.tab = "entry"; ui.focus = null; ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
+    case "bigGo": {
+      $("big").classList.remove("show");
+      ui.cls = b.dataset.c; ui.tab = "entry"; ui.focus = "g" + b.dataset.g; ui.round = openRound(ui.cls, ui.stage); render();
+      const el = $("card-" + ui.focus); if (el) el.scrollIntoView({ block: "center" });
+      break;
+    }
+    case "round": ui.round = +v; render(); if (b.closest(".banner")) scrollTo(0, 0); break;
+    case "method": ui.method[ui.stage] = v; render(); break;
+    case "sort": ui.sort = v; render(); break;
+    case "gsort": ui.gsort = v; render(); break;
+    case "abs": setAbs(cls, v, !isAbs(cls, v)); break;
+    case "allIn": put(P(cls, "absent"), null); break;
+    case "seed": {
+      const list = (S.rosters[cls] || []).map(st => String(st.no) === v ? { ...st, seed: !st.seed } : st);
+      put("rosters/" + cls, list); break;
+    }
+    case "import": doImport(); break;
+    case "delCls":
+      if (confirm(`${cls}반 명렬과 모든 기록을 지울까요? 되돌릴 수 없습니다.`)) { put("rosters/" + cls, null, true); put(P(cls), null); }
+      break;
+    case "make": {
+      const st = ui.stage;
+      // 다시 편성 = 이 경기를 1라운드부터 새로. 몇 명만 옮길 땐 학생을 눌러 옮기면 결과가 남는다
+      const had = hasAny(cls, st);
+      if (had && !confirm(`이미 입력한 ${STAGES[st].name} 결과가 있습니다.\n다시 편성하면 ${STAGES[st].name} 결과가 모두 지워지고 1라운드부터 새로 합니다.\n\n학생 몇 명만 옮기려면 [취소]를 누르고 학생을 눌러 옮기세요.`)) return;
+      if (!had && groupsOf(cls, st).length && !confirm("조를 다시 편성할까요?")) return;
+      if (had) put(P(cls, "games", st), null, true);
+      const list = makeGroups(cls, st, ui.method[st]);
+      if (!list.length) { toast("출석한 학생이 없습니다"); return; }
+      ui.sel = null; saveGroups(cls, st, list, ui.method[st]); toast(`${list.length}개 조로 편성했습니다`);
+      openBig(cls); // 편성하면 바로 프로젝터 화면으로
+      break;
+    }
+    case "pick": {
+      if (!ui.sel) { ui.sel = v; render(); break; }
+      if (ui.sel === v) { ui.sel = null; render(); break; }
+      const list = groupsOf(cls, ui.stage), a = ui.sel;
+      const ga = list.find(g => g.m.includes(a)), gb = list.find(g => g.m.includes(v));
+      ga.m[ga.m.indexOf(a)] = v; gb.m[gb.m.indexOf(v)] = a;
+      ui.sel = null; saveGroups(cls, ui.stage, list); break;
+    }
+    case "moveTo": {
+      const list = groupsOf(cls, ui.stage), a = ui.sel;
+      list.forEach(g => g.m = g.m.filter(s => s !== a)); list[+v].m.push(a);
+      ui.sel = null; saveGroups(cls, ui.stage, list); break;
+    }
+    case "selCancel": ui.sel = null; render(); break;
+    case "selAbs": { const s = ui.sel; ui.sel = null; setAbs(cls, s, !isAbs(cls, s)); break; }
+    case "newGrpWith": {
+      const list = groupsOf(cls, ui.stage), a = ui.sel;
+      list.forEach(g => g.m = g.m.filter(s => s !== a)); list.push({ m: [a], tag: "" });
+      ui.sel = null; saveGroups(cls, ui.stage, list); toast("새 조를 만들었습니다 — 다른 학생을 [여기로 이동]으로 채우세요"); break;
+    }
+    case "delGrp": {
+      // 빈 조를 지우면 뒤 조들의 번호가 하나씩 당겨진다 — 입력해 둔 결과도 같이 당긴다
+      const i = +v, st = ui.stage, list = groupsOf(cls, st);
+      if (list[i] && list[i].m.length) return;
+      list.splice(i, 1);
+      const games = JSON.parse(JSON.stringify((C(cls).games || {})[st] || {}));
+      Object.keys(games).forEach(rk => {
+        const r = games[rk] || {}, out = {};
+        Object.keys(r).forEach(k => { const m = /^g(d+)$/.exec(k); if (!m) { out[k] = r[k]; return; } const j = +m[1]; if (j < i) out[k] = r[k]; else if (j > i) out["g" + (j - 1)] = r[k]; });
+        games[rk] = out;
+      });
+      put(P(cls, "games", st), games, true); saveGroups(cls, st, list); break;
+    }
+    case "addGrp": { const list = groupsOf(cls, ui.stage); list.push({ m: [], tag: "" }); put(P(cls, "groups", ui.stage, "list"), list); break; }
+    case "big": openBig(cls); break;
+    case "bigWave": ui.wave = +v; showBig(); break;
+    case "bigCls": { const s = new Set(ui.bigCls || []); s.has(v) ? s.delete(v) : s.add(v); if (!s.size) s.add(cls); ui.bigCls = [...s]; saveUI(); showBig(); break; }
+    case "bigStage": ui.stage = v; render(); showBig(); break;
+    case "board": {
+      const s = new Set(boardsOf(cls)), n = +v;
+      if (!(C(cls).boards || []).length) s.clear(), s.add(n);   // 처음 누르면 그 위치만 고르기 시작
+      else if (s.has(n)) { if (s.size === 1) { toast("한 대 이상 골라야 합니다"); return; } s.delete(n); } else s.add(n);
+      put(P(cls, "boards"), [...s].sort((a, b) => a - b)); break;
+    }
+    case "fit": ui.fit = v === "1"; render(); break;
+    case "bmode": ui.bmode = v; render(); break;
+    case "power": {
+      const n = +v, off = { ...((S.settings || {}).off || {}) };
+      if (!isOff(n) && allBoards().filter(x => !isOff(x)).length === 1) { toast("한 대는 켜 두어야 합니다"); return; }
+      if (isOff(n)) delete off["b" + n]; else off["b" + n] = true;
+      put("settings/off", Object.keys(off).length ? off : null); break;
+    }
+    case "bcount": put("settings/count", Math.min(20, Math.max(1, boardCount() + +v))); break;
+    case "boardsSet": put(P(cls, "boards"), v ? v.split(",").map(Number) : null); break;
+    case "closeBig": $("big").classList.remove("show"); break;
+    case "rank": {
+      const gk = b.dataset.g, s = b.dataset.s, res = curCard(gk), x = res[s] || {};
+      if (x.r === +v && x.m) { delete x.r; delete x.m; } else { x.r = +v; x.m = true; }
+      res[s] = x; writeCard(gk, res); break;
+    }
+    case "mkn": { const res = curCard("mk"), x = res[b.dataset.s] || {}; x.n = +v; res[b.dataset.s] = x; writeCard("mk", res); break; }
+    case "clearCard": {
+      if (!confirm("이 조의 이번 라운드 결과를 지울까요?")) return;
+      put(P(cls, "games", ui.stage, "r" + ui.round, b.dataset.g), null); break;
+    }
+    case "autoCard": { const res = curCard(b.dataset.g); Object.values(res).forEach(x => delete x.m); writeCard(b.dataset.g, res); break; }
+    case "toMk": { const res = curCard("mk"); res[v] = { add: 1 }; put(P(cls, "games", ui.stage, "r" + ui.round, "mk"), res); break; }
+    case "task": {
+      const k = b.dataset.k, on = ((C(cls).task || {})[v] || {})[k];
+      put(P(cls, "task", v, k), on ? null : 1); break;
+    }
+    case "xlsx": downloadXLSX(); break;
+    case "gcsv": {
+      const csv = "\uFEFF" + [["순위", "반", "번호", "이름", "최고 점수", "3R 합계", "평균", "라운드 수"], ...gradeRows.map(r => [r.rank, r.c, r.st.no, r.st.name, r.best, r.total, r.avg.toFixed(1), r.n])].map(r => r.join(",")).join("\r\n");
+      download(`카운트업_학년순위_${new Date().toISOString().slice(0, 10)}.csv`, csv, "text/csv"); break;
+    }
+    case "print": print(); break;
+    case "copy": copy($(v).value); break;
+    case "copyGrp": copy(`${location.origin}${location.pathname}?cls=${encodeURIComponent(cls)}&grp=${v}`); break;
+    case "backup": download(`다트리그_백업_${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(S, null, 1), "application/json"); break;
+    case "resetGames":
+      if (confirm(`${cls}반의 경기 결과와 과제수행 체크를 모두 지울까요? 되돌릴 수 없습니다.`)) { put(P(cls, "games"), null, true); put(P(cls, "task"), null); }
+      break;
+    case "resetGroups":
+      if (confirm(`${cls}반 조 편성을 지울까요?`)) put(P(cls, "groups"), null);
+      break;
+  }
+});
+/* 점수 입력 — 칸을 벗어나거나 엔터를 치면 저장하고 다음 칸으로 */
+document.addEventListener("change", e => {
+  const t = e.target;
+  if (t.id === "clsSel") { ui.cls = t.value; ui.sel = null; render(); return; }
+  if (t.id === "restore") { restore(t.files[0]); return; }
+  if (!t.classList.contains("vin")) return;
+  const gk = t.dataset.g, s = t.dataset.s, res = curCard(gk), x = res[s] || {};
+  const raw = t.value.trim();
+  if (raw === "") delete x.v; else { const n = Math.round(+raw); if (!Number.isFinite(n) || n < 0) { toast("0 이상의 숫자를 적어 주세요"); return; } x.v = n; }
+  delete x.m;   // 점수를 고치면 자동 순위로 돌아간다
+  res[s] = x;
+  const inputs = [...document.querySelectorAll(".vin:not(:disabled)")], idx = inputs.indexOf(t);
+  const nextKey = inputs[idx + 1] ? inputs[idx + 1].dataset.g + "|" + inputs[idx + 1].dataset.s : null;
+  renderLater = false;
+  writeCard(gk, res);
+  if (nextKey && e.isTrusted && t.dataset.enter) {
+    const [g2, s2] = nextKey.split("|"); const n2 = document.querySelector(`.vin[data-g="${g2}"][data-s="${s2}"]`); if (n2) n2.focus();
+  }
+});
+document.addEventListener("toggle", e => { const k = e.target.dataset && e.target.dataset.k; if (k) ui.open[k] = e.target.open; }, true);
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.target.classList && e.target.classList.contains("vin")) { e.target.dataset.enter = "1"; e.target.blur(); }
+  if (e.key === "Escape") $("big").classList.remove("show");
+});
+// blur 로 change 가 일어난 뒤 다음 칸으로 — Enter 로 끝냈을 때만
+document.addEventListener("focusout", e => {
+  const t = e.target;
+  if (!(t.classList && t.classList.contains("vin") && t.dataset.enter)) return;
+  const g = t.dataset.g, s = t.dataset.s;
+  setTimeout(() => {
+    const inputs = [...document.querySelectorAll(".vin:not(:disabled)")];
+    const i = inputs.findIndex(x => x.dataset.g === g && x.dataset.s === s);
+    if (inputs[i + 1]) inputs[i + 1].focus();
+  }, 30);
+});
+$("clsSel").addEventListener("change", e => { ui.cls = e.target.value; ui.focus = null; if (ui.tab === "entry") ui.round = openRound(ui.cls, ui.stage); render(); });
+
+function doImport() {
+  const text = $("paste").value; if (!text.trim()) { toast("명렬표를 붙여넣어 주세요"); return; }
+  const bulk = text.includes("\t") ? parseBulk(text) : null;
+  if (bulk) {
+    const names = Object.keys(bulk).sort(numSort);
+    const exist = names.filter(c => S.rosters[c]);
+    if (!confirm(`${names.length}개 반 (${names.join(", ")}) 을 등록합니다.${exist.length ? `\n이미 있는 ${exist.join(", ")}반은 새 명렬로 바뀝니다(시드 표시는 유지).` : ""}`)) return;
+    names.forEach(c => {
+      const old = {}; (S.rosters[c] || []).forEach(st => old[st.no] = st.seed);
+      put("rosters/" + c, bulk[c].map(st => ({ ...st, seed: !!old[st.no] })), true);
+    });
+    ui.cls = names[0]; render(); toast(`${names.length}개 반 등록 완료`);
+    return;
+  }
+  const cls = ($("newCls").value || "").trim().replace(/반$/, "");
+  if (!cls) { toast("반 이름을 적어 주세요 (예: 1-3)"); return; }
+  if (/[.#$\[\]\/]/.test(cls)) { toast("반 이름에 . # $ [ ] / 는 쓸 수 없습니다"); return; }
+  const list = parseSimple(text);
+  if (!list.length) { toast("학생을 읽지 못했습니다"); return; }
+  if (S.rosters[cls] && !confirm(`${cls}반 명렬을 새 명단(${list.length}명)으로 바꿀까요?`)) return;
+  ui.cls = cls; put("rosters/" + cls, list); toast(`${cls}반 ${list.length}명 등록`);
+}
+/* 엑셀 — 첫 시트 '최종점수'(모든 반, 성적 입력용) + 반마다 시트 하나(라운드별 경기 결과 → Ⓐ·Ⓑ·Ⓒ → 최종 점수) */
+let xlsxLib = null;
+async function loadXLSX() {
+  if (xlsxLib) return xlsxLib;
+  await new Promise((ok, no) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"; s.onload = ok; s.onerror = no; document.head.appendChild(s); });
+  return (xlsxLib = window.XLSX);
+}
+function studentRow(cls, st) {
+  const s = sidOf(st), a = record(cls, "cu", s), b = record(cls, "x3", s);
+  const t = (C(cls).task || {})[s] || {}, c = taskPts(cls, s), tot = a.area + b.area + c;
+  const miss = [];
+  if (a.played < CFG.rounds) miss.push(`카운트업 ${CFG.rounds - a.played}R 미응시`);
+  if (b.played < CFG.rounds) miss.push(`301 ${CFG.rounds - b.played}R 미응시`);
+  return { s, a, b, t, c, tot, grade: convTotal(tot), note: miss.join(" / ") };
+}
+async function downloadXLSX() {
+  let X;
+  try { X = await loadXLSX(); } catch (e) { toast("엑셀 도구를 불러오지 못했습니다 — 인터넷 연결을 확인하세요"); return; }
+  const wb = X.utils.book_new(), date = today();
+  const R = CFG.rounds, dash = v => v === undefined || v === null || v === "" ? "" : v;
+
+  // ① 최종점수 — 모든 반
+  const sum = [["반", "번호", "이름", "Ⓐ 카운트 업", "Ⓑ 301 게임", "Ⓒ 과제수행", "Ⓐ+Ⓑ+Ⓒ", "최종 점수", "비고"]];
+  classNames().forEach(cls => roster(cls).forEach(st => {
+    const r = studentRow(cls, st);
+    sum.push([cls, +st.no || st.no, st.name, r.a.played ? r.a.area : 0, r.b.played ? r.b.area : 0, r.c, r.tot, r.grade, r.note]);
+  }));
+  const ws0 = X.utils.aoa_to_sheet(sum);
+  ws0["!cols"] = [6, 6, 10, 12, 12, 12, 10, 10, 28].map(w => ({ wch: w }));
+  X.utils.book_append_sheet(wb, ws0, "최종점수");
+
+  // ② 반마다 시트
+  classNames().forEach(cls => {
+    const top = ["번호", "이름"], sub = ["", ""], merges = [{ s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }, { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } }];
+    const group = (title, cols) => { const c0 = top.length; top.push(title, ...Array(cols.length - 1).fill("")); sub.push(...cols); merges.push({ s: { r: 0, c: c0 }, e: { r: 0, c: c0 + cols.length - 1 } }); };
+    for (let i = 1; i <= R; i++) group(`Ⓐ 카운트 업 ${i}R`, ["점수", "순위", "인원", "승점"]);
+    group("Ⓐ 결과", ["합산 승점", "Ⓐ 점수"]);
+    for (let i = 1; i <= R; i++) group(`Ⓑ 301 ${i}R`, ["순위", "남은점수", "인원", "승점"]);
+    group("Ⓑ 결과", ["합산 승점", "Ⓑ 점수"]);
+    group("Ⓒ 과제수행", [...TASKS.map(t => t[1]), "Ⓒ 점수"]);
+    group("최종", ["Ⓐ+Ⓑ+Ⓒ", "최종 점수", "비고"]);
+    const rows = [top, sub];
+    roster(cls).forEach(st => {
+      const r = studentRow(cls, st), row = [+st.no || st.no, st.name];
+      r.a.rounds.forEach(x => row.push(x ? dash(x.v) : "", x ? x.rank : "", x ? x.n : "", x ? x.pts : ""));
+      row.push(r.a.sum, r.a.played ? r.a.area : 0);
+      r.b.rounds.forEach(x => row.push(x ? x.rank : "", x ? dash(x.v) : "", x ? x.n : "", x ? x.pts : ""));
+      row.push(r.b.sum, r.b.played ? r.b.area : 0);
+      row.push(...TASKS.map(([k]) => r.t[k] ? 1 : 0), r.c, r.tot, r.grade, r.note);
+      rows.push(row);
+    });
+    const ws = X.utils.aoa_to_sheet(rows);
+    ws["!merges"] = merges;
+    ws["!cols"] = top.map((_, i) => ({ wch: i === 1 ? 10 : i === top.length - 1 ? 26 : 8 }));
+    X.utils.book_append_sheet(wb, ws, String(cls).replace(/[\[\]:*?\/\\]/g, "-").slice(0, 28) + "반");
+  });
+  X.writeFile(wb, `스포츠다트_수행평가_${date}.xlsx`);
+  toast("엑셀을 내려받았습니다");
+}
+function download(name, text, type) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([text], { type: type + ";charset=utf-8" })); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function copy(text) { navigator.clipboard.writeText(text).then(() => toast("복사했습니다"), () => prompt("복사하세요", text)); }
+function restore(file) {
+  if (!file) return;
+  file.text().then(t => {
+    const v = JSON.parse(t);
+    if (!v || !v.rosters) throw 0;
+    if (!confirm("백업으로 전체 자료를 바꿀까요? 지금 자료는 사라집니다.")) return;
+    put("rosters", v.rosters, true); put("settings", v.settings || null, true); put("classes", v.classes || {}); toast("백업을 불러왔습니다");
+  }).catch(() => toast("백업 파일을 읽지 못했습니다"));
+}
+
+render();
+updStatus();
+if (!params.has("local")) initFB();   // ?local=1 — 서버에 올리지 않고 이 기기에서만 시험
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
