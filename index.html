@@ -221,7 +221,11 @@
   code{background:var(--soft); padding:2px 6px; border-radius:6px; font-size:15px}
   pre{background:var(--soft); padding:12px; border-radius:12px; font-size:15px; overflow-x:auto}
   .rules td,.rules th{white-space:normal}
+  .boardPick button{min-width:64px; font-size:22px}
   @media (max-width:560px){
+    header{position:static}
+    header .wrap{padding-top:10px}
+    .selBar{top:8px}
     header h1{font-size:22px}
     #status{margin-left:0}
     .entryGrid{grid-template-columns:1fr}
@@ -316,7 +320,9 @@ let VIEW = true;
 const TEACHERS = ["teacher112@yeongjong.icehs.kr", "teacher74@yeongjong.icehs.kr"];
 let teacher = null, authKnown = false, fbFailed = false, stuOK = false, secret = {};
 let me = lsGet("darts-me" + TEST);   // 입력하는 학생 {cls, sid, day}
-const canTeach = () => !!TEST || fbFailed || !!teacher || (!authKnown && lsGet("darts-teacher") === true);
+/* ?local=1&student — 서버 없이 학생 입력 화면을 미리 보는 시연 모드 */
+const STU_DEMO = !!TEST && params.has("student");
+const canTeach = () => (!!TEST && !STU_DEMO) || (fbFailed && !STU_DEMO) || !!teacher || (!authKnown && lsGet("darts-teacher") === true);
 const canEnter = () => canTeach() || stuOK;
 const stuPath = p => /^classes\/[^/]+\/(games|roles)\/[^/]+\/r\d+\/[^/]+$/.test(p);
 const GRP = params.get("grp");                   // 조 입력 전용 링크 (?cls=1-3&grp=2)
@@ -412,6 +418,7 @@ async function joinStudent() {
   const code = ($("jCode").value || "").trim(), sid = $("jMe").value;
   if (!/^\d{4}$/.test(code)) { toast("프로젝터 화면의 숫자 4자리를 넣어 주세요"); return; }
   if (!sid) { toast("내 이름을 골라 주세요"); return; }
+  if (STU_DEMO) { me = { cls: ui.cls, sid, day: today() }; stuOK = true; toast("(시연) 입력할 수 있어요! 다트 번호를 고르세요"); updStatus(); render(); return; }
   if (!fauth) { toast("인터넷 연결을 확인해 주세요"); return; }
   try {
     if (!fauth.currentUser || !fauth.currentUser.isAnonymous) await authM.signInAnonymously(fauth);
@@ -765,7 +772,7 @@ function scEntry() {
   const cls = ui.cls, st = ui.stage, gs = groupsOf(cls, st), rr = roundRes(cls, st, ui.round);
   let h = "";
   const pair = (ui.bigCls || []).filter(c => S.rosters[c]);
-  if (GRP == null && pair.length > 1 && pair.includes(cls)) h += `<div class="seg">${pair.map(c => `<button class="plain ${c === cls ? "on" : ""}" data-act="cls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div>`;
+  if (!VIEW && GRP == null && pair.length > 1 && pair.includes(cls)) h += `<div class="seg">${pair.map(c => `<button class="plain ${c === cls ? "on" : ""}" data-act="cls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div>`;
   h += stageSeg();
   h += `<div class="seg">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => {
     const res = roundRes(cls, st, r), done = gs.filter((g, gi) => cardDone(cls, g, res, "g" + gi)).length;
@@ -781,11 +788,13 @@ function scEntry() {
   let cards = gs.map((g, gi) => ({ g, gi }));
   if (GRP != null) cards = cards.filter(c => c.gi === +GRP);
   if (VIEW) {
-    h = joinBox(cls) + h;
-    if (stuOK) {
+    // 학생 화면 순서: 참여 → 다트 번호 → 경기·라운드 → 입력 카드 (휴대폰에서 다트 번호가 맨 먼저 보이게)
+    if (!stuOK) h = joinBox(cls) + h;
+    else {
       const bs = [...new Set(gs.map((g, gi) => boardOf(cls, gi)))];
-      h += `<div class="seg">${bs.map(b => `<button class="plain ${ui.board === b ? "on" : ""}" data-act="board1" data-v="${b}">${b}번 다트</button>`).join("")}</div>`;
-      if (!bs.includes(ui.board)) return h + `<p class="hint" style="font-size:19px">👆 내가 있는 <b>다트 번호</b>를 누르세요.</p>`;
+      const pick = `<h3 style="margin-top:0">내 다트 번호</h3><div class="seg boardPick">${bs.map(b => `<button class="plain ${ui.board === b ? "on" : ""}" data-act="board1" data-v="${b}">${b}번</button>`).join("")}</div>`;
+      h = joinBox(cls) + pick + h;
+      if (!bs.includes(ui.board)) return h + `<p class="hint" style="font-size:19px">👆 위에서 내가 있는 <b>다트 번호</b>를 누르세요.</p>`;
       cards = cards.filter(c => boardOf(cls, c.gi) === ui.board);
       h += `<p class="hint">${STAGES[st].hint} 역할(경기 진행·심판·준비 정리)도 눌러 주세요.</p>`;
     }
@@ -803,7 +812,7 @@ function scEntry() {
 /* QR로 들어온 학생: 입력 코드 + 내 이름 → 그날 하루 결과 입력 가능 */
 function joinBox(cls) {
   if (stuOK && me) { const x = stuMap(me.cls)[me.sid] || {}; return `<div class="joinBox row"><b style="font-size:19px">✏️ ${esc(me.cls)}반 ${esc(x.name || "")} 입력 중</b><span class="sp"></span><button class="btn ghost" data-act="unjoin">다른 사람으로</button></div>`; }
-  if (!fdb) return "";
+  if (!fdb && !STU_DEMO) return "";
   return `<div class="joinBox"><h3 style="margin-top:0">✏️ 경기 결과 입력하기</h3>
     <p class="hint" style="margin-top:0">기록을 맡은 학생만 하면 됩니다. 프로젝터 화면의 <b>입력 코드 4자리</b>를 넣고 내 이름을 고르세요. (반은 맨 위에서 고르기)</p>
     <input type="text" id="jCode" class="codeIn" inputmode="numeric" maxlength="4" placeholder="0000">
@@ -1151,7 +1160,7 @@ document.addEventListener("click", e => {
     }
     case "join": joinStudent(); break;
     case "unjoin": stuOK = false; me = null; lsSet("darts-me" + TEST, null); if (fauth && fauth.currentUser && fauth.currentUser.isAnonymous) authM.signOut(fauth); render(); break;
-    case "board1": ui.board = +v; render(); break;
+    case "board1": { ui.board = +v; render(); const c = document.querySelector(".ecard"); if (c) c.scrollIntoView({ behavior: "smooth", block: "start" }); break; }
     case "role": { const k = b.dataset.k, s = b.dataset.s; stampRoles(b.dataset.g, R => { R[k] ||= {}; if (R[k][s]) delete R[k][s]; else R[k][s] = 1; }); break; }
     case "fit": ui.fit = v === "1"; render(); break;
     case "bmode": ui.bmode = v; render(); break;
