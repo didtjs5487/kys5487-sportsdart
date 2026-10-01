@@ -241,15 +241,15 @@ const STAGES = {
 };
 const TASKS = [["p", "준비·정리"], ["j", "경기 진행"], ["s", "심판"]];
 
-/* 스포츠다트 전용 Firebase 프로젝트 (kys5487-darts, 2026-10-01 생성). 기록은 darts 아래에 저장 */
+/* 스포츠다트 전용 Firebase 프로젝트 (kys5487-sportsdart, 2026-10-01 생성). 기록은 darts 아래에 저장 */
 const FB_CFG = {
-  apiKey: "AIzaSyDit6lr3mUwAhQuOixwvnIJKIddW89dtss",
-  authDomain: "kys5487-darts.firebaseapp.com",
-  databaseURL: "https://kys5487-darts-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "kys5487-darts",
-  storageBucket: "kys5487-darts.firebasestorage.app",
-  messagingSenderId: "425504185432",
-  appId: "1:425504185432:web:be6f66478a1202fdf33e2d",
+  apiKey: "AIzaSyAZRqsz79zak73EF0o65zP0pOPDX3JWLh0",
+  authDomain: "kys5487-sportsdart.firebaseapp.com",
+  databaseURL: "https://kys5487-sportsdart-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "kys5487-sportsdart",
+  storageBucket: "kys5487-sportsdart.firebasestorage.app",
+  messagingSenderId: "249173082121",
+  appId: "1:249173082121:web:f82eb88bafe699d777b8d8",
 };
 const ROOT = "darts";
 
@@ -799,7 +799,7 @@ function scSet() {
   return `<h2>설정 · 공유</h2>
     <div class="card"><h3 style="margin-top:0">저장 상태</h3>
     <p style="margin:0">${$("status").textContent}</p>
-    ${serverDenied || !fdb ? `<div class="note">지금은 <b>이 기기에만</b> 저장됩니다. 다른 기기와 함께 쓰려면 Firebase 콘솔(<b>kys5487-darts</b>) → Realtime Database → <b>규칙</b>에 아래 내용을 넣고 게시하세요.
+    ${serverDenied || !fdb ? `<div class="note">지금은 <b>이 기기에만</b> 저장됩니다. 다른 기기와 함께 쓰려면 Firebase 콘솔(<b>kys5487-sportsdart</b>) → Realtime Database → <b>규칙</b>에 아래 내용을 넣고 게시하세요.
       <pre>{
   "rules": {
     "darts": { ".read": true, ".write": true }
