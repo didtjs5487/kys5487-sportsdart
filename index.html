@@ -34,6 +34,25 @@
   header .wrap{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding-top:10px; padding-bottom:10px}
   header h1{margin:0; font-size:24px; font-weight:800; white-space:nowrap}
   header select{background:#fff; color:var(--ink); border:0; border-radius:12px; font-size:20px; font-weight:800; padding:8px 12px; min-height:50px}
+  #who{min-height:46px; border:0; border-radius:999px; background:#fff; color:var(--pri); font-size:16px; font-weight:800; padding:0 16px; white-space:nowrap}
+  #login{position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:70; display:none; align-items:center; justify-content:center; padding:16px}
+  #login.show{display:flex}
+  #login .box{background:#fff; border-radius:18px; padding:20px; width:min(440px,100%); max-height:90vh; overflow:auto}
+  #login input{width:100%; margin-bottom:10px}
+  .joinBox{background:var(--priSoft); border:2px solid var(--pri); border-radius:16px; padding:14px; margin-bottom:14px}
+  .joinBox select,.joinBox input{width:100%; margin-bottom:10px}
+  .codeIn{font-size:30px!important; letter-spacing:8px; text-align:center; font-weight:800}
+  .roles{margin-top:8px; border-top:2px dashed var(--line); padding-top:8px}
+  .rrow{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:6px}
+  .rrow .rl{min-width:78px; font-size:15px; font-weight:800; color:var(--sub)}
+  .rc{min-height:44px; border:2px solid var(--line); border-radius:10px; background:#fff; font-size:16px; font-weight:800; padding:0 10px; color:var(--sub)}
+  .rc.on{background:var(--good); border-color:var(--good); color:#fff}
+  .rrow select{min-height:44px; font-size:15px; padding:4px 8px}
+  .byline{font-size:15px; color:var(--sub); font-weight:700}
+  .tk.auto{background:#DCFCE7; border-color:var(--good); color:var(--good)}
+  #big .joinQR{display:flex; align-items:center; gap:12px; background:#fff; color:#062A25; border-radius:14px; padding:6px 12px 6px 6px}
+  #big .joinQR b{font-size:30px; letter-spacing:4px}
+  #big .joinQR small{display:block; font-size:15px; font-weight:700}
   #status{margin-left:auto; font-size:15px; background:rgba(255,255,255,.16); border-radius:999px; padding:6px 14px; white-space:nowrap}
 
   nav{display:flex; gap:6px; overflow-x:auto; padding:12px 0 0}
@@ -205,6 +224,7 @@
     <h1>🎯 스포츠다트 리그</h1>
     <select id="clsSel" aria-label="반 선택"></select>
     <span id="status">⚪ 연결 중…</span>
+    <button id="who" data-act="loginOpen">🔐 선생님 로그인</button>
   </div>
 </header>
 <div class="wrap">
@@ -212,6 +232,7 @@
   <main id="main"></main>
 </div>
 <div id="big"></div>
+<div id="login"></div>
 <div id="toast"></div>
 
 <script type="module">
@@ -273,14 +294,23 @@ let S = lsGet(LS) || {};
 S.rosters ||= {}; S.classes ||= {}; S.settings ||= {};
 let pending = new Set(lsGet(LSP) || []);
 const params = new URLSearchParams(location.search);
-const VIEW = params.has("view");                 // 학생용 보기 전용
+/* 누가 쓰고 있나 — 로그인한 선생님은 모두 고칠 수 있고, 로그인 안 한 사람은 보기만.
+   학생은 QR로 들어와 '오늘의 입력 코드'를 넣으면 경기 결과 카드와 역할만 입력할 수 있다. */
+let VIEW = true;
+const TEACHERS = ["teacher112@yeongjong.icehs.kr", "teacher74@yeongjong.icehs.kr"];
+let teacher = null, authKnown = false, fbFailed = false, stuOK = false, secret = {};
+let me = lsGet("darts-me" + TEST);   // 입력하는 학생 {cls, sid, day}
+const canTeach = () => !!TEST || fbFailed || !!teacher || (!authKnown && lsGet("darts-teacher") === true);
+const canEnter = () => canTeach() || stuOK;
+const stuPath = p => /^classes\/[^/]+\/(games|roles)\/[^/]+\/r\d+\/[^/]+$/.test(p);
 const GRP = params.get("grp");                   // 조 입력 전용 링크 (?cls=1-3&grp=2)
 const ui = Object.assign({ tab: "groups", cls: "", stage: "cu", round: 1, sel: null, method: { cu: "seed", x3: "grank" }, split: false, sort: "no", gsort: "best" }, lsGet(LSU) || {});
 ui.sel = null; ui.open = {};   // 접는 칸(오늘 빠지는 학생·편성 설정)을 열어 둔 채로 고를 수 있게
 if (params.get("cls")) ui.cls = params.get("cls");
-if (VIEW) ui.tab = ui.tab === "roster" || ui.tab === "set" ? "groups" : ui.tab;
+if (params.has("in")) ui.tab = "entry";            // 프로젝터 QR로 들어온 학생은 바로 결과 입력
+if (params.get("board")) ui.board = +params.get("board");
 if (GRP != null) ui.tab = "entry";
-const saveUI = () => lsSet(LSU, { tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gsort: ui.gsort, bigCls: ui.bigCls, fit: ui.fit });
+const saveUI = () => lsSet(LSU, { tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gsort: ui.gsort, bigCls: ui.bigCls, fit: ui.fit, board: ui.board });
 
 function getAt(o, path) { for (const k of path.split("/")) { if (o == null) return undefined; o = o[k]; } return o; }
 function setAt(o, path, v) {
@@ -293,6 +323,7 @@ const clean = v => v == null ? null : JSON.parse(JSON.stringify(v));
 /* 모든 저장은 put 하나로 — 먼저 이 기기에 저장하고, 서버로 보낸다.
    서버에 못 가면 pending 에 남겨 두었다가 연결되면 다시 보낸다. */
 function put(path, v, quiet) {
+  if (!canTeach() && !(stuOK && stuPath(path))) { toast(stuOK ? "학생은 경기 결과만 입력할 수 있어요" : "선생님 로그인 후 바꿀 수 있어요"); return; }
   setAt(S, path, clean(v));
   lsSet(LS, S);
   pending.add(path); lsSet(LSP, [...pending]);
@@ -311,17 +342,32 @@ function push(path) {
 let fdb = null, fmod = null, online = false, serverDenied = false, serverSeen = false;
 function updStatus() {
   const el = $("status");
+  const who = $("who");
+  if (who) { who.style.display = TEST ? "none" : ""; who.textContent = teacher ? "👤 선생님" : stuOK && me ? "✏️ 입력 중" : "🔐 선생님 로그인"; }
   if (!fdb) { el.textContent = "🟡 이 기기에만 저장 중"; return; }
+  if (VIEW && !stuOK) { el.textContent = "👀 보기 전용"; return; }
   if (serverDenied) { el.textContent = "🟡 서버 규칙 필요 · 이 기기에 저장 중"; return; }
   if (!online) { el.textContent = "🟠 오프라인 · 연결되면 자동 전송"; return; }
   el.textContent = pending.size ? `🟢 서버 연결 · 전송 중 ${pending.size}` : "🟢 실시간 저장됨";
 }
+let authM = null, fauth = null;
 async function initFB() {
   try {
     const appM = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
     fmod = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js");
-    fdb = fmod.getDatabase(appM.initializeApp(FB_CFG, "darts"));
-    [...pending].forEach(push);
+    authM = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js");
+    const app = appM.initializeApp(FB_CFG, "darts");
+    fdb = fmod.getDatabase(app);
+    fauth = authM.getAuth(app);
+    authM.onAuthStateChanged(fauth, u => {
+      const em = (u && u.email || "").toLowerCase();
+      teacher = u && TEACHERS.includes(em) ? u : null;
+      authKnown = true; lsSet("darts-teacher", !!teacher);
+      stuOK = !teacher && !!(u && u.isAnonymous && me && me.day === today());
+      if (teacher) watchSecret();
+      if (teacher || stuOK) [...pending].forEach(push);
+      updStatus(); render();
+    });
     fmod.onValue(fmod.ref(fdb, ".info/connected"), s => { online = !!s.val(); updStatus(); });
     fmod.onValue(fmod.ref(fdb, ROOT), snap => {
       serverSeen = true; serverDenied = false;
@@ -330,8 +376,46 @@ async function initFB() {
       lsSet(LS, S);
       updStatus(); safeRender();
     }, () => { serverDenied = true; updStatus(); });
-  } catch (e) { fdb = null; }
+  } catch (e) { fdb = null; fbFailed = true; }
   updStatus();
+}
+/* 오늘의 입력 코드 — 선생님 기기가 날마다 새로 만든다. 서버 규칙이 이 코드를 넣은 학생에게만 결과 입력을 허락한다 */
+let secretOn = false;
+function watchSecret() {
+  if (secretOn || !fdb) return; secretOn = true;
+  fmod.onValue(fmod.ref(fdb, "dartsSecret"), s => {
+    secret = s.val() || {};
+    if (secret.day !== today() && teacher) {
+      const pin = String(Math.floor(1000 + Math.random() * 9000));
+      fmod.set(fmod.ref(fdb, "dartsSecret"), { pin, day: today() }).catch(() => {});
+    }
+    if ($("big").classList.contains("show")) showBig(); else safeRender();
+  }, () => { secretOn = false; });
+}
+async function joinStudent() {
+  const code = ($("jCode").value || "").trim(), sid = $("jMe").value;
+  if (!/^\d{4}$/.test(code)) { toast("프로젝터 화면의 숫자 4자리를 넣어 주세요"); return; }
+  if (!sid) { toast("내 이름을 골라 주세요"); return; }
+  if (!fauth) { toast("인터넷 연결을 확인해 주세요"); return; }
+  try {
+    if (!fauth.currentUser || !fauth.currentUser.isAnonymous) await authM.signInAnonymously(fauth);
+    await fmod.set(fmod.ref(fdb, "dartsJoin/" + fauth.currentUser.uid), code);
+    me = { cls: ui.cls, sid, day: today() }; lsSet("darts-me" + TEST, me);
+    stuOK = true; toast("입력할 수 있어요! 다트 번호를 고르세요"); updStatus(); render();
+  } catch (e) { toast(/permission|PERMISSION/.test(String(e && (e.code || e.message))) ? "입력 코드가 맞지 않아요" : "연결 실패 — 다시 시도해 주세요"); }
+}
+/* 선생님 로그인 창 */
+function showLogin() {
+  const b = $("login");
+  b.innerHTML = `<div class="box">${teacher ? `<h2 style="margin-top:0">👤 로그인됨</h2><p><b>${esc(teacher.email)}</b></p>
+      <h3>비밀번호 바꾸기</h3><input type="password" id="lgNew" placeholder="새 비밀번호 (6자 이상)" autocomplete="new-password">
+      <div class="row"><button class="btn" data-act="pwChange">비밀번호 바꾸기</button><span class="sp"></span><button class="btn danger" data-act="logout">로그아웃</button></div>`
+    : `<h2 style="margin-top:0">🔐 선생님 로그인</h2><p class="hint">로그인한 선생님만 조 편성·결과·성적을 고칠 수 있습니다. 한 번 로그인하면 이 기기에서 계속 유지됩니다.</p>
+      <div class="row" style="margin-bottom:10px">${TEACHERS.map(e => `<button class="btn" data-act="lgPick" data-v="${e}">${e.split("@")[0]}</button>`).join("")}</div>
+      <input type="email" id="lgEmail" placeholder="이메일" autocomplete="username"><input type="password" id="lgPw" placeholder="비밀번호" autocomplete="current-password">
+      <button class="btn pri big" style="width:100%" data-act="doLogin">로그인</button>`}
+    <button class="btn ghost" style="width:100%;margin-top:10px" data-act="loginClose">닫기</button></div>`;
+  b.classList.add("show");
 }
 /* 입력 중에 다른 기기 결과가 들어와도 글자가 날아가지 않게, 입력칸을 벗어난 뒤 다시 그린다. */
 let renderLater = false;
@@ -437,7 +521,21 @@ function record(cls, stage, sid) {
   const vsum = rounds.reduce((a, x) => a + (x && typeof x.v === "number" ? x.v : 0), 0);
   return { rounds, played, sum, vsum, area: played ? convArea(sum) : 0 };
 }
-function taskPts(cls, sid) { const t = (C(cls).task || {})[sid] || {}; return TASKS.filter(([k]) => t[k]).length; }
+/* 역할 기록 횟수 {sid:{p,j,s}} — 모든 경기·라운드·다트를 더한다 */
+function roleCounts(cls) {
+  const out = {}, R = C(cls).roles || {};
+  Object.values(R).forEach(st => Object.values(st || {}).forEach(rd => Object.values(rd || {}).forEach(x => {
+    ["p", "j", "s"].forEach(k => Object.keys((x || {})[k] || {}).forEach(s => { (out[s] ||= { p: 0, j: 0, s: 0 })[k]++; }));
+  })));
+  return out;
+}
+/* 선생님이 직접 정한 값(1=인정, 0=불인정)이 있으면 그것, 없으면 역할 기록이 1번이라도 있으면 인정 */
+function taskOn(cls, sid, k, rc) {
+  const m = ((C(cls).task || {})[sid] || {})[k];
+  if (m === 1) return true; if (m === 0) return false;
+  return (((rc || roleCounts(cls))[sid] || {})[k] || 0) > 0;
+}
+function taskPts(cls, sid, rc) { rc ||= roleCounts(cls); return TASKS.filter(([k]) => taskOn(cls, sid, k, rc)).length; }
 
 /* 한 조 결과의 자동 순위: 점수가 있는 사람끼리 비교, 같은 점수는 같은 순위.
    직접 누른 순위(m)는 건드리지 않는다. */
@@ -512,12 +610,14 @@ function render() {
   const names = classNames();
   if (!names.includes(ui.cls)) ui.cls = names[0] || "";
   $("clsSel").innerHTML = names.length ? names.map(c => `<option ${c === ui.cls ? "selected" : ""}>${esc(c)}</option>`).join("") : `<option>반 없음</option>`;
+  VIEW = !canTeach();
+  if (VIEW && (ui.tab === "roster" || ui.tab === "set")) ui.tab = "groups";
   let tabs = TABS;
   if (VIEW) tabs = [["groups", "조 편성"], ["entry", "경기 결과"], ["stand", "승점 순위"], ["grade", "🏆 학년 순위"]];
   if (GRP != null) tabs = [["entry", `${grpLabel(ui.cls, +GRP)} 결과 입력`]];
   $("nav").innerHTML = tabs.map(([k, l]) => `<button data-act="tab" data-v="${k}" class="${ui.tab === k ? "on" : ""}">${l}</button>`).join("");
   const fn = { roster: scRoster, groups: scGroups, entry: scEntry, stand: scStand, grade: scGrade, set: scSet }[ui.tab] || scRoster;
-  $("main").innerHTML = (!ui.cls && ui.tab !== "roster" && ui.tab !== "set" && ui.tab !== "grade") ? `<h2>먼저 반을 등록하세요</h2><p class="hint">맨 뒤 <b>명렬·출석</b> 탭에서 명렬표를 붙여넣으면 됩니다.</p><button class="btn pri big" data-act="tab" data-v="roster">명렬 등록하러 가기</button>` : fn();
+  $("main").innerHTML = (!ui.cls && ui.tab !== "roster" && ui.tab !== "set" && ui.tab !== "grade") ? VIEW ? `<h2>아직 등록된 반이 없어요</h2><p class="hint">선생님이 명렬을 등록하면 여기에 조 편성과 경기 결과가 나옵니다.</p>` : `<h2>먼저 반을 등록하세요</h2><p class="hint">맨 뒤 <b>명렬·출석</b> 탭에서 명렬표를 붙여넣으면 됩니다.</p><button class="btn pri big" data-act="tab" data-v="roster">명렬 등록하러 가기</button>` : fn();
   if (ui.tab === "set") drawQR();
   saveUI();
 }
@@ -664,6 +764,16 @@ function scEntry() {
   if (!VIEW && !allDone) h += `<p class="hint">${STAGES[st].hint} 순위가 다르면 순위 단추를 직접 누르면 됩니다.</p>`;
   let cards = gs.map((g, gi) => ({ g, gi }));
   if (GRP != null) cards = cards.filter(c => c.gi === +GRP);
+  if (VIEW) {
+    h = joinBox(cls) + h;
+    if (stuOK) {
+      const bs = [...new Set(gs.map((g, gi) => boardOf(cls, gi)))];
+      h += `<div class="seg">${bs.map(b => `<button class="plain ${ui.board === b ? "on" : ""}" data-act="board1" data-v="${b}">${b}번 다트</button>`).join("")}</div>`;
+      if (!bs.includes(ui.board)) return h + `<p class="hint" style="font-size:19px">👆 내가 있는 <b>다트 번호</b>를 누르세요.</p>`;
+      cards = cards.filter(c => boardOf(cls, c.gi) === ui.board);
+      h += `<p class="hint">${STAGES[st].hint} 역할(경기 진행·심판·준비 정리)도 눌러 주세요.</p>`;
+    }
+  }
   h += `<div class="entryGrid">${cards.map(({ g, gi }) => card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}${g.tag ? " · " + g.tag : ""}`)).join("")}`;
   if (GRP == null) {
     const mk = rr.mk || {};
@@ -674,6 +784,16 @@ function scEntry() {
   return h;
 }
 /* 이 조 카드 입력이 끝났나 — 결석생, 같은 라운드를 다른 다트에서 이미 기록한(옮긴) 학생은 빼고 본다. 빈 조는 끝난 것으로 */
+/* QR로 들어온 학생: 입력 코드 + 내 이름 → 그날 하루 결과 입력 가능 */
+function joinBox(cls) {
+  if (stuOK && me) { const x = stuMap(me.cls)[me.sid] || {}; return `<div class="joinBox row"><b style="font-size:19px">✏️ ${esc(me.cls)}반 ${esc(x.name || "")} 입력 중</b><span class="sp"></span><button class="btn ghost" data-act="unjoin">다른 사람으로</button></div>`; }
+  if (!fdb) return "";
+  return `<div class="joinBox"><h3 style="margin-top:0">✏️ 경기 결과 입력하기</h3>
+    <p class="hint" style="margin-top:0">기록을 맡은 학생만 하면 됩니다. 프로젝터 화면의 <b>입력 코드 4자리</b>를 넣고 내 이름을 고르세요. (반은 맨 위에서 고르기)</p>
+    <input type="text" id="jCode" class="codeIn" inputmode="numeric" maxlength="4" placeholder="0000">
+    <select id="jMe"><option value="">내 이름 고르기</option>${roster(cls).map(st => `<option value="${sidOf(st)}">${esc(st.no)}. ${esc(st.name)}</option>`).join("")}</select>
+    <button class="btn pri big" style="width:100%" data-act="join">입력 시작</button></div>`;
+}
 function cardDone(cls, g, rr, gk) {
   const res = (rr || {})[gk] || {};
   const elsewhere = s => !res[s] && Object.keys(rr || {}).some(k => k !== gk && rr[k] && rr[k][s] && rr[k][s].r >= 1);
@@ -681,6 +801,7 @@ function cardDone(cls, g, rr, gk) {
   return live.every(s => res[s] && res[s].r >= 1);
 }
 function card(cls, st, gk, members, res, title) {
+  const RO = !canEnter();
   const focus = ui.focus === (gk === "mk" ? "mk" : "g" + gk);
   const sm = stuMap(cls), key = gk === "mk" ? "mk" : "g" + gk;
   const ids = [...new Set([...members, ...Object.keys(res)])];
@@ -694,14 +815,37 @@ function card(cls, st, gk, members, res, title) {
     const x = sm[s] || { no: "?", name: "(명렬 없음)" }, r = res[s] || {};
     if (elsewhere[s]) return `<div class="prow abs"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)} · 이번 라운드는 ${esc(kName(elsewhere[s]))}에서 기록</div></div>`;
     const a = isAbs(cls, s) && !res[s];
-    const rk = Array.from({ length: n }, (_, i) => i + 1).map(k => `<button class="${r.r === k ? "on" : ""} ${k === 1 ? "r1" : ""}" ${VIEW ? "disabled" : `data-act="rank" data-g="${key}" data-s="${s}" data-v="${k}"`}>${k}위</button>`).join("");
+    const rk = Array.from({ length: n }, (_, i) => i + 1).map(k => `<button class="${r.r === k ? "on" : ""} ${k === 1 ? "r1" : ""}" ${RO ? "disabled" : `data-act="rank" data-g="${key}" data-s="${s}" data-v="${k}"`}>${k}위</button>`).join("");
     return `<div class="prow ${a ? "abs" : ""}"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)}${sexBadge(x)}${a ? " · 결석" : ""}</div>
-      <input type="number" inputmode="numeric" placeholder="${STAGES[st].vLabel}" value="${typeof r.v === "number" ? r.v : ""}" ${VIEW || a ? "disabled" : ""} data-g="${key}" data-s="${s}" class="vin">
+      <input type="number" inputmode="numeric" placeholder="${STAGES[st].vLabel}" value="${typeof r.v === "number" ? r.v : ""}" ${RO || a ? "disabled" : ""} data-g="${key}" data-s="${s}" class="vin">
       <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
-      ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${VIEW ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
+      ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${gk === "mk" && !VIEW ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
-    ${VIEW ? "" : `<div class="foot"><button class="btn ghost" data-act="clearCard" data-g="${key}">지우기</button>${gk !== "mk" && Object.values(res).some(x => x.m) ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 다시</button>` : ""}</div>`}</div>`;
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
+    ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${!canTeach() ? "" : `<div class="foot"><button class="btn ghost" data-act="clearCard" data-g="${key}">지우기</button>${gk !== "mk" && Object.values(res).some(x => x.m) ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 다시</button>` : ""}</div>`}</div>`;
+}
+/* 역할 기록 — 이 다트(조)·이 라운드에서 누가 입력했고, 누가 경기 진행·심판·준비 정리를 했나.
+   classes/{반}/roles/{경기}/r{라운드}/{g번호} = { by, byCls, t, j:{sid:1}, s:{sid:1}, p:{sid:1} } → Ⓒ 과제수행에 자동 반영 */
+const ROLE_KEYS = [["j", "경기 진행"], ["s", "심판"], ["p", "준비·정리"]];
+const rolesAt = (cls, st, r, key) => ((((C(cls).roles || {})[st] || {})["r" + r] || {})[key]) || {};
+function rolesBox(cls, st, key, members, ro) {
+  const R = rolesAt(cls, st, ui.round, key), sm = stuMap(cls);
+  const picked = s => ROLE_KEYS.some(([k]) => (R[k] || {})[s]);
+  const cand = [...new Set([...members, ...roster(cls).map(sidOf).filter(picked)])].filter(s => sm[s]);
+  const others = roster(cls).filter(st2 => !cand.includes(sidOf(st2)));
+  const byName = R.by ? ((stuMap(R.byCls || cls)[R.by] || {}).name || "선생님") : "";
+  const tm = R.t ? new Date(R.t).toTimeString().slice(0, 5) : "";
+  return `<div class="roles">${ROLE_KEYS.map(([k, l]) => `<div class="rrow"><span class="rl">${l}</span>
+      ${cand.map(s => `<button class="rc ${(R[k] || {})[s] ? "on" : ""}" ${ro ? "disabled" : `data-act="role" data-g="${key}" data-k="${k}" data-s="${s}"`}>${esc(sm[s].name)}</button>`).join("")}
+      ${ro || !others.length ? "" : `<select class="roleAdd" data-g="${key}" data-k="${k}"><option value="">+ 다른 학생</option>${others.map(o => `<option value="${sidOf(o)}">${esc(o.no)}. ${esc(o.name)}</option>`).join("")}</select>`}</div>`).join("")}
+    ${byName ? `<div class="byline">✍ 입력: ${esc(byName)}${tm ? " · " + tm : ""}</div>` : ""}</div>`;
+}
+function stampRoles(gk, mutate) {
+  const R = JSON.parse(JSON.stringify(rolesAt(ui.cls, ui.stage, ui.round, gk)));
+  if (mutate) mutate(R);
+  if (teacher || !stuOK) { R.by = "T"; delete R.byCls; } else { R.by = me.sid; R.byCls = me.cls; }
+  R.t = Date.now();
+  put(P(ui.cls, "roles", ui.stage, "r" + ui.round, gk), R, !mutate);
 }
 /* 이번 라운드에 기록이 없는 학생 — 결석했다가 보충 경기를 하는 경우 */
 function missingBox(cls, st, gs, rr) {
@@ -718,7 +862,7 @@ function missingBox(cls, st, gs, rr) {
 
 /* ④ 순위·성적 */
 function scStand() {
-  const cls = ui.cls, list = roster(cls);
+  const cls = ui.cls, list = roster(cls), RC = roleCounts(cls);
   const rows = list.map(st => {
     const s = sidOf(st), a = record(cls, "cu", s), b = record(cls, "x3", s), c = taskPts(cls, s);
     const tot = a.area + b.area + c;
@@ -730,7 +874,7 @@ function scStand() {
   let h = `<div class="row noprint" style="margin-bottom:10px"><h2 style="margin:0">${esc(cls)}반 ${VIEW ? "승점 순위" : "순위·성적"}</h2><span class="sp"></span>
     <div class="seg" style="margin:0"><button class="plain ${ui.sort === "no" ? "on" : ""}" data-act="sort" data-v="no">번호순</button><button class="plain ${ui.sort === "score" ? "on" : ""}" data-act="sort" data-v="score">승점순</button></div></div>`;
   if (!VIEW) h += `<p class="hint noprint">칸의 숫자는 그 라운드 <b>승점</b>(4명 조 4·3·2·1, 3명 조 4·3·1, 5명 조 4·3·3·2·1). 노란 칸 = 기록 없음. 6라운드 모두 끝난 학생 ${done}/${rows.length}명.
-    Ⓒ 과제수행은 단추를 눌러 체크하세요.</p>
+    Ⓒ 과제수행은 경기 카드의 <b>역할 기록</b>으로 자동 인정(연두색, 숫자 = 횟수)되고, 단추를 눌러 직접 인정·취소할 수 있습니다.</p>
     <div class="row noprint" style="margin-bottom:10px"><button class="btn pri" data-act="xlsx">⬇ 엑셀 내려받기 (반별 시트)</button><button class="btn" data-act="print">🖨 인쇄</button></div>`;
   h += `<div class="tblWrap"><table><thead><tr><th rowspan="2">번호</th><th rowspan="2">이름</th>
     <th class="cu" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓐ 카운트 업</th><th class="x3" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓑ 301 게임</th>
@@ -740,7 +884,8 @@ function scStand() {
       <td>${esc(r.st.no)}</td><td class="nm">${esc(r.st.name)}</td>
       ${r.a.rounds.map(cell).join("")}<td class="sum">${r.a.sum}</td>${VIEW ? "" : `<td class="sum">${r.a.played ? r.a.area : "-"}</td>`}
       ${r.b.rounds.map(cell).join("")}<td class="sum">${r.b.sum}</td>${VIEW ? "" : `<td class="sum">${r.b.played ? r.b.area : "-"}</td>`}
-      ${VIEW ? "" : `<td>${TASKS.map(([k, l]) => `<button class="tk ${((C(cls).task || {})[r.s] || {})[k] ? "on" : ""}" data-act="task" data-v="${r.s}" data-k="${k}">${l}</button>`).join("")}</td>
+      ${VIEW ? "" : `<td>${TASKS.map(([k, l]) => { const n = ((RC[r.s] || {})[k]) || 0, m = ((C(cls).task || {})[r.s] || {})[k], on = taskOn(cls, r.s, k, RC);
+        return `<button class="tk ${on ? (m === 1 ? "on" : "auto") : ""}" data-act="task" data-v="${r.s}" data-k="${k}" title="${n ? "역할 기록 " + n + "회" : ""}${m === 0 ? " · 선생님이 뺌" : ""}">${l}${n ? " " + n : ""}</button>`; }).join("")}</td>
       <td class="sum">${r.tot}</td><td class="grade">${r.grade}${r.full ? "" : `<span style="font-size:14px;color:var(--warn)"> 진행중</span>`}</td>`}
     </tr>`).join("")}</tbody></table></div>`;
   if (!VIEW) h += rulesTable();
@@ -794,24 +939,19 @@ function rulesTable() {
 function scSet() {
   const base = location.origin + location.pathname;
   const cls = ui.cls;
-  const viewUrl = `${base}?view=1&cls=${encodeURIComponent(cls)}`;
+  const viewUrl = `${base}?in=1`;
   const gs = groupsOf(cls, ui.stage);
   return `<h2>설정 · 공유</h2>
     <div class="card"><h3 style="margin-top:0">저장 상태</h3>
     <p style="margin:0">${$("status").textContent}</p>
-    ${serverDenied || !fdb ? `<div class="note">지금은 <b>이 기기에만</b> 저장됩니다. 다른 기기와 함께 쓰려면 Firebase 콘솔(<b>kys5487-sportsdart</b>) → Realtime Database → <b>규칙</b>에 아래 내용을 넣고 게시하세요.
-      <pre>{
-  "rules": {
-    "darts": { ".read": true, ".write": true }
-  }
-}</pre>게시한 뒤 이 화면을 새로고침하면, 이 기기에 저장된 기록이 자동으로 서버에 올라갑니다.</div>` : `<p class="hint">기록은 서버에 저장되어 휴대폰·태블릿·교실 PC 어디서 열어도 같습니다.</p>`}
+    ${serverDenied || !fdb ? `<div class="note">지금은 <b>이 기기에만</b> 저장됩니다. Firebase 콘솔(<b>kys5487-sportsdart</b>)에서 규칙 게시·로그인 설정이 끝나면 자동으로 서버에 올라갑니다.</div>` : `<p class="hint">기록은 서버에 저장되어 휴대폰·태블릿·교실 PC 어디서 열어도 같습니다.</p>`}
+    ${secret.pin && secret.day === today() ? `<p style="font-size:20px">📱 오늘의 결과 입력 코드: <b style="font-size:28px;letter-spacing:4px">${esc(secret.pin)}</b> <span class="hint">(날마다 바뀜)</span></p>` : ""}
     </div>
-    ${cls ? `<div class="card" style="margin-top:14px"><h3 style="margin-top:0">${esc(cls)}반 학생용 보기 링크</h3>
-    <p class="hint">조 편성과 경기 결과(승점)만 보이고 고칠 수 없습니다. 평가 점수는 보이지 않습니다.</p>
+    ${cls ? `<div class="card" style="margin-top:14px"><h3 style="margin-top:0">학생용 링크 (결과 입력 · 조 편성 보기)</h3>
+    <p class="hint">프로젝터 화면에도 이 QR과 입력 코드가 나옵니다. 코드를 넣은 학생은 <b>경기 결과와 역할</b>만 입력할 수 있고, 평가 점수는 볼 수 없습니다.</p>
     <div class="row"><input type="text" readonly value="${esc(viewUrl)}" style="flex:1;min-width:240px" id="viewUrl"><button class="btn" data-act="copy" data-v="viewUrl">복사</button></div>
     <div class="qr" id="qr" style="margin-top:10px"></div>
-    ${gs.length ? `<h3>조별 입력 링크 (${STAGES[ui.stage].name})</h3><p class="hint">조장이 자기 조 결과만 입력하게 할 때 씁니다. 순위·성적은 보이지 않습니다.</p>
-    <div class="row">${gs.map((g, i) => `<button class="btn" data-act="copyGrp" data-v="${i}">${grpLabel(cls, i)} 링크</button>`).join("")}</div>` : ""}
+
     </div>` : ""}
     <div class="card" style="margin-top:14px"><h3 style="margin-top:0">백업</h3>
     <div class="row"><button class="btn" data-act="backup">⬇ 전체 백업(JSON)</button><label class="btn" style="display:inline-flex;align-items:center">⬆ 백업 불러오기<input type="file" accept=".json" id="restore" hidden></label></div>
@@ -819,10 +959,14 @@ function scSet() {
     </div>`;
 }
 let qrLib = null;
+async function loadQR() {
+  if (!qrLib) { await new Promise((ok, no) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); qrLib = window.QRCode; }
+  return qrLib;
+}
 async function drawQR() {
   const box = $("qr"); if (!box) return;
   try {
-    if (!qrLib) { await new Promise((ok, no) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); qrLib = window.QRCode; }
+    await loadQR();
     box.innerHTML = ""; new qrLib(box, { text: $("viewUrl").value, width: 200, height: 200 });
   } catch (e) { box.style.display = "none"; }
 }
@@ -849,7 +993,8 @@ function showBig() {
     });
   });
   const pick = classNames().filter(c => groupsOf(c, st).length);
-  $("big").innerHTML = `<div class="bigTop"><h2>🎯 ${STAGES[st].name}${maxW > 1 ? ` · ${wv}차 경기` : ""}</h2>
+  const joinUrl = location.origin + location.pathname + "?in=1";
+  $("big").innerHTML = `<div class="bigTop">${teacher && secret.pin && secret.day === today() ? `<div class="joinQR"><div id="bigQR"></div><div><small>📱 결과 입력 코드</small><b>${esc(secret.pin)}</b></div></div>` : ""}<h2>🎯 ${STAGES[st].name}${maxW > 1 ? ` · ${wv}차 경기` : ""}</h2>
     ${Object.entries(STAGES).map(([k, s]) => `<button class="${st === k ? "on" : ""}" data-act="bigStage" data-v="${k}">${s.mark} ${s.name}</button>`).join("")}
     ${maxW > 1 ? `<span style="width:12px"></span>` + Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("") : ""}
     <span style="width:12px"></span>${pick.map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}
@@ -859,6 +1004,7 @@ function showBig() {
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
         ${next[b] ? `<div class="nx">다음 ${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
+  if ($("bigQR")) loadQR().then(Q => { $("bigQR").innerHTML = ""; new Q($("bigQR"), { text: joinUrl, width: 96, height: 96 }); }).catch(() => {});
 }
 
 /* ---------- 동작 ---------- */
@@ -871,6 +1017,7 @@ function writeCard(gk, res) {
   if (gk !== "mk") autoRank(res, STAGES[ui.stage].better);
   Object.keys(res).forEach(s => { const x = res[s]; if (x.r == null && typeof x.v !== "number" && gk !== "mk") delete res[s]; });
   put(P(ui.cls, "games", ui.stage, "r" + ui.round, gk), Object.keys(res).length ? res : null);
+  stampRoles(gk);
 }
 const curCard = gk => JSON.parse(JSON.stringify(roundRes(ui.cls, ui.stage, ui.round)[gk] || {}));
 
@@ -910,7 +1057,7 @@ document.addEventListener("click", e => {
       const had = hasAny(cls, st);
       if (had && !confirm(`이미 입력한 ${STAGES[st].name} 결과가 있습니다.\n다시 편성하면 ${STAGES[st].name} 결과가 모두 지워지고 1라운드부터 새로 합니다.\n\n학생 몇 명만 옮기려면 [취소]를 누르고 학생을 눌러 옮기세요.`)) return;
       if (!had && groupsOf(cls, st).length && !confirm("조를 다시 편성할까요?")) return;
-      if (had) put(P(cls, "games", st), null, true);
+      if (had) { put(P(cls, "games", st), null, true); put(P(cls, "roles", st), null, true); }
       const list = makeGroups(cls, st, ui.method[st]);
       if (!list.length) { toast("출석한 학생이 없습니다"); return; }
       ui.sel = null; saveGroups(cls, st, list, ui.method[st]); toast(`${list.length}개 조로 편성했습니다`);
@@ -948,7 +1095,11 @@ document.addEventListener("click", e => {
         Object.keys(r).forEach(k => { const m = /^g(d+)$/.exec(k); if (!m) { out[k] = r[k]; return; } const j = +m[1]; if (j < i) out[k] = r[k]; else if (j > i) out["g" + (j - 1)] = r[k]; });
         games[rk] = out;
       });
-      put(P(cls, "games", st), games, true); saveGroups(cls, st, list); break;
+      put(P(cls, "games", st), games, true);
+      const roles = JSON.parse(JSON.stringify(((C(cls).roles || {})[st]) || {}));
+      Object.keys(roles).forEach(rk => { const r = roles[rk] || {}, out = {}; Object.keys(r).forEach(k => { const m = /^g(\d+)$/.exec(k); if (!m) out[k] = r[k]; else if (+m[1] < i) out[k] = r[k]; else if (+m[1] > i) out["g" + (+m[1] - 1)] = r[k]; }); roles[rk] = out; });
+      put(P(cls, "roles", st), roles, true);
+      saveGroups(cls, st, list); break;
     }
     case "addGrp": { const list = groupsOf(cls, ui.stage); list.push({ m: [], tag: "" }); put(P(cls, "groups", ui.stage, "list"), list); break; }
     case "big": openBig(cls); break;
@@ -961,6 +1112,31 @@ document.addEventListener("click", e => {
       else if (s.has(n)) { if (s.size === 1) { toast("한 대 이상 골라야 합니다"); return; } s.delete(n); } else s.add(n);
       put(P(cls, "boards"), [...s].sort((a, b) => a - b)); break;
     }
+    case "loginOpen": showLogin(); break;
+    case "loginClose": $("login").classList.remove("show"); break;
+    case "lgPick": $("lgEmail").value = v; $("lgPw").focus(); break;
+    case "doLogin": {
+      const em = ($("lgEmail").value || "").trim().toLowerCase(), pw = $("lgPw").value;
+      if (!em || !pw) { toast("이메일과 비밀번호를 넣어 주세요"); return; }
+      if (!fauth) { toast("인터넷 연결을 확인해 주세요"); return; }
+      authM.signInWithEmailAndPassword(fauth, em, pw).then(u => {
+        if (!TEACHERS.includes(em)) { toast("선생님 계정이 아닙니다"); authM.signOut(fauth); return; }
+        $("login").classList.remove("show"); toast("로그인했습니다");
+      }).catch(e => toast(/invalid|wrong|not-found|credential/.test(e.code || "") ? "이메일 또는 비밀번호가 맞지 않아요" : /too-many/.test(e.code || "") ? "시도가 많아 잠시 막혔어요" : /operation-not-allowed|configuration/.test(e.code || "") ? "Firebase에서 이메일 로그인을 먼저 켜 주세요" : "로그인 실패: " + (e.code || "")));
+      break;
+    }
+    case "logout": authM.signOut(fauth).then(() => { $("login").classList.remove("show"); toast("로그아웃했습니다"); }); break;
+    case "pwChange": {
+      const np = $("lgNew").value || "";
+      if (np.length < 6) { toast("6자 이상으로 정해 주세요"); return; }
+      authM.updatePassword(fauth.currentUser, np).then(() => { toast("비밀번호를 바꿨습니다"); $("lgNew").value = ""; })
+        .catch(e => toast(/recent-login/.test(e.code || "") ? "보안을 위해 로그아웃 후 다시 로그인한 뒤 바꿔 주세요" : "바꾸지 못했어요"));
+      break;
+    }
+    case "join": joinStudent(); break;
+    case "unjoin": stuOK = false; me = null; lsSet("darts-me" + TEST, null); if (fauth && fauth.currentUser && fauth.currentUser.isAnonymous) authM.signOut(fauth); render(); break;
+    case "board1": ui.board = +v; render(); break;
+    case "role": { const k = b.dataset.k, s = b.dataset.s; stampRoles(b.dataset.g, R => { R[k] ||= {}; if (R[k][s]) delete R[k][s]; else R[k][s] = 1; }); break; }
     case "fit": ui.fit = v === "1"; render(); break;
     case "bmode": ui.bmode = v; render(); break;
     case "power": {
@@ -985,8 +1161,9 @@ document.addEventListener("click", e => {
     case "autoCard": { const res = curCard(b.dataset.g); Object.values(res).forEach(x => delete x.m); writeCard(b.dataset.g, res); break; }
     case "toMk": { const res = curCard("mk"); res[v] = { add: 1 }; put(P(cls, "games", ui.stage, "r" + ui.round, "mk"), res); break; }
     case "task": {
-      const k = b.dataset.k, on = ((C(cls).task || {})[v] || {})[k];
-      put(P(cls, "task", v, k), on ? null : 1); break;
+      const k = b.dataset.k, rc = roleCounts(cls), now = taskOn(cls, v, k, rc), auto = ((rc[v] || {})[k] || 0) > 0;
+      const want = !now;   // 누르면 반대로 — 자동 판정과 같아지면 직접 값은 지운다
+      put(P(cls, "task", v, k), want === auto ? null : (want ? 1 : 0)); break;
     }
     case "xlsx": downloadXLSX(); break;
     case "gcsv": {
@@ -998,7 +1175,7 @@ document.addEventListener("click", e => {
     case "copyGrp": copy(`${location.origin}${location.pathname}?cls=${encodeURIComponent(cls)}&grp=${v}`); break;
     case "backup": download(`다트리그_백업_${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(S, null, 1), "application/json"); break;
     case "resetGames":
-      if (confirm(`${cls}반의 경기 결과와 과제수행 체크를 모두 지울까요? 되돌릴 수 없습니다.`)) { put(P(cls, "games"), null, true); put(P(cls, "task"), null); }
+      if (confirm(`${cls}반의 경기 결과와 과제수행 체크를 모두 지울까요? 되돌릴 수 없습니다.`)) { put(P(cls, "games"), null, true); put(P(cls, "roles"), null, true); put(P(cls, "task"), null); }
       break;
     case "resetGroups":
       if (confirm(`${cls}반 조 편성을 지울까요?`)) put(P(cls, "groups"), null);
@@ -1010,6 +1187,7 @@ document.addEventListener("change", e => {
   const t = e.target;
   if (t.id === "clsSel") { ui.cls = t.value; ui.sel = null; render(); return; }
   if (t.id === "restore") { restore(t.files[0]); return; }
+  if (t.classList.contains("roleAdd") && t.value) { const k = t.dataset.k, s = t.value; stampRoles(t.dataset.g, R => { (R[k] ||= {})[s] = 1; }); return; }
   if (!t.classList.contains("vin")) return;
   const gk = t.dataset.g, s = t.dataset.s, res = curCard(gk), x = res[s] || {};
   const raw = t.value.trim();
@@ -1073,11 +1251,13 @@ async function loadXLSX() {
 }
 function studentRow(cls, st) {
   const s = sidOf(st), a = record(cls, "cu", s), b = record(cls, "x3", s);
-  const t = (C(cls).task || {})[s] || {}, c = taskPts(cls, s), tot = a.area + b.area + c;
+  const rc = roleCounts(cls), on = {}; TASKS.forEach(([k]) => on[k] = taskOn(cls, s, k, rc));
+  const t = on, c = taskPts(cls, s, rc), tot = a.area + b.area + c;
+  const cnt = rc[s] || {}, roleText = TASKS.filter(([k]) => cnt[k]).map(([k, l]) => l + " " + cnt[k] + "회").join(" · ");
   const miss = [];
   if (a.played < CFG.rounds) miss.push(`카운트업 ${CFG.rounds - a.played}R 미응시`);
   if (b.played < CFG.rounds) miss.push(`301 ${CFG.rounds - b.played}R 미응시`);
-  return { s, a, b, t, c, tot, grade: convTotal(tot), note: miss.join(" / ") };
+  return { s, a, b, t, c, tot, roleText, grade: convTotal(tot), note: miss.join(" / ") };
 }
 async function downloadXLSX() {
   let X;
@@ -1103,7 +1283,7 @@ async function downloadXLSX() {
     group("Ⓐ 결과", ["합산 승점", "Ⓐ 점수"]);
     for (let i = 1; i <= R; i++) group(`Ⓑ 301 ${i}R`, ["순위", "남은점수", "인원", "승점"]);
     group("Ⓑ 결과", ["합산 승점", "Ⓑ 점수"]);
-    group("Ⓒ 과제수행", [...TASKS.map(t => t[1]), "Ⓒ 점수"]);
+    group("Ⓒ 과제수행", [...TASKS.map(t => t[1]), "Ⓒ 점수", "역할 기록"]);
     group("최종", ["Ⓐ+Ⓑ+Ⓒ", "최종 점수", "비고"]);
     const rows = [top, sub];
     roster(cls).forEach(st => {
@@ -1112,7 +1292,7 @@ async function downloadXLSX() {
       row.push(r.a.sum, r.a.played ? r.a.area : 0);
       r.b.rounds.forEach(x => row.push(x ? x.rank : "", x ? dash(x.v) : "", x ? x.n : "", x ? x.pts : ""));
       row.push(r.b.sum, r.b.played ? r.b.area : 0);
-      row.push(...TASKS.map(([k]) => r.t[k] ? 1 : 0), r.c, r.tot, r.grade, r.note);
+      row.push(...TASKS.map(([k]) => r.t[k] ? 1 : 0), r.c, r.roleText, r.tot, r.grade, r.note);
       rows.push(row);
     });
     const ws = X.utils.aoa_to_sheet(rows);
