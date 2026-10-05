@@ -129,13 +129,14 @@
 
   .go{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px}
   .go .btn{min-height:68px; font-size:22px}
+  .go .nextBig{background:var(--good)}
   details.setup{margin-bottom:14px}
   details.setup summary{cursor:pointer; min-height:54px; display:flex; align-items:center; font-size:18px; font-weight:700; color:var(--sub); background:var(--soft); border:1px solid var(--line); border-radius:12px; padding:0 16px; margin-bottom:10px; list-style:none}
   details.setup summary::before{content:"▸"; margin-right:10px; color:var(--pri)}
   details.setup[open] summary{color:var(--pri)}
   details.setup[open] summary::before{content:"▾"}
   .banner{display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:var(--goodSoft); border:1px solid #BFE6CF; border-radius:14px; padding:12px 16px; margin-bottom:12px; font-size:19px; font-weight:700; color:var(--good)}
-  .banner .btn{margin-left:auto}
+  .banner .btn:first-of-type{margin-left:auto}
   .banner.todo{background:var(--priSoft); border-color:#D3CEFB; color:var(--pri)}
   .selBar{position:sticky; top:80px; z-index:10; display:flex; gap:10px; align-items:center; flex-wrap:wrap; background:var(--priSoft); border:1px solid #D3CEFB; border-radius:14px; padding:10px 12px; margin-bottom:12px; font-size:17px; box-shadow:var(--shadow)}
   .selBar b:first-child{font-size:19px}
@@ -211,6 +212,9 @@
   #big .arena{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; min-height:calc(100vh - 130px); grid-auto-rows:1fr}
   #big .bd2{background:#1F2450; border-radius:18px; padding:14px 16px; display:flex; flex-direction:column; min-width:0; border:2px solid #2C326A}
   #big .bd2.empty{opacity:.35}
+  #big .nextBtn{background:var(--good)!important; color:#fff!important; border:0!important; font-size:20px!important}
+  #big .doneBar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:#1E5A3C; border:2px solid var(--good); color:#fff; border-radius:16px; padding:10px 16px; margin-bottom:12px; font-size:28px; font-weight:700}
+  #big .doneBar .btn{margin-left:auto; min-height:60px; font-size:24px!important; padding:0 26px}
   #big .waitMsg{text-align:center; font-size:40px; font-weight:700; color:#fff; padding:18px 0 10px} #big .waitMsg small{display:block; font-size:22px; color:#C9C5FF; font-weight:600; margin-top:6px}
   #big .bd2[data-act]{cursor:pointer}
   #big .bd2[data-act]:hover{border-color:var(--pri2)}
@@ -245,6 +249,14 @@
     .entryGrid{grid-template-columns:1fr}
     main{border-radius:0 0 16px 16px}
   }
+  #printQR{display:none}
+  #printQR .sheet{display:grid; grid-template-columns:1fr 1fr; gap:10mm}
+  #printQR .qc{border:2px dashed #999; border-radius:6mm; padding:6mm; text-align:center; break-inside:avoid; color:#2B3160}
+  #printQR .qc b{display:block; font-size:30pt; font-family:"Barlow Condensed","Noto Sans KR",sans-serif}
+  #printQR .qc img{width:48mm; height:48mm; margin:3mm auto; display:block}
+  #printQR .qc small{font-size:12pt}
+  body.printing > *:not(#printQR){display:none!important}
+  body.printing #printQR{display:block}
   @media print{
     header,nav,.noprint{display:none!important}
     main{padding:0; border:0; box-shadow:none}
@@ -267,6 +279,7 @@
 </div>
 <div id="big"></div>
 <div id="login"></div>
+<div id="printQR"></div>
 <div id="toast"></div>
 
 <script type="module">
@@ -344,7 +357,8 @@ const ui = Object.assign({ tab: "groups", cls: "", stage: "cu", round: 1, sel: n
 ui.sel = null; ui.open = {};   // 접는 칸(오늘 빠지는 학생·편성 설정)을 열어 둔 채로 고를 수 있게
 if (params.get("cls")) ui.cls = params.get("cls");
 if (params.has("in")) ui.tab = "entry";            // 프로젝터 QR로 들어온 학생은 바로 결과 입력
-if (params.get("board")) ui.board = +params.get("board");
+const PIN_BOARD = +params.get("board") || 0;   // 다트기에 붙인 QR로 들어온 경우 그 다트로 고정
+if (PIN_BOARD) ui.board = PIN_BOARD;
 if (GRP != null) ui.tab = "entry";
 const saveUI = () => lsSet(LSU, { tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gsort: ui.gsort, bigCls: ui.bigCls, bigDay: ui.bigDay, fit: ui.fit, board: ui.board, boardKey: ui.boardKey });
 
@@ -539,6 +553,45 @@ function grpRec(cls, stage, r) {
 const groupsOf = (cls, stage, r = ui.round) => ((grpRec(cls, stage, r) || {}).list || []).map(g => ({ m: (g.m || []).slice(), tag: g.tag || "" }));
 /* 지금 진행 중인 라운드 — 선생님이 조를 짜거나 프로젝터에 띄운 라운드. 학생 입력은 이 라운드로 고정된다(오입력 방지) */
 const liveOf = cls => { const L = C(cls).live; return L && L.day === today() ? L : null; };
+/* 경기마다 기본 편성 방법 — 조 편성 화면에서 마지막으로 고른 방법을 쓴다 */
+const METHOD_OPTS = { cu: ["seed", "random", "no"], x3: ["grank", "rank", "seed", "random"] };
+const methodFor = st => METHOD_OPTS[st].includes(ui.method[st]) ? ui.method[st] : METHOD_OPTS[st][0];
+/* 지금 진행 중(또는 막 시작할) 경기 — 진행 중 라운드가 있으면 그것, 없으면 아직 안 끝난 첫 라운드 */
+function curGame(cls) {
+  const L = liveOf(cls);
+  if (L && !isClosed(cls, L.st, L.r)) return { st: L.st, r: L.r };
+  for (const st of ["cu", "x3"]) for (let r = 1; r <= CFG.rounds; r++) if (!isClosed(cls, st, r)) return { st, r };
+  return null;
+}
+const allEntered = (cls, st, r) => { const gs = groupsOf(cls, st, r), rr = roundRes(cls, st, r); return gs.length > 0 && gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi)); };
+/* [▶ 다음 경기 시작]: 진행 중 경기를 종료하고, 다음 라운드 조를 (기본 방법으로) 짜서, 프로젝터에 띄운다.
+   진행 중 경기가 아직 없으면(수업 시작) 첫 경기 조를 짠다. 이미 짜 둔 조가 있으면 그대로 쓴다. */
+function startNext(cls) {
+  const cur = curGame(cls);
+  if (!cur) { toast("모든 경기가 끝났습니다 — 순위·성적을 확인하세요"); ui.tab = "stand"; $("big").classList.remove("show"); render(); return; }
+  let target = cur;
+  const running = groupsOf(cls, cur.st, cur.r).length > 0 && liveOf(cls);
+  if (running) {
+    const gs = groupsOf(cls, cur.st, cur.r), rr = roundRes(cls, cur.st, cur.r);
+    const left = gs.map((g, gi) => cardDone(cls, g, rr, "g" + gi) ? null : grpLabel(cls, gi)).filter(Boolean);
+    const nx = nextStep(cur.st, cur.r);
+    if (!confirm(`${STAGES[cur.st].name} ${cur.r}라운드를 끝내고 ${nx ? `${STAGES[nx.st].name} ${nx.r}라운드를 시작할까요?` : "모든 경기를 마칠까요?"}${left.length ? `\n\n⚠ 아직 입력이 안 끝난 다트: ${left.join(", ")}` : ""}`)) return;
+    put(P(cls, "closed", cur.st, "r" + cur.r), Date.now(), true);
+    put(P(cls, "live"), null, true);
+    if (!nx) { ui.tab = "stand"; $("big").classList.remove("show"); toast("모든 경기가 끝났습니다 — 순위·성적을 확인하세요"); render(); return; }
+    target = nx;
+  }
+  ui.stage = target.st; ui.round = target.r; ui.sel = null; ui.focus = null;
+  let list = groupsOf(cls, target.st, target.r);
+  if (!list.length) {
+    list = makeGroups(cls, target.st, methodFor(target.st));
+    if (!list.length) { toast("참여하는 학생이 없습니다 — 오늘 빠지는 학생을 확인하세요"); render(); return; }
+    saveGroups(cls, target.st, list, methodFor(target.st), target.r);
+  }
+  if (isClosed(cls, target.st, target.r)) put(P(cls, "closed", target.st, "r" + target.r), null, true);
+  toast(`▶ ${STAGES[target.st].name} ${target.r}라운드 시작 — ${list.length}개 조 (${METHODS[methodFor(target.st)][0]})`);
+  openBig(cls);
+}
 const isClosed = (cls, st, r) => !!((((C(cls).closed || {})[st]) || {})["r" + r]);
 function nextStep(st, r) { return r < CFG.rounds ? { st, r: r + 1 } : st === "cu" ? { st: "x3", r: 1 } : null; }
 function setLive(cls, st, r) {
@@ -666,6 +719,12 @@ function render() {
     const L = liveOf(ui.cls), key = L ? ui.cls + L.st + L.r + L.day : "";
     if (L && (stuOK || ui.liveSeen !== key)) { ui.stage = L.st; ui.round = L.r; ui.liveSeen = key; }
     if (ui.boardKey !== key) { ui.board = null; ui.boardKey = key; }
+    if (PIN_BOARD) ui.board = PIN_BOARD;
+  }
+  // 다트 QR로 들어왔으면, 오늘 그 다트를 쓰는 반을 저절로 고른다 (두 반이 함께 수업해도)
+  if (VIEW && PIN_BOARD && !ui.pinCls) {
+    const hit = classNames().filter(c => { const L = liveOf(c); return L && groupsOf(c, L.st, L.r).some((g, gi) => boardOf(c, gi) === PIN_BOARD); });
+    if (hit.length === 1) { ui.cls = hit[0]; ui.pinCls = true; const L = liveOf(hit[0]); ui.stage = L.st; ui.round = L.r; }
   }
   let tabs = TABS;
   if (VIEW) tabs = [["groups", "조 편성"], ["entry", "경기 결과"], ["stand", "승점 순위"], ["grade", "🏆 학년 순위"]];
@@ -674,6 +733,7 @@ function render() {
   const fn = { roster: scRoster, groups: scGroups, entry: scEntry, stand: scStand, grade: scGrade, set: scSet }[ui.tab] || scRoster;
   $("main").innerHTML = (!ui.cls && ui.tab !== "roster" && ui.tab !== "set" && ui.tab !== "grade") ? VIEW ? `<h2>아직 등록된 반이 없어요</h2><p class="hint">선생님이 명렬을 등록하면 여기에 조 편성과 경기 결과가 나옵니다.</p>` : `<h2>먼저 반을 등록하세요</h2><p class="hint">맨 뒤 <b>명렬·출석</b> 탭에서 명렬표를 붙여넣으면 됩니다.</p><button class="btn pri big" data-act="tab" data-v="roster">명렬 등록하러 가기</button>` : fn();
   if (ui.tab === "set") drawQR();
+  if ($("big").classList.contains("show") && !ui.inBig) { ui.inBig = true; try { showBig(); } finally { ui.inBig = false; } }
   saveUI();
 }
 function stageSeg() {
@@ -719,6 +779,7 @@ function scGroups() {
   const info = grpRec(cls, st, r);
   let h = stageSeg() + roundSeg(cls, st, "gRound");
   if (!VIEW) h += `<p class="hint" style="margin-top:-4px">● = 지금 진행 중인 라운드. 학생 입력 화면은 이 라운드로 고정됩니다. 라운드마다 조를 새로 짤 수 있습니다.</p>`;
+  if (!VIEW && !gs.length && !liveOf(cls)) h += `<div class="go noprint" style="grid-template-columns:1fr"><button class="btn pri big nextBig" data-act="startNext">▶ 경기 시작 — ${(curGame(cls) ? STAGES[curGame(cls).st].name + " " + curGame(cls).r + "라운드" : "")} 조를 짜서 프로젝터에 띄우기</button></div>`;
   if (!VIEW && gs.length) h += `<div class="go noprint"><button class="btn pri big" data-act="big">📺 화면에 띄우기</button><button class="btn pri big alt" data-act="goEntry">✏️ 경기 결과 입력 →</button></div>`;
   if (!VIEW) h += absPicker(cls, !gs.length);
   if (!VIEW) {
@@ -827,7 +888,7 @@ function scEntry() {
   const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi)), closed = isClosed(cls, st, ui.round);
   if (!VIEW && GRP == null) {
     if (closed) h += `<div class="banner" style="background:var(--soft);border-color:var(--line);color:var(--sub)">🔒 ${STAGES[st].name} ${ui.round}라운드 경기 종료됨 — 학생 입력이 잠겼습니다. 선생님은 고칠 수 있어요.<button class="btn" data-act="reopenRound">다시 열기</button></div>`;
-    else h += `<div class="banner${allDone ? "" : " todo"}">${allDone ? `✔ ${ui.round}라운드 입력 끝!` : `${ui.round}라운드 진행 중`}<button class="btn pri big" data-act="endRound">🏁 ${ui.round}라운드 경기 종료</button></div>`;
+    else h += `<div class="banner${allDone ? "" : " todo"}">${allDone ? `✔ ${ui.round}라운드 모든 다트 입력 완료!` : `${ui.round}라운드 진행 중`}<button class="btn${allDone ? "" : " ghost"}" data-act="endRound">🏁 종료만</button><button class="btn pri big" data-act="startNext">▶ 다음 경기 시작</button></div>`;
   }
   if (!VIEW && !allDone) h += `<p class="hint">${STAGES[st].hint} 순위가 다르면 순위 단추를 직접 누르면 됩니다.</p>`;
   let cards = gs.map((g, gi) => ({ g, gi }));
@@ -1025,6 +1086,9 @@ function scSet() {
     <p class="hint">프로젝터 화면에도 이 QR과 입력 코드가 나옵니다. 코드를 넣은 학생은 <b>경기 결과와 역할</b>만 입력할 수 있고, 평가 점수는 볼 수 없습니다.</p>
     <div class="row"><input type="text" readonly value="${esc(viewUrl)}" style="flex:1;min-width:240px" id="viewUrl"><button class="btn" data-act="copy" data-v="viewUrl">복사</button></div>
     <div class="qr" id="qr" style="margin-top:10px"></div>
+    <h3>🖨 다트기에 붙일 QR</h3>
+    <p class="hint">다트마다 전용 QR을 인쇄해 다트기 옆에 붙여 두면, 학생이 찍었을 때 <b>그 다트의 입력 카드가 바로</b> 열립니다(다트 번호 고르기 없음). 한 번만 인쇄하면 계속 씁니다.</p>
+    <button class="btn pri" data-act="printQR">🖨 다트 1~${allBoards().length}번 QR 인쇄</button>
 
     </div>` : ""}
     <div class="card" style="margin-top:14px"><h3 style="margin-top:0">백업</h3>
@@ -1036,6 +1100,21 @@ let qrLib = null;
 async function loadQR() {
   if (!qrLib) { await new Promise((ok, no) => { const s = document.createElement("script"); s.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"; s.onload = ok; s.onerror = no; document.head.appendChild(s); }); qrLib = window.QRCode; }
   return qrLib;
+}
+const qrCache = {};
+async function qrImg(text, size) {
+  const k = size + "|" + text; if (qrCache[k]) return qrCache[k];
+  const Q = await loadQR(), d = document.createElement("div");
+  new Q(d, { text, width: size, height: size });
+  const c = d.querySelector("canvas"), i = d.querySelector("img");
+  return (qrCache[k] = c ? c.toDataURL("image/png") : i.src);
+}
+async function printBoardQR() {
+  const base = location.origin + location.pathname, box = $("printQR");
+  const cards = await Promise.all(allBoards().map(async b => `<div class="qc"><b>🎯 ${b}번 다트</b><img src="${await qrImg(base + "?in=1&board=" + b, 400)}" alt=""><small>찍으면 ${b}번 다트 결과 입력 · 스포츠다트 리그</small></div>`));
+  box.innerHTML = `<div class="sheet">${cards.join("")}</div>`;
+  document.body.classList.add("printing");
+  setTimeout(() => { print(); document.body.classList.remove("printing"); }, 300);
 }
 async function drawQR() {
   const box = $("qr"); if (!box) return;
@@ -1079,14 +1158,15 @@ function showBig() {
     ${maxW > 1 ? `<span style="width:12px"></span>` + Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("") : ""}
     <span style="width:12px"></span>${pick.map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}
     <button class="btn close" data-act="closeBig">닫기</button><button class="btn" style="background:var(--cu);color:var(--cuInk);border:0" data-act="bigEntry">✏️ 결과 입력</button>
-    ${canTeach() && groupsOf(ui.cls, st).length && !isClosed(ui.cls, st, ui.round) ? `<button class="btn" style="background:var(--pri2);color:#fff;border:0" data-act="endRound">🏁 ${ui.round}라운드 종료</button>` : ""}</div>
+    ${canTeach() ? `<button class="btn nextBtn" data-act="startNext">▶ ${groupsOf(ui.cls, st).length && liveOf(ui.cls) ? "다음 경기 시작" : "경기 시작"}</button>` : ""}</div>
+    ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ ${ui.round}라운드 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기 시작</button></div>` : ""}
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">${isClosed(ui.cls, st, ui.round) ? `🏁 ${ui.round}라운드 경기 종료` : `${STAGES[st].name} ${ui.round}라운드`}<small>다음 경기 조 편성을 기다리는 중</small></div>`}
     <div class="arena" style="grid-template-columns:repeat(${onBoards().length <= 5 ? onBoards().length : Math.ceil(onBoards().length / 2)},1fr)">${onBoards().map(b => { const g = slot[b] || [];
       return `<div class="bd2 ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}${g.length > 1 ? "<br>⚠ 겹침" : ""}</span>` : `<span class="c" style="color:#7D82B8">비어 있음</span>`}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
         ${next[b] ? `<div class="nx">다음 ${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
-  if ($("bigQR")) loadQR().then(Q => { $("bigQR").innerHTML = ""; new Q($("bigQR"), { text: joinUrl, width: 96, height: 96 }); }).catch(() => {});
+  if ($("bigQR")) qrImg(joinUrl, 96).then(src => { if ($("bigQR")) $("bigQR").innerHTML = `<img src="${src}" width="96" height="96" alt="">`; }).catch(() => {});
 }
 
 /* ---------- 동작 ---------- */
@@ -1172,6 +1252,8 @@ document.addEventListener("click", e => {
     case "gRound": ui.round = +v; ui.sel = null; if (groupsOf(cls, ui.stage).length) setLive(cls, ui.stage, ui.round); render(); break;
     case "nextRound": ui.round = +v; ui.tab = "groups"; ui.sel = null; render(); scrollTo(0, 0); break;
     case "toGroups": ui.tab = "groups"; render(); scrollTo(0, 0); break;
+    case "startNext": startNext(cls); break;
+    case "printQR": printBoardQR(); break;
     case "endRound": {
       const st = ui.stage, r = ui.round, gs = groupsOf(cls, st), rr = roundRes(cls, st, r);
       const left = gs.map((g, gi) => cardDone(cls, g, rr, "g" + gi) ? null : grpLabel(cls, gi)).filter(Boolean);
