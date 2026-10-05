@@ -171,6 +171,11 @@
   .pickList button{min-height:50px; border:1px dashed var(--warn); background:var(--warnSoft); border-radius:12px; padding:0 14px; font-size:17px; font-weight:700; color:#6B4A00}
   .roles{margin-top:12px; background:var(--soft); border-radius:14px; padding:12px}
   .rtitle{font-size:17px; font-weight:700; margin-bottom:8px} .rtitle small{font-size:14px; font-weight:600; color:var(--sub); margin-left:6px}
+  .refPick{background:var(--priSoft); border:1px solid #D3CEFB; border-radius:14px; padding:12px; margin:4px 0 10px}
+  .refPick b{display:block; font-size:19px} .refPick small{display:block; font-size:14px; color:var(--sub); margin:2px 0 8px}
+  .refBtns{display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px}
+  .refBtns .btn{min-height:56px; font-size:19px; background:var(--panel)}
+  .refPick select{width:100%; margin-top:8px; min-height:48px; font-size:16px; background:var(--panel)}
   .refBox{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px; background:var(--soft); border-radius:12px; padding:10px 12px; font-size:18px}
   .refBox.on{background:var(--goodSoft); color:#1E6B42}
   .refBox small{font-size:14px; color:var(--sub); font-weight:600}
@@ -350,7 +355,8 @@ const params = new URLSearchParams(location.search);
 let VIEW = true;
 const TEACHERS = ["teacher112@yeongjong.icehs.kr", "teacher74@yeongjong.icehs.kr"];
 let teacher = null, authKnown = false, fbFailed = false, stuOK = false, secret = {};
-let me = lsGet("darts-me" + TEST);   // 입력하는 학생 {cls, sid, day}
+let me = lsGet("darts-me" + TEST);   // 코드를 넣은 휴대폰 {day}
+const DEV = lsGet("darts-dev") || (() => { const d = Math.random().toString(36).slice(2, 10); lsSet("darts-dev", d); return d; })();   // 이 휴대폰 표시
 /* ?local=1&student — 서버 없이 학생 입력 화면을 미리 보는 시연 모드 */
 const STU_DEMO = !!TEST && params.has("student");
 const canTeach = () => (!!TEST && !STU_DEMO) || (fbFailed && !STU_DEMO) || !!teacher || (!authKnown && lsGet("darts-teacher") === true);
@@ -447,16 +453,15 @@ function watchSecret() {
   }, () => { secretOn = false; });
 }
 async function joinStudent() {
-  const code = ($("jCode").value || "").trim(), sid = $("jMe").value;
+  const code = ($("jCode").value || "").trim();
   if (!/^\d{4}$/.test(code)) { toast("프로젝터 화면의 숫자 4자리를 넣어 주세요"); return; }
-  if (!sid) { toast("내 이름을 골라 주세요"); return; }
-  if (STU_DEMO) { me = { cls: ui.cls, sid, day: today() }; stuOK = true; toast("(시연) 입력할 수 있어요! 다트 번호를 고르세요"); updStatus(); render(); return; }
+  if (STU_DEMO) { me = { day: today() }; lsSet("darts-me" + TEST, me); stuOK = true; toast("(시연) 이번 경기 심판을 고르세요"); updStatus(); render(); return; }
   if (!fauth) { toast("인터넷 연결을 확인해 주세요"); return; }
   try {
     if (!fauth.currentUser || !fauth.currentUser.isAnonymous) await authM.signInAnonymously(fauth);
     await fmod.set(fmod.ref(fdb, "dartsJoin/" + fauth.currentUser.uid), code);
-    me = { cls: ui.cls, sid, day: today() }; lsSet("darts-me" + TEST, me);
-    stuOK = true; toast("입력할 수 있어요! 다트 번호를 고르세요"); updStatus(); render();
+    me = { day: today() }; lsSet("darts-me" + TEST, me);
+    stuOK = true; toast("들어왔어요! 이번 경기 심판을 고르세요"); updStatus(); render();
   } catch (e) { toast(/permission|PERMISSION/.test(String(e && (e.code || e.message))) ? "입력 코드가 맞지 않아요" : "연결 실패 — 다시 시도해 주세요"); }
 }
 /* 선생님 로그인 창 */
@@ -923,12 +928,11 @@ function scEntry() {
 /* 이 조 카드 입력이 끝났나 — 결석생, 같은 라운드를 다른 다트에서 이미 기록한(옮긴) 학생은 빼고 본다. 빈 조는 끝난 것으로 */
 /* QR로 들어온 학생: 입력 코드 + 내 이름 → 그날 하루 결과 입력 가능 */
 function joinBox(cls) {
-  if (stuOK && me) { const x = stuMap(me.cls)[me.sid] || {}; return `<div class="joinBox row"><b style="font-size:19px">✏️ ${esc(me.cls)}반 ${esc(x.name || "")} 입력 중</b><span class="sp"></span><button class="btn ghost" data-act="unjoin">다른 사람으로</button></div>`; }
+  if (stuOK && me) return `<div class="joinBox row"><b style="font-size:19px">✏️ ${esc(cls)}반 결과 입력</b><span class="sp"></span><button class="btn ghost" data-act="unjoin">나가기</button></div>`;
   if (!fdb && !STU_DEMO) return "";
   return `<div class="joinBox"><h3 style="margin-top:0">✏️ 경기 결과 입력하기</h3>
-    <p class="hint" style="margin-top:0">조마다 정한 <b>심판</b> 1명만 하면 됩니다. 프로젝터 화면의 <b>입력 코드 4자리</b>를 넣고 내 이름을 고르세요. (반은 맨 위에서 고르기)</p>
+    <p class="hint" style="margin-top:0">조마다 정한 <b>심판</b> 1명만 하면 됩니다. 프로젝터 화면의 <b>입력 코드 4자리</b>를 넣으세요. 이 휴대폰은 오늘 하루 다시 넣을 필요가 없어요.${PIN_BOARD ? "" : " (반은 맨 위에서 고르기)"}</p>
     <input type="text" id="jCode" class="codeIn" inputmode="numeric" maxlength="4" placeholder="0000">
-    <select id="jMe"><option value="">내 이름 고르기</option>${roster(cls).map(st => `<option value="${sidOf(st)}">${esc(st.no)}. ${esc(st.name)}</option>`).join("")}</select>
     <button class="btn pri big" style="width:100%" data-act="join">입력 시작</button></div>`;
 }
 function cardDone(cls, g, rr, gk) {
@@ -939,8 +943,10 @@ function cardDone(cls, g, rr, gk) {
 }
 function card(cls, st, gk, members, res, title) {
   const R0 = rolesAt(cls, st, ui.round, gk === "mk" ? "mk" : "g" + gk);
-  const takenByOther = !canTeach() && stuOK && me && R0.by && R0.by !== "T" && !(R0.by === me.sid && (R0.byCls || cls) === me.cls);
-  const RO = !canEnter() || (!canTeach() && isClosed(cls, st, ui.round)) || takenByOther;
+  const hasRef = R0.by && R0.by !== "T";
+  const takenByOther = !canTeach() && stuOK && hasRef && R0.dev !== DEV;
+  const needRef = !canTeach() && stuOK && !hasRef && !isClosed(cls, st, ui.round);
+  const RO = !canEnter() || (!canTeach() && isClosed(cls, st, ui.round)) || takenByOther || needRef;
   const focus = ui.focus === (gk === "mk" ? "mk" : "g" + gk);
   const sm = stuMap(cls), key = gk === "mk" ? "mk" : "g" + gk;
   const ids = [...new Set([...members, ...Object.keys(res)])];
@@ -961,20 +967,28 @@ function card(cls, st, gk, members, res, title) {
       <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ 이 다트는 <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 학생이 심판으로 입력하고 있어요. 고칠 게 있으면 심판이나 선생님께 말해 주세요.</p>` : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ 이 경기는 <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 학생이 심판으로 다른 휴대폰에서 입력하고 있어요. 고칠 게 있으면 심판이나 선생님께 말해 주세요.</p>` : ""}${needRef ? refPicker(cls, key, members) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
     ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${RO ? "" : `<div class="foot"><button class="btn ghost" data-act="clearCard" data-g="${key}">이 다트 결과 모두 지우기</button>${gk !== "mk" && Object.values(res).some(x => x.m) ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 다시</button>` : ""}</div>`}</div>`;
 }
 /* 역할 기록 — 이 다트(조)·이 라운드에서 누가 입력했고, 누가 경기 진행·심판·준비 정리를 했나.
    classes/{반}/roles/{경기}/r{라운드}/{g번호} = { by, byCls, t, j:{sid:1}, s:{sid:1}, p:{sid:1} } → Ⓒ 과제수행에 자동 반영 */
 const ROLE_KEYS = [["j", "경기 진행"], ["s", "심판"], ["p", "준비·정리"]];
 const rolesAt = (cls, st, r, key) => ((((C(cls).roles || {})[st] || {})["r" + r] || {})[key]) || {};
+/* 이번 경기 심판 고르기 — 조원 이름이 먼저, 다른 조 학생은 아래 목록에서 */
+function refPicker(cls, key, members) {
+  const sm = stuMap(cls), mem = members.filter(s => sm[s] && !isAbs(cls, s)), others = roster(cls).filter(st => !mem.includes(sidOf(st)));
+  return `<div class="refPick"><b>🧑‍⚖️ 이번 경기 심판은 누구인가요?</b><small>심판이 이 휴대폰으로 결과를 입력해요. 심판으로 Ⓒ 점수가 인정됩니다.</small>
+    <div class="refBtns">${mem.map(s => `<button class="btn" data-act="claimRef" data-g="${key}" data-s="${s}">${esc(sm[s].name)}</button>`).join("")}</div>
+    ${others.length ? `<select class="refOther" data-g="${key}"><option value="">다른 조 학생이 심판이에요</option>${others.map(o => `<option value="${sidOf(o)}">${esc(o.no)}. ${esc(o.name)}</option>`).join("")}</select>` : ""}</div>`;
+}
 function rolesBox(cls, st, key, members, ro) {
   const R = rolesAt(cls, st, ui.round, key);
   const ref = R.by && R.by !== "T" ? (stuMap(R.byCls || cls)[R.by] || {}) : null;
   const tm = R.t ? new Date(R.t).toTimeString().slice(0, 5) : "";
-  const mine = ref && stuOK && me && R.by === me.sid && (R.byCls || cls) === me.cls;
-  return `<div class="refBox ${ref ? "on" : ""}">🧑‍⚖️ <b>심판</b> ${ref ? `${esc(ref.name)}${R.byCls && R.byCls !== cls ? ` (${esc(R.byCls)}반)` : ""}${mine ? " (나)" : ""} <small>Ⓒ 심판 인정${tm ? " · " + tm : ""}</small>` : `<small>${canTeach() ? "아직 없음 — 학생이 입력하면 그 학생이 심판으로 기록됩니다" : "처음 입력하는 학생이 이 다트의 심판이 됩니다"}</small>`}
-    ${canTeach() && ref ? `<button class="btn ghost" data-act="unclaim" data-g="${key}">심판 바꾸기</button>` : ""}</div>`;
+  const mine = ref && stuOK && !canTeach() && R.dev === DEV;
+  return `<div class="refBox ${ref ? "on" : ""}">🧑‍⚖️ <b>심판</b> ${ref ? `${esc(ref.name)}${R.byCls && R.byCls !== cls ? ` (${esc(R.byCls)}반)` : ""}${mine ? " (이 휴대폰)" : ""} <small>Ⓒ 심판 인정${tm ? " · " + tm : ""}</small>` : `<small>아직 없음${canTeach() ? " — 아래에서 골라도 됩니다" : ""}</small>`}
+    ${ref && (canTeach() || mine) ? `<button class="btn ghost" data-act="unclaim" data-g="${key}">심판 바꾸기</button>` : ""}</div>
+    ${canTeach() && !ref ? refPicker(cls, key, members) : ""}`;
 }
 function rolesBoxOld(cls, st, key, members, ro) {
   const R = rolesAt(cls, st, ui.round, key), sm = stuMap(cls);
@@ -991,11 +1005,18 @@ function rolesBoxOld(cls, st, key, members, ro) {
     ${ro || !others.length ? "" : `<select class="roleAdd" data-g="${key}"><option value="">+ 다른 조 학생이 역할을 했어요</option>${others.map(o => `<option value="${sidOf(o)}">${esc(o.no)}. ${esc(o.name)}</option>`).join("")}</select>`}
     ${byName ? `<div class="byline">✍ 입력: ${esc(byName)}${tm ? " · " + tm : ""}</div>` : ""}</div>`;
 }
+function claimRef(gk, sid) {
+  const R = JSON.parse(JSON.stringify(rolesAt(ui.cls, ui.stage, ui.round, gk)));
+  if (R.by && R.by !== "T" && R.dev !== DEV && !canTeach()) { toast("이미 다른 휴대폰에서 심판을 정했어요"); render(); return; }
+  R.by = sid; R.byCls = ui.cls; R.dev = canTeach() ? "T" : DEV; R.t = Date.now();
+  put(P(ui.cls, "roles", ui.stage, "r" + ui.round, gk), R);
+  toast(`심판: ${(stuMap(ui.cls)[sid] || {}).name || ""}${canTeach() ? "" : " — 이제 결과를 입력하세요"}`);
+}
 function stampRoles(gk, mutate) {
   const R = JSON.parse(JSON.stringify(rolesAt(ui.cls, ui.stage, ui.round, gk)));
   if (mutate) mutate(R);
   if (canTeach()) { if (!R.by) R.by = "T"; }                       // 선생님이 고쳐도 학생 심판 기록은 남긴다
-  else if (!R.by || R.by === "T") { R.by = me.sid; R.byCls = me.cls; } // 처음 입력한 학생이 심판
+  // 학생 휴대폰: 심판은 카드에서 고른 그대로(R.by·R.dev) 둔다
   R.t = Date.now();
   put(P(ui.cls, "roles", ui.stage, "r" + ui.round, gk), R);
 }
@@ -1270,9 +1291,10 @@ document.addEventListener("click", e => {
     case "nextRound": ui.round = +v; ui.tab = "groups"; ui.sel = null; render(); scrollTo(0, 0); break;
     case "toGroups": ui.tab = "groups"; render(); scrollTo(0, 0); break;
     case "startNext": startNext(cls); break;
+    case "claimRef": claimRef(b.dataset.g, b.dataset.s); break;
     case "unclaim": {
-      if (!confirm("이 다트의 심판 기록을 지울까요? 다음에 입력하는 학생이 심판이 됩니다.")) return;
-      const R = JSON.parse(JSON.stringify(rolesAt(cls, ui.stage, ui.round, b.dataset.g))); delete R.by; delete R.byCls;
+      if (!confirm("이 경기 심판을 다시 고를까요?")) return;
+      const R = JSON.parse(JSON.stringify(rolesAt(cls, ui.stage, ui.round, b.dataset.g))); delete R.by; delete R.byCls; delete R.dev;
       put(P(cls, "roles", ui.stage, "r" + ui.round, b.dataset.g), Object.keys(R).length ? R : null); break;
     }
     case "printQR": printBoardQR(); break;
@@ -1418,6 +1440,7 @@ document.addEventListener("change", e => {
   const t = e.target;
   if (t.id === "clsSel") { ui.cls = t.value; ui.sel = null; render(); return; }
   if (t.id === "restore") { restore(t.files[0]); return; }
+  if (t.classList.contains("refOther") && t.value) { claimRef(t.dataset.g, t.value); return; }
   if (t.classList.contains("roleAdd") && t.value) { const s = t.value; stampRoles(t.dataset.g, R => { (R.x ||= {})[s] = 1; }); return; }
   if (!t.classList.contains("vin")) return;
   const gk = t.dataset.g, s = t.dataset.s, res = curCard(gk), x = res[s] || {};
