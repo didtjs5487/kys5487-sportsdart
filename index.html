@@ -171,6 +171,10 @@
   .pickList button{min-height:50px; border:1px dashed var(--warn); background:var(--warnSoft); border-radius:12px; padding:0 14px; font-size:17px; font-weight:700; color:#6B4A00}
   .roles{margin-top:12px; background:var(--soft); border-radius:14px; padding:12px}
   .rtitle{font-size:17px; font-weight:700; margin-bottom:8px} .rtitle small{font-size:14px; font-weight:600; color:var(--sub); margin-left:6px}
+  .refBox{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px; background:var(--soft); border-radius:12px; padding:10px 12px; font-size:18px}
+  .refBox.on{background:var(--goodSoft); color:#1E6B42}
+  .refBox small{font-size:14px; color:var(--sub); font-weight:600}
+  .refBox .btn{margin-left:auto; min-height:44px; font-size:15px}
   .rgrid{display:grid; grid-template-columns:minmax(72px,1fr) repeat(3, minmax(58px,76px)); gap:6px 6px; align-items:center}
   .rgrid .rh{font-size:14px; font-weight:700; color:var(--sub); text-align:center; line-height:1.2}
   .rgrid .rn{font-size:18px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
@@ -632,6 +636,8 @@ function roleCounts(cls) {
   const out = {}, R = C(cls).roles || {};
   Object.values(R).forEach(st => Object.values(st || {}).forEach(rd => Object.values(rd || {}).forEach(x => {
     ["p", "j", "s"].forEach(k => Object.keys((x || {})[k] || {}).forEach(s => { (out[s] ||= { p: 0, j: 0, s: 0 })[k]++; }));
+    // 결과를 입력한 학생 = 그 다트의 심판 (예전 역할 표에서 이미 심판으로 체크했으면 두 번 세지 않는다)
+    if (x && x.by && x.by !== "T" && (x.byCls || cls) === cls && !((x.s || {})[x.by])) (out[x.by] ||= { p: 0, j: 0, s: 0 }).s++;
   })));
   return out;
 }
@@ -902,7 +908,7 @@ function scEntry() {
       h = joinBox(cls) + pick + h;
       if (!bs.includes(ui.board)) return h + `<p class="hint" style="font-size:19px">👆 위에서 내가 있는 <b>다트 번호</b>를 누르세요.</p>`;
       cards = cards.filter(c => boardOf(cls, c.gi) === ui.board);
-      h += `<p class="hint">${STAGES[st].hint} 잘못 적었으면 고쳐 쓰거나 ✕로 지우세요. 아래 역할 표도 눌러 주세요.</p>`;
+      h += `<p class="hint">${STAGES[st].hint} 잘못 적었으면 고쳐 쓰거나 ✕로 지우세요. 입력하는 사람이 이 다트의 <b>심판</b>으로 기록됩니다.</p>`;
     }
   }
   h += `<div class="entryGrid">${cards.map(({ g, gi }) => card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}${g.tag ? " · " + g.tag : ""}`)).join("")}`;
@@ -920,7 +926,7 @@ function joinBox(cls) {
   if (stuOK && me) { const x = stuMap(me.cls)[me.sid] || {}; return `<div class="joinBox row"><b style="font-size:19px">✏️ ${esc(me.cls)}반 ${esc(x.name || "")} 입력 중</b><span class="sp"></span><button class="btn ghost" data-act="unjoin">다른 사람으로</button></div>`; }
   if (!fdb && !STU_DEMO) return "";
   return `<div class="joinBox"><h3 style="margin-top:0">✏️ 경기 결과 입력하기</h3>
-    <p class="hint" style="margin-top:0">기록을 맡은 학생만 하면 됩니다. 프로젝터 화면의 <b>입력 코드 4자리</b>를 넣고 내 이름을 고르세요. (반은 맨 위에서 고르기)</p>
+    <p class="hint" style="margin-top:0">조마다 정한 <b>심판</b> 1명만 하면 됩니다. 프로젝터 화면의 <b>입력 코드 4자리</b>를 넣고 내 이름을 고르세요. (반은 맨 위에서 고르기)</p>
     <input type="text" id="jCode" class="codeIn" inputmode="numeric" maxlength="4" placeholder="0000">
     <select id="jMe"><option value="">내 이름 고르기</option>${roster(cls).map(st => `<option value="${sidOf(st)}">${esc(st.no)}. ${esc(st.name)}</option>`).join("")}</select>
     <button class="btn pri big" style="width:100%" data-act="join">입력 시작</button></div>`;
@@ -932,7 +938,9 @@ function cardDone(cls, g, rr, gk) {
   return live.every(s => res[s] && res[s].r >= 1);
 }
 function card(cls, st, gk, members, res, title) {
-  const RO = !canEnter() || (!canTeach() && isClosed(cls, st, ui.round));
+  const R0 = rolesAt(cls, st, ui.round, gk === "mk" ? "mk" : "g" + gk);
+  const takenByOther = !canTeach() && stuOK && me && R0.by && R0.by !== "T" && !(R0.by === me.sid && (R0.byCls || cls) === me.cls);
+  const RO = !canEnter() || (!canTeach() && isClosed(cls, st, ui.round)) || takenByOther;
   const focus = ui.focus === (gk === "mk" ? "mk" : "g" + gk);
   const sm = stuMap(cls), key = gk === "mk" ? "mk" : "g" + gk;
   const ids = [...new Set([...members, ...Object.keys(res)])];
@@ -953,7 +961,7 @@ function card(cls, st, gk, members, res, title) {
       <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ 이 다트는 <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 학생이 심판으로 입력하고 있어요. 고칠 게 있으면 심판이나 선생님께 말해 주세요.</p>` : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
     ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${RO ? "" : `<div class="foot"><button class="btn ghost" data-act="clearCard" data-g="${key}">이 다트 결과 모두 지우기</button>${gk !== "mk" && Object.values(res).some(x => x.m) ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 다시</button>` : ""}</div>`}</div>`;
 }
 /* 역할 기록 — 이 다트(조)·이 라운드에서 누가 입력했고, 누가 경기 진행·심판·준비 정리를 했나.
@@ -961,6 +969,14 @@ function card(cls, st, gk, members, res, title) {
 const ROLE_KEYS = [["j", "경기 진행"], ["s", "심판"], ["p", "준비·정리"]];
 const rolesAt = (cls, st, r, key) => ((((C(cls).roles || {})[st] || {})["r" + r] || {})[key]) || {};
 function rolesBox(cls, st, key, members, ro) {
+  const R = rolesAt(cls, st, ui.round, key);
+  const ref = R.by && R.by !== "T" ? (stuMap(R.byCls || cls)[R.by] || {}) : null;
+  const tm = R.t ? new Date(R.t).toTimeString().slice(0, 5) : "";
+  const mine = ref && stuOK && me && R.by === me.sid && (R.byCls || cls) === me.cls;
+  return `<div class="refBox ${ref ? "on" : ""}">🧑‍⚖️ <b>심판</b> ${ref ? `${esc(ref.name)}${R.byCls && R.byCls !== cls ? ` (${esc(R.byCls)}반)` : ""}${mine ? " (나)" : ""} <small>Ⓒ 심판 인정${tm ? " · " + tm : ""}</small>` : `<small>${canTeach() ? "아직 없음 — 학생이 입력하면 그 학생이 심판으로 기록됩니다" : "처음 입력하는 학생이 이 다트의 심판이 됩니다"}</small>`}
+    ${canTeach() && ref ? `<button class="btn ghost" data-act="unclaim" data-g="${key}">심판 바꾸기</button>` : ""}</div>`;
+}
+function rolesBoxOld(cls, st, key, members, ro) {
   const R = rolesAt(cls, st, ui.round, key), sm = stuMap(cls);
   const picked = s => ROLE_KEYS.some(([k]) => (R[k] || {})[s]) || (R.x || {})[s];
   const cand = [...new Set([...members, ...roster(cls).map(sidOf).filter(picked)])].filter(s => sm[s]);
@@ -978,9 +994,10 @@ function rolesBox(cls, st, key, members, ro) {
 function stampRoles(gk, mutate) {
   const R = JSON.parse(JSON.stringify(rolesAt(ui.cls, ui.stage, ui.round, gk)));
   if (mutate) mutate(R);
-  if (teacher || !stuOK) { R.by = "T"; delete R.byCls; } else { R.by = me.sid; R.byCls = me.cls; }
+  if (canTeach()) { if (!R.by) R.by = "T"; }                       // 선생님이 고쳐도 학생 심판 기록은 남긴다
+  else if (!R.by || R.by === "T") { R.by = me.sid; R.byCls = me.cls; } // 처음 입력한 학생이 심판
   R.t = Date.now();
-  put(P(ui.cls, "roles", ui.stage, "r" + ui.round, gk), R, !mutate);
+  put(P(ui.cls, "roles", ui.stage, "r" + ui.round, gk), R);
 }
 /* 이번 라운드에 기록이 없는 학생 — 결석했다가 보충 경기를 하는 경우 */
 function missingBox(cls, st, gs, rr) {
@@ -1009,7 +1026,7 @@ function scStand() {
   let h = `<div class="row noprint" style="margin-bottom:10px"><h2 style="margin:0">${esc(cls)}반 ${VIEW ? "승점 순위" : "순위·성적"}</h2><span class="sp"></span>
     <div class="seg" style="margin:0"><button class="plain ${ui.sort === "no" ? "on" : ""}" data-act="sort" data-v="no">번호순</button><button class="plain ${ui.sort === "score" ? "on" : ""}" data-act="sort" data-v="score">승점순</button></div></div>`;
   if (!VIEW) h += `<p class="hint noprint">칸의 숫자는 그 라운드 <b>승점</b>(4명 조 4·3·2·1, 3명 조 4·3·1, 5명 조 4·3·3·2·1). 노란 칸 = 기록 없음. 6라운드 모두 끝난 학생 ${done}/${rows.length}명.
-    Ⓒ 과제수행은 경기 카드의 <b>역할 기록</b>으로 자동 인정(연두색, 숫자 = 횟수)되고, 단추를 눌러 직접 인정·취소할 수 있습니다.</p>
+    Ⓒ <b>심판</b>은 경기 결과를 입력한 학생에게 자동 인정(연두색, 숫자 = 횟수)되고, 준비·정리와 경기 진행은 선생님이 단추를 눌러 인정합니다(누르면 인정 ↔ 취소).</p>
     <div class="row noprint" style="margin-bottom:10px"><button class="btn pri" data-act="xlsx">⬇ 엑셀 내려받기 (반별 시트)</button><button class="btn" data-act="print">🖨 인쇄</button></div>`;
   h += `<div class="tblWrap"><table><thead><tr><th rowspan="2">번호</th><th rowspan="2">이름</th>
     <th class="cu" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓐ 카운트 업</th><th class="x3" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓑ 301 게임</th>
@@ -1253,6 +1270,11 @@ document.addEventListener("click", e => {
     case "nextRound": ui.round = +v; ui.tab = "groups"; ui.sel = null; render(); scrollTo(0, 0); break;
     case "toGroups": ui.tab = "groups"; render(); scrollTo(0, 0); break;
     case "startNext": startNext(cls); break;
+    case "unclaim": {
+      if (!confirm("이 다트의 심판 기록을 지울까요? 다음에 입력하는 학생이 심판이 됩니다.")) return;
+      const R = JSON.parse(JSON.stringify(rolesAt(cls, ui.stage, ui.round, b.dataset.g))); delete R.by; delete R.byCls;
+      put(P(cls, "roles", ui.stage, "r" + ui.round, b.dataset.g), Object.keys(R).length ? R : null); break;
+    }
     case "printQR": printBoardQR(); break;
     case "endRound": {
       const st = ui.stage, r = ui.round, gs = groupsOf(cls, st), rr = roundRes(cls, st, r);
