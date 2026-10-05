@@ -236,6 +236,7 @@
   #big .bd2 .nx{margin-top:auto; padding-top:8px; border-top:1px dashed #3A3F78; font-size:18px; font-weight:600; color:#FFC876; line-height:1.4}
   #big .joinQR{display:flex; align-items:center; gap:12px; background:#fff; color:var(--ink); border-radius:14px; padding:6px 14px 6px 6px}
   #big .joinQR b{font-size:36px; letter-spacing:4px; color:var(--pri)}
+  #big .joinQR .pinLine{display:flex; align-items:baseline; gap:8px; line-height:1.1} #big .joinQR .pinLine span{font-size:18px; font-weight:700; color:var(--ink)}
   #big .joinQR small{display:block; font-size:15px; font-weight:700; color:var(--sub)}
   @media (max-width:900px){ #big .arena{grid-template-columns:repeat(2,1fr)!important; min-height:0} }
 
@@ -423,7 +424,7 @@ async function initFB() {
       const em = (u && u.email || "").toLowerCase();
       teacher = u && TEACHERS.includes(em) ? u : null;
       authKnown = true; lsSet("darts-teacher", !!teacher);
-      stuOK = !teacher && !!(u && u.isAnonymous && me && me.day === today());
+      stuOK = !teacher && !!(u && u.isAnonymous && me && me.day === today() && me.cls);
       if (teacher) watchSecret();
       if (teacher || stuOK) [...pending].forEach(push);
       updStatus(); render();
@@ -445,24 +446,38 @@ function watchSecret() {
   if (secretOn || !fdb) return; secretOn = true;
   fmod.onValue(fmod.ref(fdb, "dartsSecret"), s => {
     secret = s.val() || {};
-    if (secret.day !== today() && teacher) {
-      const pin = String(Math.floor(1000 + Math.random() * 9000));
-      fmod.set(fmod.ref(fdb, "dartsSecret"), { pin, day: today() }).catch(() => {});
-    }
+    if (teacher) ensurePins();
     if ($("big").classList.contains("show")) showBig(); else safeRender();
   }, () => { secretOn = false; });
+}
+const pinOf = cls => secret.day === today() ? ((secret.pins || {})[cls] || "") : "";
+function newPin(used) { let p; do { p = String(Math.floor(1000 + Math.random() * 9000)); } while (used.has(p)); used.add(p); return p; }
+/* 오늘 코드가 없는 반에 코드를 만든다 (날이 바뀌면 모두 새로) */
+function ensurePins(force) {
+  if (!teacher || !fdb) return;
+  const fresh = secret.day !== today();
+  const pins = fresh ? {} : { ...(secret.pins || {}) }, used = new Set(Object.values(pins));
+  let changed = fresh;
+  if (force) { delete pins[force]; used.clear(); Object.values(pins).forEach(p => used.add(p)); }
+  classNames().forEach(c => { if (!pins[c]) { pins[c] = newPin(used); changed = true; } });
+  if (changed) fmod.set(fmod.ref(fdb, "dartsSecret"), { day: today(), pins }).catch(() => {});
 }
 async function joinStudent() {
   const code = ($("jCode").value || "").trim();
   if (!/^\d{4}$/.test(code)) { toast("프로젝터 화면의 숫자 4자리를 넣어 주세요"); return; }
-  if (STU_DEMO) { me = { day: today() }; lsSet("darts-me" + TEST, me); stuOK = true; toast("(시연) 이번 경기 심판을 고르세요"); updStatus(); render(); return; }
+  if (STU_DEMO) { me = { day: today(), cls: ui.cls }; lsSet("darts-me" + TEST, me); stuOK = true; toast("(시연) 이번 경기 심판을 고르세요"); updStatus(); render(); return; }
   if (!fauth) { toast("인터넷 연결을 확인해 주세요"); return; }
   try {
     if (!fauth.currentUser || !fauth.currentUser.isAnonymous) await authM.signInAnonymously(fauth);
-    await fmod.set(fmod.ref(fdb, "dartsJoin/" + fauth.currentUser.uid), code);
-    me = { day: today() }; lsSet("darts-me" + TEST, me);
-    stuOK = true; toast("들어왔어요! 이번 경기 심판을 고르세요"); updStatus(); render();
-  } catch (e) { toast(/permission|PERMISSION/.test(String(e && (e.code || e.message))) ? "입력 코드가 맞지 않아요" : "연결 실패 — 다시 시도해 주세요"); }
+    // 코드가 어느 반 것인지 학생 기기는 모른다 — 오늘 진행 중인 반부터 차례로 맞춰 본다(서버가 틀린 반은 거절)
+    const ref = fmod.ref(fdb, "dartsJoin/" + fauth.currentUser.uid);
+    const cands = [...new Set([ui.cls, ...classNames().filter(c => liveOf(c)), ...classNames()])].filter(Boolean);
+    let hit = null;
+    for (const c of cands) { try { await fmod.set(ref, { cls: c, code }); hit = c; break; } catch (e) { if (!/permission|PERMISSION/.test(String(e && (e.code || e.message)))) throw e; } }
+    if (!hit) { toast("입력 코드가 맞지 않아요 — 프로젝터에서 우리 반 코드를 확인하세요"); return; }
+    me = { day: today(), cls: hit }; lsSet("darts-me" + TEST, me); ui.cls = hit;
+    stuOK = true; toast(`${hit}반으로 들어왔어요! 이번 경기 심판을 고르세요`); updStatus(); render();
+  } catch (e) { toast("연결 실패 — 다시 시도해 주세요"); }
 }
 /* 선생님 로그인 창 */
 function showLogin() {
@@ -723,8 +738,10 @@ const TABS = [["groups", "① 조 편성"], ["entry", "② 경기 결과"], ["st
 function render() {
   const names = classNames();
   if (!names.includes(ui.cls)) ui.cls = names[0] || "";
+  $("clsSel").disabled = !!(stuOK && !canTeach());
   $("clsSel").innerHTML = names.length ? names.map(c => `<option ${c === ui.cls ? "selected" : ""}>${esc(c)}</option>`).join("") : `<option>반 없음</option>`;
   VIEW = !canTeach();
+  if (VIEW && stuOK && me && me.cls && S.rosters[me.cls]) { ui.cls = me.cls; ui.pinCls = true; }   // 코드로 정해진 반
   if (VIEW && (ui.tab === "roster" || ui.tab === "set")) ui.tab = "groups";
   if (VIEW && ui.cls) {
     const L = liveOf(ui.cls), key = L ? ui.cls + L.st + L.r + L.day : "";
@@ -744,6 +761,7 @@ function render() {
   const fn = { roster: scRoster, groups: scGroups, entry: scEntry, stand: scStand, grade: scGrade, set: scSet }[ui.tab] || scRoster;
   $("main").innerHTML = (!ui.cls && ui.tab !== "roster" && ui.tab !== "set" && ui.tab !== "grade") ? VIEW ? `<h2>아직 등록된 반이 없어요</h2><p class="hint">선생님이 명렬을 등록하면 여기에 조 편성과 경기 결과가 나옵니다.</p>` : `<h2>먼저 반을 등록하세요</h2><p class="hint">맨 뒤 <b>명렬·출석</b> 탭에서 명렬표를 붙여넣으면 됩니다.</p><button class="btn pri big" data-act="tab" data-v="roster">명렬 등록하러 가기</button>` : fn();
   if (ui.tab === "set") drawQR();
+  if (teacher && secret.day === today() && classNames().some(c => !(secret.pins || {})[c])) ensurePins();
   if ($("big").classList.contains("show") && !ui.inBig) { ui.inBig = true; try { showBig(); } finally { ui.inBig = false; } }
   saveUI();
 }
@@ -931,7 +949,7 @@ function joinBox(cls) {
   if (stuOK && me) return `<div class="joinBox row"><b style="font-size:19px">✏️ ${esc(cls)}반 결과 입력</b><span class="sp"></span><button class="btn ghost" data-act="unjoin">나가기</button></div>`;
   if (!fdb && !STU_DEMO) return "";
   return `<div class="joinBox"><h3 style="margin-top:0">✏️ 경기 결과 입력하기</h3>
-    <p class="hint" style="margin-top:0">조마다 정한 <b>심판</b> 1명만 하면 됩니다. 프로젝터 화면의 <b>입력 코드 4자리</b>를 넣으세요. 이 휴대폰은 오늘 하루 다시 넣을 필요가 없어요.${PIN_BOARD ? "" : " (반은 맨 위에서 고르기)"}</p>
+    <p class="hint" style="margin-top:0">조마다 정한 <b>심판</b> 1명만 하면 됩니다. 프로젝터 화면의 <b>우리 반 입력 코드 4자리</b>를 넣으세요. 이 휴대폰은 오늘 하루 다시 넣을 필요가 없어요.${PIN_BOARD ? "" : " (반은 맨 위에서 고르기)"}</p>
     <input type="text" id="jCode" class="codeIn" inputmode="numeric" maxlength="4" placeholder="0000">
     <button class="btn pri big" style="width:100%" data-act="join">입력 시작</button></div>`;
 }
@@ -1118,7 +1136,9 @@ function scSet() {
     <div class="card"><h3 style="margin-top:0">저장 상태</h3>
     <p style="margin:0">${$("status").textContent}</p>
     ${serverDenied || !fdb ? `<div class="note">지금은 <b>이 기기에만</b> 저장됩니다. Firebase 콘솔(<b>kys5487-sportsdart</b>)에서 규칙 게시·로그인 설정이 끝나면 자동으로 서버에 올라갑니다.</div>` : `<p class="hint">기록은 서버에 저장되어 휴대폰·태블릿·교실 PC 어디서 열어도 같습니다.</p>`}
-    ${secret.pin && secret.day === today() ? `<p style="font-size:20px">📱 오늘의 결과 입력 코드: <b style="font-size:28px;letter-spacing:4px">${esc(secret.pin)}</b> <span class="hint">(날마다 바뀜)</span></p>` : ""}
+    ${pinOf(cls) ? `<p style="font-size:20px">📱 ${esc(cls)}반 오늘의 입력 코드: <b style="font-size:28px;letter-spacing:4px">${esc(pinOf(cls))}</b> <button class="btn ghost" data-act="renewPin">🔄 새 코드</button></p>
+      <p class="hint">반마다 코드가 다르고 날마다 바뀝니다. 이 코드로는 <b>${esc(cls)}반 결과만</b> 입력할 수 있어요. [새 코드]를 누르면 이 반의 지금 코드는 바로 못 씁니다.</p>
+      <details class="setup"><summary>오늘 모든 반 코드 보기</summary><div class="card">${classNames().map(c => `<span class="tag" style="font-size:17px;margin:3px">${esc(c)}반 <b>${esc(pinOf(c) || "-")}</b></span>`).join("")}</div></details>` : ""}
     </div>
     ${cls ? `<div class="card" style="margin-top:14px"><h3 style="margin-top:0">학생용 링크 (결과 입력 · 조 편성 보기)</h3>
     <p class="hint">프로젝터 화면에도 이 QR과 입력 코드가 나옵니다. 코드를 넣은 학생은 <b>경기 결과와 역할</b>만 입력할 수 있고, 평가 점수는 볼 수 없습니다.</p>
@@ -1190,7 +1210,7 @@ function showBig() {
   });
   const pick = classNames().filter(c => groupsOf(c, st).length || show.includes(c));
   const joinUrl = location.origin + location.pathname + "?in=1";
-  $("big").innerHTML = `<div class="bigTop">${teacher && secret.pin && secret.day === today() ? `<div class="joinQR"><div id="bigQR"></div><div><small>📱 결과 입력 코드</small><b>${esc(secret.pin)}</b></div></div>` : ""}<h2>🎯 ${STAGES[st].name} ${ui.round}라운드${maxW > 1 ? ` · ${wv}차` : ""}</h2>
+  $("big").innerHTML = `<div class="bigTop">${teacher && show.some(c => pinOf(c)) ? `<div class="joinQR"><div id="bigQR"></div><div><small>📱 결과 입력 코드</small>${show.map(c => pinOf(c) ? `<div class="pinLine">${show.length > 1 ? `<span>${esc(c)}반</span>` : ""}<b>${esc(pinOf(c))}</b></div>` : "").join("")}</div></div>` : ""}<h2>🎯 ${STAGES[st].name} ${ui.round}라운드${maxW > 1 ? ` · ${wv}차` : ""}</h2>
     ${Object.entries(STAGES).map(([k, s]) => `<button class="${st === k ? "on" : ""}" data-act="bigStage" data-v="${k}">${s.mark} ${s.name}</button>`).join("")}
     <span style="width:12px"></span>${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}
     ${maxW > 1 ? `<span style="width:12px"></span>` + Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("") : ""}
@@ -1291,6 +1311,7 @@ document.addEventListener("click", e => {
     case "nextRound": ui.round = +v; ui.tab = "groups"; ui.sel = null; render(); scrollTo(0, 0); break;
     case "toGroups": ui.tab = "groups"; render(); scrollTo(0, 0); break;
     case "startNext": startNext(cls); break;
+    case "renewPin": if (confirm(`${cls}반 코드를 새로 만들까요? 지금 코드로 들어온 학생은 다시 넣어야 합니다.`)) { ensurePins(cls); toast("새 코드를 만들었습니다"); } break;
     case "claimRef": claimRef(b.dataset.g, b.dataset.s); break;
     case "unclaim": {
       if (!confirm("이 경기 심판을 다시 고를까요?")) return;
