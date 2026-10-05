@@ -136,6 +136,7 @@
   details.setup[open] summary::before{content:"▾"}
   .banner{display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:var(--goodSoft); border:1px solid #BFE6CF; border-radius:14px; padding:12px 16px; margin-bottom:12px; font-size:19px; font-weight:700; color:var(--good)}
   .banner .btn{margin-left:auto}
+  .banner.todo{background:var(--priSoft); border-color:#D3CEFB; color:var(--pri)}
   .selBar{position:sticky; top:80px; z-index:10; display:flex; gap:10px; align-items:center; flex-wrap:wrap; background:var(--priSoft); border:1px solid #D3CEFB; border-radius:14px; padding:10px 12px; margin-bottom:12px; font-size:17px; box-shadow:var(--shadow)}
   .selBar b:first-child{font-size:19px}
   .absGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:8px}
@@ -210,6 +211,7 @@
   #big .arena{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; min-height:calc(100vh - 130px); grid-auto-rows:1fr}
   #big .bd2{background:#1F2450; border-radius:18px; padding:14px 16px; display:flex; flex-direction:column; min-width:0; border:2px solid #2C326A}
   #big .bd2.empty{opacity:.35}
+  #big .waitMsg{text-align:center; font-size:40px; font-weight:700; color:#fff; padding:18px 0 10px} #big .waitMsg small{display:block; font-size:22px; color:#C9C5FF; font-weight:600; margin-top:6px}
   #big .bd2[data-act]{cursor:pointer}
   #big .bd2[data-act]:hover{border-color:var(--pri2)}
   #big .bd2.clash{border-color:var(--bad)}
@@ -537,6 +539,8 @@ function grpRec(cls, stage, r) {
 const groupsOf = (cls, stage, r = ui.round) => ((grpRec(cls, stage, r) || {}).list || []).map(g => ({ m: (g.m || []).slice(), tag: g.tag || "" }));
 /* 지금 진행 중인 라운드 — 선생님이 조를 짜거나 프로젝터에 띄운 라운드. 학생 입력은 이 라운드로 고정된다(오입력 방지) */
 const liveOf = cls => { const L = C(cls).live; return L && L.day === today() ? L : null; };
+const isClosed = (cls, st, r) => !!((((C(cls).closed || {})[st]) || {})["r" + r]);
+function nextStep(st, r) { return r < CFG.rounds ? { st, r: r + 1 } : st === "cu" ? { st: "x3", r: 1 } : null; }
 function setLive(cls, st, r) {
   if (!canTeach() || !cls) return;
   const L = liveOf(cls);
@@ -706,7 +710,7 @@ function roundSeg(cls, st, act) {
   const L = liveOf(cls);
   return `<div class="seg">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => {
     const gs = groupsOf(cls, st, r), res = roundRes(cls, st, r), done = gs.filter((g, gi) => cardDone(cls, g, res, "g" + gi)).length;
-    const mark = L && L.st === st && L.r === r ? "● " : "";
+    const mark = L && L.st === st && L.r === r ? "● " : isClosed(cls, st, r) ? "🔒 " : "";
     const sub = act === "round" ? (gs.length ? `${done}/${gs.length}` : "조 없음") : (gs.length ? "✓" : "");
     return `<button class="plain ${ui.round === r ? "on" : ""}" data-act="${act}" data-v="${r}">${mark}${r}라운드<span class="done">${sub}</span></button>`; }).join("")}</div>`;
 }
@@ -820,11 +824,10 @@ function scEntry() {
   if (VIEW && stuOK) h += `<div class="lockTag">${STAGES[st].mark} ${STAGES[st].name} · ${ui.round}라운드</div>`;
   else h += stageSeg() + roundSeg(cls, st, "round");
   if (!gs.length) return (VIEW ? joinBox(cls) : "") + h + (VIEW ? `<p class="hint" style="font-size:19px">선생님이 이 라운드 조를 짜면 입력할 수 있어요.</p>` : `<p class="hint">${STAGES[st].name} ${ui.round}라운드 조 편성을 먼저 하세요.</p><button class="btn pri big" data-act="toGroups">${ui.round}라운드 조 편성하러 가기 →</button>`);
-  const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi));
-  if (!VIEW && GRP == null && allDone) {
-    if (ui.round < CFG.rounds) h += `<div class="banner">✔ ${ui.round}라운드 입력 끝!<button class="btn pri big" data-act="nextRound" data-v="${ui.round + 1}">${ui.round + 1}라운드 조 편성 →</button></div>`;
-    else if (st === "cu") h += `<div class="banner">✔ 카운트 업 ${CFG.rounds}라운드 모두 끝!<button class="btn pri big" data-act="toX3">301 조 편성하기 →</button></div>`;
-    else h += `<div class="banner">✔ 301 게임 ${CFG.rounds}라운드 모두 끝!<button class="btn pri big" data-act="tab" data-v="stand">순위·성적 보기 →</button></div>`;
+  const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi)), closed = isClosed(cls, st, ui.round);
+  if (!VIEW && GRP == null) {
+    if (closed) h += `<div class="banner" style="background:var(--soft);border-color:var(--line);color:var(--sub)">🔒 ${STAGES[st].name} ${ui.round}라운드 경기 종료됨 — 학생 입력이 잠겼습니다. 선생님은 고칠 수 있어요.<button class="btn" data-act="reopenRound">다시 열기</button></div>`;
+    else h += `<div class="banner${allDone ? "" : " todo"}">${allDone ? `✔ ${ui.round}라운드 입력 끝!` : `${ui.round}라운드 진행 중`}<button class="btn pri big" data-act="endRound">🏁 ${ui.round}라운드 경기 종료</button></div>`;
   }
   if (!VIEW && !allDone) h += `<p class="hint">${STAGES[st].hint} 순위가 다르면 순위 단추를 직접 누르면 됩니다.</p>`;
   let cards = gs.map((g, gi) => ({ g, gi }));
@@ -868,7 +871,7 @@ function cardDone(cls, g, rr, gk) {
   return live.every(s => res[s] && res[s].r >= 1);
 }
 function card(cls, st, gk, members, res, title) {
-  const RO = !canEnter();
+  const RO = !canEnter() || (!canTeach() && isClosed(cls, st, ui.round));
   const focus = ui.focus === (gk === "mk" ? "mk" : "g" + gk);
   const sm = stuMap(cls), key = gk === "mk" ? "mk" : "g" + gk;
   const ids = [...new Set([...members, ...Object.keys(res)])];
@@ -1053,12 +1056,15 @@ function openBig(cls) {
 /* 10대 경기장 전체를 한 화면에 — 같이 수업하는 반을 골라 함께 띄운다 */
 function showBig() {
   const st = ui.stage, show = (ui.bigCls || [ui.cls]).filter(c => S.rosters[c]);
-  const maxW = Math.max(1, ...show.map(c => waves(c, st)));
+  // 함께 띄운 다른 반은 그 반의 진행 중 라운드를 보여 준다
+  const rOf = c => { if (c === ui.cls) return ui.round; const L = liveOf(c); return L && L.st === st ? L.r : 0; };
+  const gOf = c => rOf(c) ? groupsOf(c, st, rOf(c)) : [];
+  const maxW = Math.max(1, ...show.map(c => Math.ceil((gOf(c).length || 1) / boardsOf(c).length)));
   if (!(ui.wave >= 1 && ui.wave <= maxW)) ui.wave = 1;
   const wv = ui.wave, slot = {}, next = {};
   show.forEach(c => {
     const sm = stuMap(c);
-    groupsOf(c, st).forEach((g, gi) => {
+    gOf(c).forEach((g, gi) => {
       const names = g.m.filter(s => !isAbs(c, s)).map(s => { const x = sm[s] || { name: "?" }; return esc(x.name) + sexBadge(x); });
       const b = boardOf(c, gi), w = waveOf(c, gi);
       if (w === wv) (slot[b] ||= []).push({ c, names, gi });
@@ -1072,7 +1078,9 @@ function showBig() {
     <span style="width:12px"></span>${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}
     ${maxW > 1 ? `<span style="width:12px"></span>` + Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("") : ""}
     <span style="width:12px"></span>${pick.map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}
-    <button class="btn close" data-act="closeBig">닫기</button><button class="btn" style="background:var(--cu);color:var(--cuInk);border:0" data-act="bigEntry">✏️ 결과 입력</button></div>
+    <button class="btn close" data-act="closeBig">닫기</button><button class="btn" style="background:var(--cu);color:var(--cuInk);border:0" data-act="bigEntry">✏️ 결과 입력</button>
+    ${canTeach() && groupsOf(ui.cls, st).length && !isClosed(ui.cls, st, ui.round) ? `<button class="btn" style="background:var(--pri2);color:#fff;border:0" data-act="endRound">🏁 ${ui.round}라운드 종료</button>` : ""}</div>
+    ${Object.keys(slot).length ? "" : `<div class="waitMsg">${isClosed(ui.cls, st, ui.round) ? `🏁 ${ui.round}라운드 경기 종료` : `${STAGES[st].name} ${ui.round}라운드`}<small>다음 경기 조 편성을 기다리는 중</small></div>`}
     <div class="arena" style="grid-template-columns:repeat(${onBoards().length <= 5 ? onBoards().length : Math.ceil(onBoards().length / 2)},1fr)">${onBoards().map(b => { const g = slot[b] || [];
       return `<div class="bd2 ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}${g.length > 1 ? "<br>⚠ 겹침" : ""}</span>` : `<span class="c" style="color:#7D82B8">비어 있음</span>`}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
@@ -1141,6 +1149,7 @@ document.addEventListener("click", e => {
       if (had) { put(P(cls, "games", st, "r" + r), null, true); put(P(cls, "roles", st, "r" + r), null, true); }
       const list = makeGroups(cls, st, ui.method[st]);
       if (!list.length) { toast("출석한 학생이 없습니다"); return; }
+      if (isClosed(cls, st, r)) put(P(cls, "closed", st, "r" + r), null, true);
       ui.sel = null; saveGroups(cls, st, list, ui.method[st]); toast(`${nm} — ${list.length}개 조로 편성했습니다`);
       openBig(cls); // 편성하면 바로 프로젝터 화면으로 (이 라운드가 진행 중 라운드가 된다)
       break;
@@ -1163,6 +1172,23 @@ document.addEventListener("click", e => {
     case "gRound": ui.round = +v; ui.sel = null; if (groupsOf(cls, ui.stage).length) setLive(cls, ui.stage, ui.round); render(); break;
     case "nextRound": ui.round = +v; ui.tab = "groups"; ui.sel = null; render(); scrollTo(0, 0); break;
     case "toGroups": ui.tab = "groups"; render(); scrollTo(0, 0); break;
+    case "endRound": {
+      const st = ui.stage, r = ui.round, gs = groupsOf(cls, st), rr = roundRes(cls, st, r);
+      const left = gs.map((g, gi) => cardDone(cls, g, rr, "g" + gi) ? null : grpLabel(cls, gi)).filter(Boolean);
+      if (!confirm(`${STAGES[st].name} ${r}라운드 경기를 종료할까요?${left.length ? `\n\n⚠ 아직 입력이 안 끝난 다트: ${left.join(", ")}` : ""}\n\n종료하면 학생 입력이 잠기고 다트가 비워집니다. 결과는 그대로 남고, 선생님은 나중에도 고칠 수 있어요.`)) return;
+      put(P(cls, "closed", st, "r" + r), Date.now(), true);
+      const L = liveOf(cls); if (L && L.st === st && L.r === r) put(P(cls, "live"), null, true);
+      const nx = nextStep(st, r);
+      ui.sel = null; ui.focus = null;
+      if (nx) { ui.stage = nx.st; ui.round = nx.r; ui.tab = "groups"; toast(`${r}라운드 종료 — ${STAGES[nx.st].name} ${nx.r}라운드 조를 짜 주세요`); }
+      else { ui.tab = "stand"; toast("모든 경기가 끝났습니다 — 순위·성적을 확인하세요"); }
+      render(); if ($("big").classList.contains("show")) showBig(); else scrollTo(0, 0);
+      break;
+    }
+    case "reopenRound": {
+      put(P(cls, "closed", ui.stage, "r" + ui.round), null, true); setLive(cls, ui.stage, ui.round);
+      toast(`${ui.round}라운드를 다시 열었습니다 — 학생이 다시 입력할 수 있어요`); render(); break;
+    }
     case "bigRound": ui.round = +v; setLive(cls, ui.stage, ui.round); render(); showBig(); break;
     case "pick": {
       if (!ui.sel) { ui.sel = v; render(); break; }
@@ -1276,7 +1302,7 @@ document.addEventListener("click", e => {
     case "copyGrp": copy(`${location.origin}${location.pathname}?cls=${encodeURIComponent(cls)}&grp=${v}`); break;
     case "backup": download(`다트리그_백업_${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(S, null, 1), "application/json"); break;
     case "resetGames":
-      if (confirm(`${cls}반의 경기 결과와 과제수행 체크를 모두 지울까요? 되돌릴 수 없습니다.`)) { put(P(cls, "games"), null, true); put(P(cls, "roles"), null, true); put(P(cls, "task"), null); }
+      if (confirm(`${cls}반의 경기 결과와 과제수행 체크를 모두 지울까요? 되돌릴 수 없습니다.`)) { put(P(cls, "games"), null, true); put(P(cls, "roles"), null, true); put(P(cls, "closed"), null, true); put(P(cls, "live"), null, true); put(P(cls, "task"), null); }
       break;
     case "resetGroups":
       if (confirm(`${cls}반 조 편성을 지울까요?`)) put(P(cls, "groups"), null);
