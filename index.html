@@ -7,7 +7,7 @@
 <title>스포츠다트 리그</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="다트리그">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -40,7 +40,8 @@
 
   /* 머리글 — 타바타처럼 바탕 위에 제목, 오른쪽에 알약 모양 상태 */
   header{background:var(--bg); position:sticky; top:0; z-index:20}
-  header .wrap{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding-top:14px; padding-bottom:8px}
+  header .wrap{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding-top:calc(14px + env(safe-area-inset-top)); padding-bottom:8px;
+    padding-left:max(16px, env(safe-area-inset-left)); padding-right:max(16px, env(safe-area-inset-right))}
   header h1{margin:0; font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-size:28px; font-weight:700; letter-spacing:.5px; white-space:nowrap}
   header select{background:var(--panel); color:var(--pri); border:1px solid var(--line); border-radius:999px; font-size:20px; font-weight:800; padding:6px 14px; min-height:48px}
   #status{margin-left:auto; font-size:15px; font-weight:600; background:var(--panel); border:1px solid var(--line); color:var(--sub); border-radius:999px; padding:8px 14px; white-space:nowrap}
@@ -166,7 +167,16 @@
   .ecard .foot .btn{min-height:48px; font-size:16px; padding:0 14px}
   .pickList{display:flex; flex-wrap:wrap; gap:8px; margin:8px 0}
   .pickList button{min-height:50px; border:1px dashed var(--warn); background:var(--warnSoft); border-radius:12px; padding:0 14px; font-size:17px; font-weight:700; color:#6B4A00}
-  .roles{margin-top:10px; background:var(--soft); border-radius:12px; padding:10px}
+  .roles{margin-top:12px; background:var(--soft); border-radius:14px; padding:12px}
+  .rtitle{font-size:17px; font-weight:700; margin-bottom:8px} .rtitle small{font-size:14px; font-weight:600; color:var(--sub); margin-left:6px}
+  .rgrid{display:grid; grid-template-columns:minmax(72px,1fr) repeat(3, minmax(58px,76px)); gap:6px 6px; align-items:center}
+  .rgrid .rh{font-size:14px; font-weight:700; color:var(--sub); text-align:center; line-height:1.2}
+  .rgrid .rn{font-size:18px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .rgrid .rc{min-height:50px; width:100%; padding:0; border-radius:12px; font-size:24px; font-weight:800; background:var(--panel); border:1px solid var(--line2)}
+  .rgrid .rc.on{background:var(--good); border-color:var(--good); color:#fff}
+  .roles .roleAdd{width:100%; margin-top:10px; min-height:48px; font-size:16px; background:var(--panel)}
+  .rowX{margin-left:8px; width:40px; height:40px; border-radius:50%; border:1px solid var(--line2); background:var(--panel); color:var(--bad); font-size:18px; font-weight:800; vertical-align:middle}
+  .lockTag{display:inline-block; background:var(--pri); color:#fff; font-size:20px; font-weight:700; border-radius:999px; padding:8px 18px; margin-bottom:12px}
   .rrow{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:6px}
   .rrow .rl{min-width:80px; font-size:15px; font-weight:700; color:var(--sub)}
   .rc{min-height:44px; border:1px solid var(--line); border-radius:999px; background:var(--panel); font-size:16px; font-weight:700; padding:0 14px; color:var(--sub)}
@@ -224,7 +234,9 @@
   .boardPick button{min-width:64px; font-size:22px}
   @media (max-width:560px){
     header{position:static}
-    header .wrap{padding-top:10px}
+    header .wrap{padding-top:calc(12px + env(safe-area-inset-top))}
+    header h1{flex:1 1 auto}
+    header select{flex:0 0 auto}
     .selBar{top:8px}
     header h1{font-size:22px}
     #status{margin-left:0}
@@ -332,7 +344,7 @@ if (params.get("cls")) ui.cls = params.get("cls");
 if (params.has("in")) ui.tab = "entry";            // 프로젝터 QR로 들어온 학생은 바로 결과 입력
 if (params.get("board")) ui.board = +params.get("board");
 if (GRP != null) ui.tab = "entry";
-const saveUI = () => lsSet(LSU, { tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gsort: ui.gsort, bigCls: ui.bigCls, fit: ui.fit, board: ui.board });
+const saveUI = () => lsSet(LSU, { tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gsort: ui.gsort, bigCls: ui.bigCls, bigDay: ui.bigDay, fit: ui.fit, board: ui.board, boardKey: ui.boardKey });
 
 function getAt(o, path) { for (const k of path.split("/")) { if (o == null) return undefined; o = o[k]; } return o; }
 function setAt(o, path, v) {
@@ -516,7 +528,21 @@ function parseBulk(text) {
 }
 
 /* ---------- 경기 결과 계산 ---------- */
-const groupsOf = (cls, stage) => (((C(cls).groups || {})[stage] || {}).list || []).map(g => ({ m: (g.m || []).slice(), tag: g.tag || "" }));
+/* 조 편성은 경기 × 라운드마다 따로: classes/{반}/groups/{경기}/r{라운드} = {list, method, ts}
+   (2026-10-05 선생님: "매 라운드마다 조편성을 바꿔서 진행"). 예전 형식(경기 하나에 한 벌)은 1라운드로 읽는다. */
+function grpRec(cls, stage, r) {
+  const g = ((C(cls).groups || {})[stage]) || {};
+  return g.list ? (r === 1 ? g : null) : (g["r" + r] || null);
+}
+const groupsOf = (cls, stage, r = ui.round) => ((grpRec(cls, stage, r) || {}).list || []).map(g => ({ m: (g.m || []).slice(), tag: g.tag || "" }));
+/* 지금 진행 중인 라운드 — 선생님이 조를 짜거나 프로젝터에 띄운 라운드. 학생 입력은 이 라운드로 고정된다(오입력 방지) */
+const liveOf = cls => { const L = C(cls).live; return L && L.day === today() ? L : null; };
+function setLive(cls, st, r) {
+  if (!canTeach() || !cls) return;
+  const L = liveOf(cls);
+  if (L && L.st === st && L.r === r) return;
+  put(P(cls, "live"), { st, r, day: today() });
+}
 const roundRes = (cls, stage, r) => (((C(cls).games || {})[stage] || {})["r" + r]) || {};
 function ptsOf(rank, n) {
   if (!(rank >= 1)) return 0;
@@ -587,15 +613,12 @@ function byCU(cls, list) {
   const rec = {}; list.forEach(st => rec[sidOf(st)] = record(cls, "cu", sidOf(st)));
   return shuffle(list).sort((a, b) => { const A = rec[sidOf(a)], B = rec[sidOf(b)]; return B.sum - A.sum || B.vsum - A.vsum; });
 }
-/* 카운트업 '조별 순위'끼리 (각 조 1위끼리, 2위끼리 …) */
+/* 카운트업 '조별 순위'끼리 — 라운드마다 조가 바뀌므로, 카운트업 라운드별 조 순위의 평균으로 줄 세운다
+   (평균 1위 근처끼리, 2위 근처끼리 …). 같으면 합산 승점 → 총점 */
 function byGroupRank(cls, list) {
-  const ids = new Set(list.map(sidOf)), place = {};
-  groupsOf(cls, "cu").forEach(g => {
-    const mem = g.m.filter(s => ids.has(s)).map(s => ({ s, ...record(cls, "cu", s) }));
-    shuffle(mem).sort((a, b) => b.sum - a.sum || b.vsum - a.vsum).forEach((x, i) => place[x.s] = i + 1);
-  });
   const rec = {}; list.forEach(st => rec[sidOf(st)] = record(cls, "cu", sidOf(st)));
-  return shuffle(list).sort((a, b) => (place[sidOf(a)] || 9) - (place[sidOf(b)] || 9) || rec[sidOf(b)].sum - rec[sidOf(a)].sum || rec[sidOf(b)].vsum - rec[sidOf(a)].vsum);
+  const place = s => { const rs = rec[s].rounds.filter(Boolean); return rs.length ? rs.reduce((a, x) => a + x.rank, 0) / rs.length : 9; };
+  return shuffle(list).sort((a, b) => place(sidOf(a)) - place(sidOf(b)) || rec[sidOf(b)].sum - rec[sidOf(a)].sum || rec[sidOf(b)].vsum - rec[sidOf(a)].vsum);
 }
 function makeGroups(cls, stage, method) {
   const present = roster(cls).filter(st => !isAbs(cls, sidOf(st)));
@@ -622,7 +645,7 @@ const METHODS = {
   seed: ["시드 분산", "★ 시드 학생을 조마다 한 명씩 흩어 놓고 나머지는 무작위"],
   random: ["완전 랜덤", "모두 무작위로 섞기"],
   no: ["번호순", "1번부터 차례로 4명씩"],
-  grank: ["카운트업 조별 순위끼리", "카운트업 각 조 1위끼리, 2위끼리… 비슷한 실력끼리 모인다 (평가계획)"],
+  grank: ["카운트업 조별 순위끼리", "카운트업 라운드별 조 순위가 비슷한 학생끼리(1위들끼리, 2위들끼리…) 모인다 (평가계획)"],
   rank: ["카운트업 전체 순위순", "카운트업 합산 승점 순으로 줄 세워 4명씩"],
 };
 
@@ -635,6 +658,11 @@ function render() {
   $("clsSel").innerHTML = names.length ? names.map(c => `<option ${c === ui.cls ? "selected" : ""}>${esc(c)}</option>`).join("") : `<option>반 없음</option>`;
   VIEW = !canTeach();
   if (VIEW && (ui.tab === "roster" || ui.tab === "set")) ui.tab = "groups";
+  if (VIEW && ui.cls) {
+    const L = liveOf(ui.cls), key = L ? ui.cls + L.st + L.r + L.day : "";
+    if (L && (stuOK || ui.liveSeen !== key)) { ui.stage = L.st; ui.round = L.r; ui.liveSeen = key; }
+    if (ui.boardKey !== key) { ui.board = null; ui.boardKey = key; }
+  }
   let tabs = TABS;
   if (VIEW) tabs = [["groups", "조 편성"], ["entry", "경기 결과"], ["stand", "승점 순위"], ["grade", "🏆 학년 순위"]];
   if (GRP != null) tabs = [["entry", `${grpLabel(ui.cls, +GRP)} 결과 입력`]];
@@ -673,30 +701,42 @@ function scRoster() {
 }
 
 /* ② 조 편성 */
+/* 라운드 단추 — 조가 있는 라운드는 ✓, 진행 중인 라운드는 ● */
+function roundSeg(cls, st, act) {
+  const L = liveOf(cls);
+  return `<div class="seg">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => {
+    const gs = groupsOf(cls, st, r), res = roundRes(cls, st, r), done = gs.filter((g, gi) => cardDone(cls, g, res, "g" + gi)).length;
+    const mark = L && L.st === st && L.r === r ? "● " : "";
+    const sub = act === "round" ? (gs.length ? `${done}/${gs.length}` : "조 없음") : (gs.length ? "✓" : "");
+    return `<button class="plain ${ui.round === r ? "on" : ""}" data-act="${act}" data-v="${r}">${mark}${r}라운드<span class="done">${sub}</span></button>`; }).join("")}</div>`;
+}
 function scGroups() {
-  const cls = ui.cls, st = ui.stage, sm = stuMap(cls), gs = groupsOf(cls, st);
-  const info = (C(cls).groups || {})[st];
-  let h = stageSeg();
+  const cls = ui.cls, st = ui.stage, r = ui.round, sm = stuMap(cls), gs = groupsOf(cls, st);
+  const info = grpRec(cls, st, r);
+  let h = stageSeg() + roundSeg(cls, st, "gRound");
+  if (!VIEW) h += `<p class="hint" style="margin-top:-4px">● = 지금 진행 중인 라운드. 학생 입력 화면은 이 라운드로 고정됩니다. 라운드마다 조를 새로 짤 수 있습니다.</p>`;
   if (!VIEW && gs.length) h += `<div class="go noprint"><button class="btn pri big" data-act="big">📺 화면에 띄우기</button><button class="btn pri big alt" data-act="goEntry">✏️ 경기 결과 입력 →</button></div>`;
   if (!VIEW) h += absPicker(cls, !gs.length);
   if (!VIEW) {
     const opts = st === "cu" ? ["seed", "random", "no"] : ["grank", "rank", "seed", "random"];
     if (!opts.includes(ui.method[st])) ui.method[st] = opts[0];
-    h += `<details class="setup noprint" data-k="setup" ${(ui.open.setup ?? !gs.length) ? "open" : ""}><summary>${gs.length ? "⚙ 다트 위치 · 편성 방법 · 다시 편성" : "다트 위치와 편성 방법을 고르고 [조 편성하기]"}</summary>${boardPicker(cls)}
+    h += `<details class="setup noprint" data-k="setup" ${(ui.open.setup ?? !gs.length) ? "open" : ""}><summary>${gs.length ? `⚙ 다트 위치 · 편성 방법 · ${r}라운드 다시 편성 · 지우기` : `다트 위치와 편성 방법을 고르고 [${r}라운드 조 편성하기]`}</summary>${boardPicker(cls)}
     <div class="card noprint" style="margin-bottom:14px">
       <div class="seg" style="margin-bottom:6px">${opts.map(k => `<button class="plain ${ui.method[st] === k ? "on" : ""}" data-act="method" data-v="${k}">${METHODS[k][0]}</button>`).join("")}</div>
       <p class="hint" style="margin-top:0">${METHODS[ui.method[st]][1]}. 결석 학생은 빠집니다.</p>
       <div class="seg" style="margin-bottom:6px"><button class="plain ${fitOn() ? "" : "on"}" data-act="fit" data-v="0">4명 조 (남으면 3명 조)</button><button class="plain ${fitOn() ? "on" : ""}" data-act="fit" data-v="1">다트 수에 맞추기 (5명 조 허용)</button></div>
       <p class="hint" style="margin-top:0">${(() => { const n = roster(cls).filter(s => !isAbs(cls, sidOf(s))).length, sz = sizes(n, CFG.size, boardsOf(cls).length, fitOn());
         return n ? `출석 ${n}명 · 다트 ${boardsOf(cls).length}대 → <b>${sz.length}개 조 (${sz.join("·")}명)</b>${sz.length > boardsOf(cls).length ? " — 2차 경기 생김" : ""}` : ""; })()}</p>
-      <div class="row"><span class="sp"></span><button class="btn pri big" data-act="make">${gs.length ? "다시 편성" : "조 편성하기"}</button></div>
+      <div class="row">${gs.length ? `<button class="btn danger" data-act="clrGroups">${r}라운드 조 지우기</button>` : ""}
+        ${!gs.length && r > 1 && groupsOf(cls, st, r - 1).length ? `<button class="btn" data-act="copyPrev">${r - 1}라운드 조 그대로 쓰기</button>` : ""}
+        <span class="sp"></span><button class="btn pri big" data-act="make">${STAGES[st].name} ${r}라운드 ${gs.length ? "다시 편성" : "조 편성하기"}</button></div>
       ${st === "x3" && !hasAny(cls, "cu") ? `<div class="note">카운트업 결과가 아직 없어 순위 편성은 무작위와 같습니다.</div>` : ""}
     </div></details>`;
   }
-  if (!gs.length) return h + `<p class="hint">아직 ${STAGES[st].name} 조가 없습니다.</p>`;
+  if (!gs.length) return h + `<p class="hint">아직 ${STAGES[st].name} ${r}라운드 조가 없습니다.</p>`;
   const wait = gs.length - boardsOf(cls).length;
   if (wait > 0 && !VIEW) h += `<div class="note">다트 위치(${boardsOf(cls).length}대)보다 조(${gs.length}개)가 많아 <b>${wait}개 조는 2차 경기</b>입니다 — 1차가 끝난 같은 다트에서 이어서 합니다.</div>`;
-  h += `<div class="row noprint" style="margin-bottom:10px"><b>${gs.length}개 조 · ${gs.reduce((a, g) => a + g.m.length, 0)}명</b>${info && info.method ? ` <span class="tag">${METHODS[info.method] ? METHODS[info.method][0] : ""}</span>` : ""}
+  h += `<div class="row noprint" style="margin-bottom:10px"><b>${r}라운드 · ${gs.length}개 조 · ${gs.reduce((a, g) => a + g.m.length, 0)}명</b>${info && info.method ? ` <span class="tag">${METHODS[info.method] ? METHODS[info.method][0] : ""}</span>` : ""}
     <span class="sp"></span>${VIEW ? `<button class="btn" data-act="big">📺 크게 보기</button>` : `<button class="btn" data-act="addGrp">＋ 빈 조</button>`}</div>`;
   if (!VIEW && ui.sel) {
     const x = sm[ui.sel] || { name: "?" };
@@ -730,9 +770,11 @@ const allBoards = () => Array.from({ length: boardCount() }, (_, i) => i + 1);
 const isOff = n => !!((S.settings || {}).off || {})["b" + n];
 /* 켜진 다트 — 고장 났거나 오늘 안 쓰는 다트는 꺼 두면 조 배정·화면에서 빠진다 */
 function onBoards() { const on = allBoards().filter(n => !isOff(n)); return on.length ? on : allBoards(); }
+/* 반이 고른 다트 위치는 그날만 쓴다 — 다음 수업(다른 날)에는 다시 켜진 다트 전체 (2026-10-05) */
+function chosenBoards(cls) { const b = C(cls).boards; return b && !Array.isArray(b) && b.day === today() ? (b.list || []) : []; }
 function boardsOf(cls) {
   const on = onBoards();
-  const b = (C(cls).boards || []).map(Number).filter(n => on.includes(n));
+  const b = chosenBoards(cls).map(Number).filter(n => on.includes(n));
   return b.length ? [...new Set(b)].sort((x, y) => x - y) : on;
 }
 const boardOf = (cls, gi) => { const b = boardsOf(cls); return b[gi % b.length]; };
@@ -740,9 +782,9 @@ const waveOf = (cls, gi) => Math.floor(gi / boardsOf(cls).length) + 1;
 const waves = (cls, st) => Math.ceil((groupsOf(cls, st || ui.stage).length || 1) / boardsOf(cls).length);
 const grpLabel = (cls, gi) => `${boardOf(cls, gi)}번 다트${waves(cls) > 1 ? ` · ${waveOf(cls, gi)}차` : ""}`;
 function boardPicker(cls) {
-  const mine = boardsOf(cls), explicit = !!(C(cls).boards || []).length, on = onBoards(), power = ui.bmode === "power";
-  const others = {};   // 다른 반이 직접 고른 위치
-  classNames().filter(c => c !== cls && (C(c).boards || []).length).forEach(c => boardsOf(c).forEach(b => (others[b] ||= []).push(c)));
+  const mine = boardsOf(cls), explicit = !!chosenBoards(cls).length, on = onBoards(), power = ui.bmode === "power";
+  const others = {};   // 다른 반이 오늘 직접 고른 위치
+  classNames().filter(c => c !== cls && chosenBoards(c).length).forEach(c => boardsOf(c).forEach(b => (others[b] ||= []).push(c)));
   const half = Math.ceil(on.length / 2), A = on.slice(0, half), B = on.slice(half);
   const rng = a => !a.length ? "" : a.length === 1 ? `${a[0]}번` : a[a.length - 1] - a[0] === a.length - 1 ? `${a[0]}~${a[a.length - 1]}번` : `${a.join("·")}번`;
   const cols = Math.min(10, allBoards().length);
@@ -755,7 +797,7 @@ function boardPicker(cls) {
   } else {
     h += `<div class="row" style="margin-bottom:8px">${B.length ? `<button class="btn" data-act="boardsSet" data-v="${A.join(",")}">${rng(A)}</button><button class="btn" data-act="boardsSet" data-v="${B.join(",")}">${rng(B)}</button>` : ""}<button class="btn" data-act="boardsSet" data-v="">켜진 다트 전체</button></div>
       <div class="boards" style="grid-template-columns:repeat(${cols},1fr)">${allBoards().map(n => isOff(n) ? `<button class="bd dead" disabled>${n}<small>꺼짐</small></button>` : `<button class="bd ${mine.includes(n) ? "on" : ""} ${mine.includes(n) && others[n] ? "clash" : ""}" data-act="board" data-v="${n}">${n}${others[n] ? `<small>${others[n].map(esc).join(",")}</small>` : ""}</button>`).join("")}</div>
-      <p class="hint" style="margin-bottom:0">${explicit ? "" : `지금은 켜진 다트 ${on.length}대 모두 사용. `}두 반이 함께 수업하면 반마다 위치를 나눠 고르세요 — 조가 고른 위치에 차례로 배정되고 남은 조는 2차 경기. 작은 글씨는 다른 반이 고른 위치.</p>`;
+      <p class="hint" style="margin-bottom:0">${explicit ? "" : `지금은 켜진 다트 ${on.length}대 모두 사용. `}두 반이 함께 수업하면 반마다 위치를 나눠 고르세요 — 조가 고른 위치에 차례로 배정되고 남은 조는 2차 경기. 고른 위치는 <b>오늘만</b> 쓰고, 다음 수업에는 다시 전체로 돌아갑니다. 작은 글씨는 다른 반이 오늘 고른 위치.</p>`;
   }
   return h + `</div>`;
 }
@@ -764,8 +806,9 @@ function hasAny(cls, stage) { const g = (C(cls).games || {})[stage] || {}; retur
 /* ③ 경기 결과 입력 */
 /* 아직 다 입력하지 않은 첫 라운드 — 결과 입력 화면에 들어올 때 거기서 시작한다 */
 function openRound(cls, st) {
-  const gs = groupsOf(cls, st);
-  for (let r = 1; r <= CFG.rounds; r++) { const res = roundRes(cls, st, r); if (!gs.length || gs.some((g, gi) => !cardDone(cls, g, res, "g" + gi))) return r; }
+  const L = liveOf(cls);
+  if (L && L.st === st) return L.r;                       // 진행 중인 라운드가 있으면 거기서
+  for (let r = 1; r <= CFG.rounds; r++) { const gs = groupsOf(cls, st, r), res = roundRes(cls, st, r); if (!gs.length || gs.some((g, gi) => !cardDone(cls, g, res, "g" + gi))) return r; }
   return CFG.rounds;
 }
 function scEntry() {
@@ -773,14 +816,13 @@ function scEntry() {
   let h = "";
   const pair = (ui.bigCls || []).filter(c => S.rosters[c]);
   if (!VIEW && GRP == null && pair.length > 1 && pair.includes(cls)) h += `<div class="seg">${pair.map(c => `<button class="plain ${c === cls ? "on" : ""}" data-act="cls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div>`;
-  h += stageSeg();
-  h += `<div class="seg">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => {
-    const res = roundRes(cls, st, r), done = gs.filter((g, gi) => cardDone(cls, g, res, "g" + gi)).length;
-    return `<button class="plain ${ui.round === r ? "on" : ""}" data-act="round" data-v="${r}">${r}라운드<span class="done">${done}/${gs.length}</span></button>`; }).join("")}</div>`;
-  if (!gs.length) return h + `<p class="hint">${STAGES[st].name} 조 편성을 먼저 하세요 (① 조 편성).</p>`;
+  if (VIEW && stuOK && !liveOf(cls)) return joinBox(cls) + `<p class="hint" style="font-size:19px">선생님이 오늘 진행할 경기와 라운드를 정하면(조 편성·프로젝터) 여기에 입력 카드가 나옵니다.</p>`;
+  if (VIEW && stuOK) h += `<div class="lockTag">${STAGES[st].mark} ${STAGES[st].name} · ${ui.round}라운드</div>`;
+  else h += stageSeg() + roundSeg(cls, st, "round");
+  if (!gs.length) return (VIEW ? joinBox(cls) : "") + h + (VIEW ? `<p class="hint" style="font-size:19px">선생님이 이 라운드 조를 짜면 입력할 수 있어요.</p>` : `<p class="hint">${STAGES[st].name} ${ui.round}라운드 조 편성을 먼저 하세요.</p><button class="btn pri big" data-act="toGroups">${ui.round}라운드 조 편성하러 가기 →</button>`);
   const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi));
   if (!VIEW && GRP == null && allDone) {
-    if (ui.round < CFG.rounds) h += `<div class="banner">✔ ${ui.round}라운드 입력 끝!<button class="btn pri big" data-act="round" data-v="${ui.round + 1}">${ui.round + 1}라운드 입력 →</button></div>`;
+    if (ui.round < CFG.rounds) h += `<div class="banner">✔ ${ui.round}라운드 입력 끝!<button class="btn pri big" data-act="nextRound" data-v="${ui.round + 1}">${ui.round + 1}라운드 조 편성 →</button></div>`;
     else if (st === "cu") h += `<div class="banner">✔ 카운트 업 ${CFG.rounds}라운드 모두 끝!<button class="btn pri big" data-act="toX3">301 조 편성하기 →</button></div>`;
     else h += `<div class="banner">✔ 301 게임 ${CFG.rounds}라운드 모두 끝!<button class="btn pri big" data-act="tab" data-v="stand">순위·성적 보기 →</button></div>`;
   }
@@ -796,7 +838,7 @@ function scEntry() {
       h = joinBox(cls) + pick + h;
       if (!bs.includes(ui.board)) return h + `<p class="hint" style="font-size:19px">👆 위에서 내가 있는 <b>다트 번호</b>를 누르세요.</p>`;
       cards = cards.filter(c => boardOf(cls, c.gi) === ui.board);
-      h += `<p class="hint">${STAGES[st].hint} 역할(경기 진행·심판·준비 정리)도 눌러 주세요.</p>`;
+      h += `<p class="hint">${STAGES[st].hint} 잘못 적었으면 고쳐 쓰거나 ✕로 지우세요. 아래 역할 표도 눌러 주세요.</p>`;
     }
   }
   h += `<div class="entryGrid">${cards.map(({ g, gi }) => card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}${g.tag ? " · " + g.tag : ""}`)).join("")}`;
@@ -841,13 +883,14 @@ function card(cls, st, gk, members, res, title) {
     if (elsewhere[s]) return `<div class="prow abs"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)} · 이번 라운드는 ${esc(kName(elsewhere[s]))}에서 기록</div></div>`;
     const a = isAbs(cls, s) && !res[s];
     const rk = Array.from({ length: n }, (_, i) => i + 1).map(k => `<button class="${r.r === k ? "on" : ""} ${k === 1 ? "r1" : ""}" ${RO ? "disabled" : `data-act="rank" data-g="${key}" data-s="${s}" data-v="${k}"`}>${k}위</button>`).join("");
-    return `<div class="prow ${a ? "abs" : ""}"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)}${sexBadge(x)}${a ? " · 결석" : ""}</div>
+    const hasRes = typeof r.v === "number" || r.r >= 1;
+    return `<div class="prow ${a ? "abs" : ""}"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)}${sexBadge(x)}${a ? " · 결석" : ""}${!RO && hasRes ? `<button class="rowX" data-act="clrRow" data-g="${key}" data-s="${s}" aria-label="이 학생 결과 지우기">✕</button>` : ""}</div>
       <input type="number" inputmode="numeric" placeholder="${STAGES[st].vLabel}" value="${typeof r.v === "number" ? r.v : ""}" ${RO || a ? "disabled" : ""} data-g="${key}" data-s="${s}" class="vin">
       <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
   return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
-    ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${!canTeach() ? "" : `<div class="foot"><button class="btn ghost" data-act="clearCard" data-g="${key}">지우기</button>${gk !== "mk" && Object.values(res).some(x => x.m) ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 다시</button>` : ""}</div>`}</div>`;
+    ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${RO ? "" : `<div class="foot"><button class="btn ghost" data-act="clearCard" data-g="${key}">이 다트 결과 모두 지우기</button>${gk !== "mk" && Object.values(res).some(x => x.m) ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 다시</button>` : ""}</div>`}</div>`;
 }
 /* 역할 기록 — 이 다트(조)·이 라운드에서 누가 입력했고, 누가 경기 진행·심판·준비 정리를 했나.
    classes/{반}/roles/{경기}/r{라운드}/{g번호} = { by, byCls, t, j:{sid:1}, s:{sid:1}, p:{sid:1} } → Ⓒ 과제수행에 자동 반영 */
@@ -855,14 +898,17 @@ const ROLE_KEYS = [["j", "경기 진행"], ["s", "심판"], ["p", "준비·정�
 const rolesAt = (cls, st, r, key) => ((((C(cls).roles || {})[st] || {})["r" + r] || {})[key]) || {};
 function rolesBox(cls, st, key, members, ro) {
   const R = rolesAt(cls, st, ui.round, key), sm = stuMap(cls);
-  const picked = s => ROLE_KEYS.some(([k]) => (R[k] || {})[s]);
+  const picked = s => ROLE_KEYS.some(([k]) => (R[k] || {})[s]) || (R.x || {})[s];
   const cand = [...new Set([...members, ...roster(cls).map(sidOf).filter(picked)])].filter(s => sm[s]);
   const others = roster(cls).filter(st2 => !cand.includes(sidOf(st2)));
   const byName = R.by ? ((stuMap(R.byCls || cls)[R.by] || {}).name || "선생님") : "";
   const tm = R.t ? new Date(R.t).toTimeString().slice(0, 5) : "";
-  return `<div class="roles">${ROLE_KEYS.map(([k, l]) => `<div class="rrow"><span class="rl">${l}</span>
-      ${cand.map(s => `<button class="rc ${(R[k] || {})[s] ? "on" : ""}" ${ro ? "disabled" : `data-act="role" data-g="${key}" data-k="${k}" data-s="${s}"`}>${esc(sm[s].name)}</button>`).join("")}
-      ${ro || !others.length ? "" : `<select class="roleAdd" data-g="${key}" data-k="${k}"><option value="">+ 다른 학생</option>${others.map(o => `<option value="${sidOf(o)}">${esc(o.no)}. ${esc(o.name)}</option>`).join("")}</select>`}</div>`).join("")}
+  // 학생마다 한 줄, 역할마다 한 칸 — 누가 무엇을 했는지 한눈에 (2026-10-05 "박스가 보기 어려워")
+  return `<div class="roles"><div class="rtitle">역할 기록 <small>Ⓒ 과제수행에 들어갑니다</small></div>
+    <div class="rgrid"><span></span>${ROLE_KEYS.map(([, l]) => `<span class="rh">${l}</span>`).join("")}
+    ${cand.map(s => `<span class="rn">${esc(sm[s].name)}</span>${ROLE_KEYS.map(([k, l]) => { const on = (R[k] || {})[s];
+      return `<button class="rc ${on ? "on" : ""}" ${ro ? "disabled" : `data-act="role" data-g="${key}" data-k="${k}" data-s="${s}"`} aria-label="${esc(sm[s].name)} ${l}">${on ? "✓" : ""}</button>`; }).join("")}`).join("")}</div>
+    ${ro || !others.length ? "" : `<select class="roleAdd" data-g="${key}"><option value="">+ 다른 조 학생이 역할을 했어요</option>${others.map(o => `<option value="${sidOf(o)}">${esc(o.no)}. ${esc(o.name)}</option>`).join("")}</select>`}
     ${byName ? `<div class="byline">✍ 입력: ${esc(byName)}${tm ? " · " + tm : ""}</div>` : ""}</div>`;
 }
 function stampRoles(gk, mutate) {
@@ -999,8 +1045,10 @@ async function drawQR() {
 /* 크게 보기 (프로젝터) */
 /* 화면 띄우기 — 지난번 함께 띄운 반(같은 시간 수업)이 있으면 같이 띄운다 */
 function openBig(cls) {
-  const prev = (ui.bigCls || []).filter(c => c !== cls && S.rosters[c] && groupsOf(c, ui.stage).length);
-  ui.bigCls = [cls, ...prev]; ui.wave = 1; saveUI(); showBig();
+  const prev = ui.bigDay === today() ? (ui.bigCls || []).filter(c => c !== cls && S.rosters[c] && liveOf(c)) : [];
+  ui.bigCls = [cls, ...prev]; ui.bigDay = today(); ui.wave = 1; saveUI();
+  setLive(cls, ui.stage, ui.round);
+  showBig();
 }
 /* 10대 경기장 전체를 한 화면에 — 같이 수업하는 반을 골라 함께 띄운다 */
 function showBig() {
@@ -1017,10 +1065,11 @@ function showBig() {
       else if (w === wv + 1) (next[b] ||= []).push({ c, names });
     });
   });
-  const pick = classNames().filter(c => groupsOf(c, st).length);
+  const pick = classNames().filter(c => groupsOf(c, st).length || show.includes(c));
   const joinUrl = location.origin + location.pathname + "?in=1";
-  $("big").innerHTML = `<div class="bigTop">${teacher && secret.pin && secret.day === today() ? `<div class="joinQR"><div id="bigQR"></div><div><small>📱 결과 입력 코드</small><b>${esc(secret.pin)}</b></div></div>` : ""}<h2>🎯 ${STAGES[st].name}${maxW > 1 ? ` · ${wv}차 경기` : ""}</h2>
+  $("big").innerHTML = `<div class="bigTop">${teacher && secret.pin && secret.day === today() ? `<div class="joinQR"><div id="bigQR"></div><div><small>📱 결과 입력 코드</small><b>${esc(secret.pin)}</b></div></div>` : ""}<h2>🎯 ${STAGES[st].name} ${ui.round}라운드${maxW > 1 ? ` · ${wv}차` : ""}</h2>
     ${Object.entries(STAGES).map(([k, s]) => `<button class="${st === k ? "on" : ""}" data-act="bigStage" data-v="${k}">${s.mark} ${s.name}</button>`).join("")}
+    <span style="width:12px"></span>${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}
     ${maxW > 1 ? `<span style="width:12px"></span>` + Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("") : ""}
     <span style="width:12px"></span>${pick.map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}
     <button class="btn close" data-act="closeBig">닫기</button><button class="btn" style="background:var(--cu);color:var(--cuInk);border:0" data-act="bigEntry">✏️ 결과 입력</button></div>
@@ -1033,10 +1082,17 @@ function showBig() {
 }
 
 /* ---------- 동작 ---------- */
-function saveGroups(cls, st, list, method) {
-  const prev = (C(cls).groups || {})[st] || {};
-  put(P(cls, "groups", st), { list, method: method || prev.method || "", ts: Date.now() });
+function saveGroups(cls, st, list, method, r = ui.round) {
+  const all = ((C(cls).groups || {})[st]) || {}, prev = grpRec(cls, st, r) || {};
+  const rec = { list, method: method || prev.method || "", ts: Date.now() };
+  if (all.list) {   // 예전 형식 → 라운드별로 바꿔 저장 (예전 조는 1라운드)
+    const conv = { r1: { list: all.list, method: all.method || "", ts: all.ts || Date.now() } };
+    conv["r" + r] = rec;
+    put(P(cls, "groups", st), conv); return;
+  }
+  put(P(cls, "groups", st, "r" + r), rec);
 }
+const hasAnyRound = (cls, st, r) => Object.values(roundRes(cls, st, r)).some(x => Object.values(x || {}).some(y => y && y.r >= 1));
 function writeCard(gk, res) {
   // 보충 경기는 다른 조에 끼어 던진 순위를 선생님이 직접 누른다 — 혼자 1위가 되지 않게 자동 순위를 쓰지 않는다
   if (gk !== "mk") autoRank(res, STAGES[ui.stage].better);
@@ -1050,11 +1106,11 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
   const act = b.dataset.act, v = b.dataset.v, cls = ui.cls;
   switch (act) {
-    case "tab": ui.tab = v; ui.sel = null; ui.focus = null; if (v === "entry") ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
-    case "stage": ui.stage = v; ui.sel = null; ui.focus = null; ui.round = openRound(cls, v); render(); break;
+    case "tab": ui.tab = v; ui.sel = null; ui.focus = null; if (v === "entry" || v === "groups") ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
+    case "stage": ui.stage = v; ui.sel = null; ui.focus = null; ui.round = openRound(cls, v); if (ui.tab === "groups" && groupsOf(cls, v).length) setLive(cls, v, ui.round); render(); break;
     case "cls": ui.open = {}; ui.cls = v; ui.focus = null; ui.round = openRound(v, ui.stage); render(); break;
     case "goEntry": ui.tab = "entry"; ui.focus = null; ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
-    case "toX3": ui.tab = "groups"; ui.stage = "x3"; render(); scrollTo(0, 0); break;
+    case "toX3": ui.tab = "groups"; ui.stage = "x3"; ui.round = 1; render(); scrollTo(0, 0); break;
     case "bigEntry": $("big").classList.remove("show"); ui.tab = "entry"; ui.focus = null; ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
     case "bigGo": {
       $("big").classList.remove("show");
@@ -1077,18 +1133,37 @@ document.addEventListener("click", e => {
       if (confirm(`${cls}반 명렬과 모든 기록을 지울까요? 되돌릴 수 없습니다.`)) { put("rosters/" + cls, null, true); put(P(cls), null); }
       break;
     case "make": {
-      const st = ui.stage;
-      // 다시 편성 = 이 경기를 1라운드부터 새로. 몇 명만 옮길 땐 학생을 눌러 옮기면 결과가 남는다
-      const had = hasAny(cls, st);
-      if (had && !confirm(`이미 입력한 ${STAGES[st].name} 결과가 있습니다.\n다시 편성하면 ${STAGES[st].name} 결과가 모두 지워지고 1라운드부터 새로 합니다.\n\n학생 몇 명만 옮기려면 [취소]를 누르고 학생을 눌러 옮기세요.`)) return;
-      if (!had && groupsOf(cls, st).length && !confirm("조를 다시 편성할까요?")) return;
-      if (had) { put(P(cls, "games", st), null, true); put(P(cls, "roles", st), null, true); }
+      const st = ui.stage, r = ui.round, nm = `${STAGES[st].name} ${r}라운드`;
+      // 다시 편성 = 이 라운드만 새로. 몇 명만 옮길 땐 학생을 눌러 옮기면 결과가 남는다
+      const had = hasAnyRound(cls, st, r);
+      if (had && !confirm(`이미 입력한 ${nm} 결과가 있습니다.\n다시 편성하면 ${nm} 결과가 지워집니다.\n\n학생 몇 명만 옮기려면 [취소]를 누르고 학생을 눌러 옮기세요.`)) return;
+      if (!had && groupsOf(cls, st).length && !confirm(`${nm} 조를 다시 편성할까요?`)) return;
+      if (had) { put(P(cls, "games", st, "r" + r), null, true); put(P(cls, "roles", st, "r" + r), null, true); }
       const list = makeGroups(cls, st, ui.method[st]);
       if (!list.length) { toast("출석한 학생이 없습니다"); return; }
-      ui.sel = null; saveGroups(cls, st, list, ui.method[st]); toast(`${list.length}개 조로 편성했습니다`);
-      openBig(cls); // 편성하면 바로 프로젝터 화면으로
+      ui.sel = null; saveGroups(cls, st, list, ui.method[st]); toast(`${nm} — ${list.length}개 조로 편성했습니다`);
+      openBig(cls); // 편성하면 바로 프로젝터 화면으로 (이 라운드가 진행 중 라운드가 된다)
       break;
     }
+    case "clrGroups": {
+      const st = ui.stage, r = ui.round, nm = `${STAGES[st].name} ${r}라운드`, had = hasAnyRound(cls, st, r);
+      if (!confirm(`${nm} 조 편성을 지울까요?${had ? `\n입력한 ${nm} 결과도 함께 지워집니다.` : ""}`)) return;
+      if (had) { put(P(cls, "games", st, "r" + r), null, true); put(P(cls, "roles", st, "r" + r), null, true); }
+      const all = ((C(cls).groups || {})[st]) || {};
+      if (all.list) put(P(cls, "groups", st), null); else put(P(cls, "groups", st, "r" + r), null);
+      const L = liveOf(cls); if (L && L.st === st && L.r === r) put(P(cls, "live"), null, true);   // 진행 중 라운드였다면 해제
+      ui.sel = null; toast(`${nm} 조 편성을 지웠습니다`); break;
+    }
+    case "copyPrev": {
+      const list = groupsOf(cls, ui.stage, ui.round - 1);
+      if (!list.length) return;
+      saveGroups(cls, ui.stage, list, (grpRec(cls, ui.stage, ui.round - 1) || {}).method); setLive(cls, ui.stage, ui.round);
+      toast(`${ui.round - 1}라운드 조를 ${ui.round}라운드에 그대로 썼습니다`); break;
+    }
+    case "gRound": ui.round = +v; ui.sel = null; if (groupsOf(cls, ui.stage).length) setLive(cls, ui.stage, ui.round); render(); break;
+    case "nextRound": ui.round = +v; ui.tab = "groups"; ui.sel = null; render(); scrollTo(0, 0); break;
+    case "toGroups": ui.tab = "groups"; render(); scrollTo(0, 0); break;
+    case "bigRound": ui.round = +v; setLive(cls, ui.stage, ui.round); render(); showBig(); break;
     case "pick": {
       if (!ui.sel) { ui.sel = v; render(); break; }
       if (ui.sel === v) { ui.sel = null; render(); break; }
@@ -1111,31 +1186,26 @@ document.addEventListener("click", e => {
     }
     case "delGrp": {
       // 빈 조를 지우면 뒤 조들의 번호가 하나씩 당겨진다 — 입력해 둔 결과도 같이 당긴다
-      const i = +v, st = ui.stage, list = groupsOf(cls, st);
+      // 조 편성이 라운드별이므로 이 라운드의 결과·역할만 당긴다
+      const i = +v, st = ui.stage, rk = "r" + ui.round, list = groupsOf(cls, st);
       if (list[i] && list[i].m.length) return;
       list.splice(i, 1);
-      const games = JSON.parse(JSON.stringify((C(cls).games || {})[st] || {}));
-      Object.keys(games).forEach(rk => {
-        const r = games[rk] || {}, out = {};
-        Object.keys(r).forEach(k => { const m = /^g(d+)$/.exec(k); if (!m) { out[k] = r[k]; return; } const j = +m[1]; if (j < i) out[k] = r[k]; else if (j > i) out["g" + (j - 1)] = r[k]; });
-        games[rk] = out;
-      });
-      put(P(cls, "games", st), games, true);
-      const roles = JSON.parse(JSON.stringify(((C(cls).roles || {})[st]) || {}));
-      Object.keys(roles).forEach(rk => { const r = roles[rk] || {}, out = {}; Object.keys(r).forEach(k => { const m = /^g(\d+)$/.exec(k); if (!m) out[k] = r[k]; else if (+m[1] < i) out[k] = r[k]; else if (+m[1] > i) out["g" + (+m[1] - 1)] = r[k]; }); roles[rk] = out; });
-      put(P(cls, "roles", st), roles, true);
+      const shift = obj => { const out = {}; Object.keys(obj || {}).forEach(k => { const m = /^g(\d+)$/.exec(k); if (!m) out[k] = obj[k]; else if (+m[1] < i) out[k] = obj[k]; else if (+m[1] > i) out["g" + (+m[1] - 1)] = obj[k]; }); return out; };
+      const g2 = shift(roundRes(cls, st, ui.round)), r2 = shift((((C(cls).roles || {})[st]) || {})[rk]);
+      put(P(cls, "games", st, rk), Object.keys(g2).length ? g2 : null, true);
+      put(P(cls, "roles", st, rk), Object.keys(r2).length ? r2 : null, true);
       saveGroups(cls, st, list); break;
     }
-    case "addGrp": { const list = groupsOf(cls, ui.stage); list.push({ m: [], tag: "" }); put(P(cls, "groups", ui.stage, "list"), list); break; }
+    case "addGrp": { const list = groupsOf(cls, ui.stage); list.push({ m: [], tag: "" }); saveGroups(cls, ui.stage, list); break; }
     case "big": openBig(cls); break;
     case "bigWave": ui.wave = +v; showBig(); break;
     case "bigCls": { const s = new Set(ui.bigCls || []); s.has(v) ? s.delete(v) : s.add(v); if (!s.size) s.add(cls); ui.bigCls = [...s]; saveUI(); showBig(); break; }
-    case "bigStage": ui.stage = v; render(); showBig(); break;
+    case "bigStage": ui.stage = v; ui.round = openRound(cls, v); render(); showBig(); break;
     case "board": {
       const s = new Set(boardsOf(cls)), n = +v;
-      if (!(C(cls).boards || []).length) s.clear(), s.add(n);   // 처음 누르면 그 위치만 고르기 시작
+      if (!chosenBoards(cls).length) s.clear(), s.add(n);   // 처음 누르면 그 위치만 고르기 시작
       else if (s.has(n)) { if (s.size === 1) { toast("한 대 이상 골라야 합니다"); return; } s.delete(n); } else s.add(n);
-      put(P(cls, "boards"), [...s].sort((a, b) => a - b)); break;
+      put(P(cls, "boards"), { day: today(), list: [...s].sort((a, b) => a - b) }); break;
     }
     case "loginOpen": showLogin(); break;
     case "loginClose": $("login").classList.remove("show"); break;
@@ -1171,7 +1241,7 @@ document.addEventListener("click", e => {
       put("settings/off", Object.keys(off).length ? off : null); break;
     }
     case "bcount": put("settings/count", Math.min(20, Math.max(1, boardCount() + +v))); break;
-    case "boardsSet": put(P(cls, "boards"), v ? v.split(",").map(Number) : null); break;
+    case "boardsSet": put(P(cls, "boards"), v ? { day: today(), list: v.split(",").map(Number) } : null); break;
     case "closeBig": $("big").classList.remove("show"); break;
     case "rank": {
       const gk = b.dataset.g, s = b.dataset.s, res = curCard(gk), x = res[s] || {};
@@ -1180,8 +1250,14 @@ document.addEventListener("click", e => {
     }
     case "mkn": { const res = curCard("mk"), x = res[b.dataset.s] || {}; x.n = +v; res[b.dataset.s] = x; writeCard("mk", res); break; }
     case "clearCard": {
-      if (!confirm("이 조의 이번 라운드 결과를 지울까요?")) return;
-      put(P(cls, "games", ui.stage, "r" + ui.round, b.dataset.g), null); break;
+      if (!confirm(`이 다트의 ${ui.round}라운드 결과를 모두 지울까요?`)) return;
+      put(P(cls, "games", ui.stage, "r" + ui.round, b.dataset.g), null); stampRoles(b.dataset.g); break;
+    }
+    case "clrRow": {
+      const gk = b.dataset.g, res = curCard(gk), s = b.dataset.s, nm = (stuMap(cls)[s] || {}).name || "";
+      if (!confirm(`${nm} 학생의 ${ui.round}라운드 결과를 지울까요?`)) return;
+      if (gk === "mk") res[s] = { add: 1, n: (res[s] || {}).n }; else delete res[s];
+      writeCard(gk, res); break;
     }
     case "autoCard": { const res = curCard(b.dataset.g); Object.values(res).forEach(x => delete x.m); writeCard(b.dataset.g, res); break; }
     case "toMk": { const res = curCard("mk"); res[v] = { add: 1 }; put(P(cls, "games", ui.stage, "r" + ui.round, "mk"), res); break; }
@@ -1212,7 +1288,7 @@ document.addEventListener("change", e => {
   const t = e.target;
   if (t.id === "clsSel") { ui.cls = t.value; ui.sel = null; render(); return; }
   if (t.id === "restore") { restore(t.files[0]); return; }
-  if (t.classList.contains("roleAdd") && t.value) { const k = t.dataset.k, s = t.value; stampRoles(t.dataset.g, R => { (R[k] ||= {})[s] = 1; }); return; }
+  if (t.classList.contains("roleAdd") && t.value) { const s = t.value; stampRoles(t.dataset.g, R => { (R.x ||= {})[s] = 1; }); return; }
   if (!t.classList.contains("vin")) return;
   const gk = t.dataset.g, s = t.dataset.s, res = curCard(gk), x = res[s] || {};
   const raw = t.value.trim();
