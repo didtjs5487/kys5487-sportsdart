@@ -451,7 +451,12 @@
     header select{flex:0 0 auto}
     .selBar{top:8px}
     header h1{font-size:22px}
-    #status{margin-left:0}
+    /* 휴대폰 머리줄은 한 줄로: 제목 · 반 · 👤 — 연결 상태는 👤 단추 귀퉁이의 작은 점 (2026-10-07) */
+    header .wrap{flex-wrap:nowrap; gap:8px; position:relative}
+    header h1{min-width:0; overflow:hidden; text-overflow:ellipsis}
+    header select{font-size:19px; padding:4px 10px; min-height:46px}
+    #who{flex:none; width:46px; min-height:46px; padding:0; font-size:20px}
+    #status{position:absolute; right:calc(max(16px, env(safe-area-inset-right)) - 5px); top:calc(8px + env(safe-area-inset-top)); z-index:2; margin:0; padding:0; border:0; background:none; font-size:13px; line-height:1; pointer-events:none}
     .entryGrid{grid-template-columns:1fr}
     main{border-radius:0 0 16px 16px}
   }
