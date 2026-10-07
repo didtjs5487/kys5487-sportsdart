@@ -180,6 +180,7 @@
   .refBox.on{background:var(--goodSoft); color:#1E6B42}
   .refBox small{font-size:14px; color:var(--sub); font-weight:600}
   .refBox .btn{margin-left:auto; min-height:44px; font-size:15px}
+  .refBox .tRef{flex:1; min-height:46px; font-size:16px; background:var(--panel)}
   .rgrid{display:grid; grid-template-columns:minmax(72px,1fr) repeat(3, minmax(58px,76px)); gap:6px 6px; align-items:center}
   .rgrid .rh{font-size:14px; font-weight:700; color:var(--sub); text-align:center; line-height:1.2}
   .rgrid .rn{font-size:18px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
@@ -248,6 +249,90 @@
   pre{background:var(--soft); padding:12px; border-radius:12px; font-size:15px; overflow-x:auto}
   .rules td,.rules th{white-space:normal}
   .boardPick button{min-width:64px; font-size:22px}
+  .prow.cu1{grid-template-columns:1fr 104px 76px; grid-template-rows:auto; align-items:center}
+  .rkBadge{font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-size:24px; font-weight:700; color:var(--pri); text-align:right; line-height:1}
+  .rkBadge small{display:block; font-size:16px; opacity:.85} .rkBadge.r1{color:var(--r1)}
+  .tapHint{margin:2px 0 8px; font-size:17px; font-weight:700; color:var(--sub)}
+  .tapGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
+  .tapBtn{position:relative; min-width:0; min-height:66px; border:1px solid var(--line2); border-radius:14px; background:var(--soft); font-size:19px; font-weight:700; display:flex; align-items:center; gap:8px; padding:0 10px; text-align:left; color:var(--ink)}
+  .tapBtn .ord{width:40px; height:40px; border-radius:50%; background:var(--panel); border:2px dashed var(--line2); display:flex; align-items:center; justify-content:center; font-family:"Barlow Condensed",sans-serif; font-size:24px; flex:none}
+  .tapBtn .tn{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .tapBtn small{position:absolute; top:3px; right:8px; color:var(--pri); font-size:15px; font-family:"Barlow Condensed",sans-serif}
+  .tapBtn.on{background:var(--priSoft); border-color:var(--pri)}
+  .tapBtn.on .ord{background:var(--pri); color:#fff; border:0}
+  .tapBtn.r1 .ord{background:var(--r1)}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:14px; transition:transform .08s, box-shadow .15s, background .15s; -webkit-tap-highlight-color:transparent}
+  .btn:active{transform:scale(.97)}
+  .btn.pri{box-shadow:0 6px 14px rgba(91,81,232,.28)}
+  .btn.alt{box-shadow:0 6px 14px rgba(255,159,28,.28)}
+  .btn.ghost{background:var(--panel); box-shadow:inset 0 0 0 1px var(--line2)}
+  .btn.danger{box-shadow:inset 0 0 0 1px #F6B9C1}
+  .nextBig, .go .nextBig{background:var(--good)!important; color:#fff!important; box-shadow:0 6px 14px rgba(46,158,96,.30)!important}
+  .gseg button, .seg button, .tapBtn, .ranks button, .ds, .chip, .absBtn, .bd{transition:transform .08s, background .15s}
+  .gseg button:active, .seg button:active, .tapBtn:active, .ds:active, .chip:active{transform:scale(.96)}
+  .bcount{font-size:20px} .bcount b{font-family:"Barlow Condensed",sans-serif; font-size:26px}
+  .dstat{display:grid; grid-template-columns:repeat(auto-fill,minmax(58px,1fr)); gap:6px; margin:-4px 0 14px}
+  .ds{min-height:58px; border-radius:14px; border:2px dashed var(--line2); background:var(--panel); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.05; color:var(--sub); padding:2px}
+  .ds b{font-family:"Barlow Condensed",sans-serif; font-size:24px} .ds sub{font-size:11px; font-weight:700; margin-left:1px}
+  .ds i{font-style:normal; font-size:15px; font-weight:800}
+  .ds.part{border-style:solid; border-color:var(--pri); color:var(--pri); background:var(--priSoft)}
+  .ds.done{border-style:solid; border-color:var(--good); background:var(--good); color:#fff}
+  #big .bd2.done{border-color:var(--good); background:#1E3F46}
+  #big .bd2 .ok2{margin-left:auto; width:40px; height:40px; border-radius:50%; background:var(--good); color:#fff; font-size:24px; font-weight:800; display:flex; align-items:center; justify-content:center}
+  #big .bd2 .ok2.part{background:transparent; border:2px solid var(--pri2); color:var(--pri2)}
+  .slist{display:flex; flex-direction:column; gap:6px}
+  .srow{background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:6px 10px 8px}
+  .s1{display:flex; align-items:center; gap:8px}
+  .sno{min-width:24px; font-family:"Barlow Condensed",sans-serif; font-weight:700; color:var(--pri); font-size:18px}
+  .snm{flex:1; min-width:0; font-size:18px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .sa, .sb{font-size:15px; font-weight:700; color:var(--sub); white-space:nowrap}
+  .sa b, .sb b{font-family:"Barlow Condensed",sans-serif; font-size:21px; color:var(--ink)}
+  .sa em, .sb em{font-style:normal; font-size:14px; margin-left:3px; color:var(--pri)}
+  .sa b{color:var(--cuInk)} .sb b{color:var(--x3Ink)}
+  .sg{text-align:right; font-family:"Barlow Condensed",sans-serif; font-size:28px; color:var(--pri)} .sg small{font-size:15px; margin-left:1px} .sg i{display:block; font-size:12px; color:var(--warn); font-style:normal; font-family:"Noto Sans KR",sans-serif; text-align:right; margin-top:-4px}
+  .s2{display:flex; align-items:center; gap:10px; margin-top:4px}
+  .stk{display:flex; gap:5px} .stk .tk{min-height:40px; padding:0 10px; margin:0}
+  .gseg{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-bottom:12px}
+  .gseg button{position:relative; min-height:54px; border:1px solid var(--line); background:var(--soft); border-radius:12px; font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-size:21px; font-weight:700; color:var(--sub); padding:0}
+  .gseg button .gm{font-size:15px; margin-right:1px}
+  .gseg button i{position:absolute; top:2px; right:4px; font-style:normal; font-size:11px}
+  .gseg button.has::after{content:""; position:absolute; bottom:6px; left:50%; width:6px; height:6px; margin-left:-3px; border-radius:50%; background:currentColor; opacity:.5}
+  .gseg button.cu.on{background:var(--cu); border-color:var(--cu); color:var(--cuInk)}
+  .gseg button.x3.on{background:var(--x3); border-color:var(--x3); color:var(--x3Ink)}
+  .go.three{grid-template-columns:2fr 1fr 1fr} .go.one{grid-template-columns:1fr}
+  .btn.sm{min-height:46px; font-size:16px; padding:0 14px}
+  .wait{font-size:22px; font-weight:700; color:var(--sub); text-align:center; padding:28px 0}
+  .joinBar{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:19px}
+  details.setup summary .sumR{font-weight:600; color:var(--sub)}
+  .inprog{font-size:16px; color:var(--warn)}
+  nav button .ti{margin-right:6px}
+  @media (max-width:700px){
+    /* 휴대폰: 설명 문구는 숨기고, 탭은 아래쪽 막대로 */
+    .hint:not(.keep){display:none!important}
+    .ttl, .stx, .rcol{display:none!important}
+    #status{margin-left:auto; padding:6px 10px}
+    #who{min-height:44px; padding:0 12px}
+    body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+    nav{position:fixed; left:0; right:0; bottom:0; z-index:30; background:var(--panel); border-top:1px solid var(--line); box-shadow:0 -6px 20px rgba(91,81,232,.10);
+      padding:4px 4px calc(4px + env(safe-area-inset-bottom)); gap:2px; overflow:visible}
+    nav button{flex:1 1 0; min-width:0; min-height:62px; border:0; border-radius:12px; background:transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2px; font-size:14px; line-height:1.2}
+    nav button .ti{font-size:22px; margin:0}
+    nav button.on{background:var(--priSoft); color:var(--pri)}
+    nav.few button{flex-direction:row; gap:6px; font-size:17px}
+    main{border-radius:16px; padding:14px 12px 18px; margin-top:8px}
+    .gseg button{font-size:19px; min-height:50px}
+    .go .btn{min-height:60px; font-size:18px; padding:0 6px; white-space:nowrap}
+    .banner{gap:8px} .banner .btn.big{min-height:52px; font-size:18px; padding:0 14px}
+    .ecard .foot{justify-content:flex-end}
+    .grpGrid{grid-template-columns:1fr 1fr; gap:8px}
+    .grp{padding:10px} .grp h4{font-size:18px}
+    .chip{min-height:46px; font-size:17px; padding:0 8px; gap:4px} .chip .info{display:none}
+    .ecard{padding:12px} .ecard h4 .tag{display:none}
+    .banner{font-size:18px; padding:10px 12px}
+    .tk{min-width:0; padding:0 8px; font-size:14px}
+    table{font-size:16px} th,td{padding:8px 5px}
+    h2{font-size:22px}
+  }
   @media (max-width:560px){
     header{position:static}
     header .wrap{padding-top:calc(12px + env(safe-area-inset-top))}
@@ -277,7 +362,7 @@
 <body>
 <header>
   <div class="wrap">
-    <h1>🎯 스포츠다트 리그</h1>
+    <h1>🎯<span class="ttl"> 스포츠다트 리그</span></h1>
     <select id="clsSel" aria-label="반 선택"></select>
     <span id="status">⚪ 연결 중…</span>
     <button id="who" data-act="loginOpen">🔐 선생님 로그인</button>
@@ -408,12 +493,14 @@ let fdb = null, fmod = null, online = false, serverDenied = false, serverSeen = 
 function updStatus() {
   const el = $("status");
   const who = $("who");
-  if (who) { who.style.display = TEST ? "none" : ""; who.textContent = teacher ? "👤 선생님" : stuOK && me ? "✏️ 입력 중" : "🔐 선생님 로그인"; }
-  if (!fdb) { el.textContent = "🟡 이 기기에만 저장 중"; return; }
-  if (VIEW && !stuOK) { el.textContent = "👀 보기 전용"; return; }
-  if (serverDenied) { el.textContent = "🟡 서버 규칙 필요 · 이 기기에 저장 중"; return; }
-  if (!online) { el.textContent = "🟠 오프라인 · 연결되면 자동 전송"; return; }
-  el.textContent = pending.size ? `🟢 서버 연결 · 전송 중 ${pending.size}` : "🟢 실시간 저장됨";
+  const two = (i, t) => `${i}<span class="stx"> ${t}</span>`;   // 휴대폰에선 아이콘만
+  if (who) { who.style.display = TEST ? "none" : ""; who.innerHTML = teacher ? two("👤", "선생님") : stuOK && me ? two("✏️", "입력 중") : two("🔐", "선생님 로그인"); }
+  const set = (i, t) => { el.innerHTML = two(i, t); el.title = t; };
+  if (!fdb) return set("🟡", "이 기기에만 저장 중");
+  if (VIEW && !stuOK) return set("👀", "보기 전용");
+  if (serverDenied) return set("🟡", "서버 규칙 필요 · 이 기기에 저장 중");
+  if (!online) return set("🟠", "오프라인 · 연결되면 자동 전송");
+  set("🟢", pending.size ? `서버 연결 · 전송 중 ${pending.size}` : "실시간 저장됨");
 }
 let authM = null, fauth = null;
 async function initFB() {
@@ -761,7 +848,7 @@ const METHODS = {
 
 /* ---------- 화면 ---------- */
 // 명렬·출석은 학기 초에 한 번 쓰는 일이라 맨 뒤로 (2026-10-01 선생님 요청)
-const TABS = [["groups", "① 조 편성"], ["entry", "② 경기 결과"], ["stand", "③ 순위·성적"], ["grade", "🏆 학년 순위"], ["roster", "명렬·출석"], ["set", "⚙ 설정"]];
+const TABS = [["groups", "👥", "조 편성"], ["entry", "✏️", "결과"], ["stand", "📊", "성적"], ["grade", "🏆", "학년"], ["roster", "📋", "명렬"], ["set", "⚙️", "설정"]];
 function render() {
   const names = classNames();
   if (!names.includes(ui.cls)) ui.cls = names[0] || "";
@@ -783,11 +870,12 @@ function render() {
   }
   let tabs = TABS;
   // 학생은 자기 다트 입력 + 우리 반 승점 순위만 (평가 점수·과제수행·다른 반 기록은 보지 않음)
-  if (VIEW) { tabs = stuOK ? [["entry", "✏️ 결과 입력"], ["stand", "🏅 우리 반 승점"]] : [["entry", "✏️ 결과 입력"]]; if (!tabs.some(t => t[0] === ui.tab)) ui.tab = "entry"; }
-  if (GRP != null) tabs = [["entry", `${grpLabel(ui.cls, +GRP)} 결과 입력`]];
-  $("nav").innerHTML = tabs.map(([k, l]) => `<button data-act="tab" data-v="${k}" class="${ui.tab === k ? "on" : ""}">${l}</button>`).join("");
+  if (VIEW) { tabs = stuOK ? [["entry", "✏️", "결과 입력"], ["stand", "🏅", "우리 반 승점"]] : [["entry", "✏️", "결과 입력"]]; if (!tabs.some(t => t[0] === ui.tab)) ui.tab = "entry"; }
+  if (GRP != null) tabs = [["entry", "✏️", `${grpLabel(ui.cls, +GRP)} 결과 입력`]];
+  $("nav").innerHTML = tabs.map(([k, i, l]) => `<button data-act="tab" data-v="${k}" class="${ui.tab === k ? "on" : ""}"><span class="ti">${i}</span><span class="tl">${l}</span></button>`).join("");
+  $("nav").classList.toggle("few", tabs.length <= 2);
   if (VIEW && !stuOK) {   // 코드를 넣기 전: 아무 학생 정보도 보이지 않는다
-    $("main").innerHTML = joinBox("") + `<p class="hint">선생님은 오른쪽 위 <b>[🔐 선생님 로그인]</b>을 누르세요.</p>`;
+    $("main").innerHTML = joinBox("");
     saveUI(); return;
   }
   const fn = { roster: scRoster, groups: scGroups, entry: scEntry, stand: scStand, grade: scGrade, set: scSet }[ui.tab] || scRoster;
@@ -836,54 +924,61 @@ function roundSeg(cls, st, act) {
     const sub = act === "round" ? (gs.length ? `${done}/${gs.length}` : "조 없음") : (gs.length ? "✓" : "");
     return `<button class="plain ${ui.round === r ? "on" : ""}" data-act="${act}" data-v="${r}">${mark}${r}라운드<span class="done">${sub}</span></button>`; }).join("")}</div>`;
 }
+/* 경기·라운드 단추 한 줄 — ● 진행 중 · 🔒 종료 · 점 = 조 있음 */
+function gameSeg(cls) {
+  const L = liveOf(cls);
+  return `<div class="gseg">${["cu", "x3"].map(st => Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => {
+    const gs = groupsOf(cls, st, r), live = L && L.st === st && L.r === r, cl = isClosed(cls, st, r);
+    return `<button class="${st} ${ui.stage === st && ui.round === r ? "on" : ""} ${gs.length ? "has" : ""}" data-act="gm" data-v="${st}|${r}"><span class="gm">${STAGES[st].mark}</span>${r}R<i>${live ? "●" : cl ? "🔒" : ""}</i></button>`;
+  }).join("")).join("")}</div>`;
+}
 function scGroups() {
   const cls = ui.cls, st = ui.stage, r = ui.round, sm = stuMap(cls), gs = groupsOf(cls, st);
   const info = grpRec(cls, st, r);
-  let h = stageSeg() + roundSeg(cls, st, "gRound");
-  if (!VIEW) h += `<p class="hint" style="margin-top:-4px">● = 지금 진행 중인 라운드. 학생 입력 화면은 이 라운드로 고정됩니다. 라운드마다 조를 새로 짤 수 있습니다.</p>`;
-  if (!VIEW && !gs.length && !liveOf(cls)) h += `<div class="go noprint" style="grid-template-columns:1fr"><button class="btn pri big nextBig" data-act="startNext">▶ 경기 시작 — ${(curGame(cls) ? STAGES[curGame(cls).st].name + " " + curGame(cls).r + "라운드" : "")} 조를 짜서 프로젝터에 띄우기</button></div>`;
-  if (!VIEW && gs.length) h += `<div class="go noprint"><button class="btn pri big" data-act="big">📺 화면에 띄우기</button><button class="btn pri big alt" data-act="goEntry">✏️ 경기 결과 입력 →</button></div>`;
+  let h = gameSeg(cls);
+  if (!VIEW && !gs.length && !liveOf(cls)) h += `<div class="go one noprint"><button class="btn pri big nextBig" data-act="startNext">▶ 경기 시작${curGame(cls) ? ` · ${STAGES[curGame(cls).st].mark}${curGame(cls).r}R` : ""}</button></div>`;
+  if (!VIEW && gs.length) h += `<div class="go three noprint"><button class="btn pri big nextBig" data-act="startNext">▶ 다음 경기</button><button class="btn pri big" data-act="big">📺 화면</button><button class="btn pri big alt" data-act="goEntry">✏️ 입력</button></div>`;
   if (!VIEW) h += absPicker(cls, !gs.length);
   if (!VIEW) {
     const opts = st === "cu" ? ["seed", "random", "no"] : ["grank", "rank", "seed", "random"];
     if (!opts.includes(ui.method[st])) ui.method[st] = opts[0];
-    h += `<details class="setup noprint" data-k="setup" ${(ui.open.setup ?? !gs.length) ? "open" : ""}><summary>${gs.length ? `⚙ 다트 위치 · 편성 방법 · ${r}라운드 다시 편성 · 지우기` : `다트 위치와 편성 방법을 고르고 [${r}라운드 조 편성하기]`}</summary>${boardPicker(cls)}
+    h += `<details class="setup noprint" data-k="setup" ${(ui.open.setup ?? !gs.length) ? "open" : ""}><summary>⚙ 편성 설정 · 다시 편성</summary>${boardPicker(cls)}
     <div class="card noprint" style="margin-bottom:14px">
       <div class="seg" style="margin-bottom:6px">${opts.map(k => `<button class="plain ${ui.method[st] === k ? "on" : ""}" data-act="method" data-v="${k}">${METHODS[k][0]}</button>`).join("")}</div>
       <p class="hint" style="margin-top:0">${METHODS[ui.method[st]][1]}. 결석 학생은 빠집니다.</p>
       <div class="seg" style="margin-bottom:6px"><button class="plain ${fitOn() ? "" : "on"}" data-act="fit" data-v="0">4명 조 (남으면 3명 조)</button><button class="plain ${fitOn() ? "on" : ""}" data-act="fit" data-v="1">다트 수에 맞추기 (5명 조 허용)</button></div>
       <p class="hint" style="margin-top:0">${(() => { const n = roster(cls).filter(s => !isAbs(cls, sidOf(s))).length, sz = sizes(n, CFG.size, boardsOf(cls).length, fitOn());
         return n ? `출석 ${n}명 · 다트 ${boardsOf(cls).length}대 → <b>${sz.length}개 조 (${sz.join("·")}명)</b>${sz.length > boardsOf(cls).length ? " — 2차 경기 생김" : ""}` : ""; })()}</p>
-      <div class="row">${gs.length ? `<button class="btn danger" data-act="clrGroups">${r}라운드 조 지우기</button>` : ""}
-        ${!gs.length && r > 1 && groupsOf(cls, st, r - 1).length ? `<button class="btn" data-act="copyPrev">${r - 1}라운드 조 그대로 쓰기</button>` : ""}
-        <span class="sp"></span><button class="btn pri big" data-act="make">${STAGES[st].name} ${r}라운드 ${gs.length ? "다시 편성" : "조 편성하기"}</button></div>
+      <p class="hint keep" style="margin-top:0">${(() => { const n = roster(cls).filter(s => !isAbs(cls, sidOf(s))).length, sz = sizes(n, CFG.size, boardsOf(cls).length, fitOn()); return n ? `${n}명 → ${sz.length}개 조 (${sz.join("·")})` : ""; })()}</p>
+      <div class="row">${gs.length ? `<button class="btn danger" data-act="clrGroups">${r}R 조 지우기</button>` : ""}
+        ${!gs.length && r > 1 && groupsOf(cls, st, r - 1).length ? `<button class="btn" data-act="copyPrev">${r - 1}R 조 그대로</button>` : ""}
+        <span class="sp"></span><button class="btn pri big" data-act="make">${STAGES[st].mark}${r}R ${gs.length ? "다시 편성" : "편성"}</button></div>
       ${st === "x3" && !hasAny(cls, "cu") ? `<div class="note">카운트업 결과가 아직 없어 순위 편성은 무작위와 같습니다.</div>` : ""}
     </div></details>`;
   }
-  if (!gs.length) return h + `<p class="hint">아직 ${STAGES[st].name} ${r}라운드 조가 없습니다.</p>`;
+  if (!gs.length) return h;
   const wait = gs.length - boardsOf(cls).length;
   if (wait > 0 && !VIEW) h += `<div class="note">다트 위치(${boardsOf(cls).length}대)보다 조(${gs.length}개)가 많아 <b>${wait}개 조는 2차 경기</b>입니다 — 1차가 끝난 같은 다트에서 이어서 합니다.</div>`;
-  h += `<div class="row noprint" style="margin-bottom:10px"><b>${r}라운드 · ${gs.length}개 조 · ${gs.reduce((a, g) => a + g.m.length, 0)}명</b>${info && info.method ? ` <span class="tag">${METHODS[info.method] ? METHODS[info.method][0] : ""}</span>` : ""}
-    <span class="sp"></span>${VIEW ? `<button class="btn" data-act="big">📺 크게 보기</button>` : `<button class="btn" data-act="addGrp">＋ 빈 조</button>`}</div>`;
+  h += `<div class="row noprint" style="margin-bottom:8px"><b>${STAGES[st].mark}${r}R · ${gs.length}개 조 · ${gs.reduce((a, g) => a + g.m.length, 0)}명</b>
+    <span class="sp"></span>${VIEW ? "" : `<button class="btn sm" data-act="addGrp">＋ 조</button>`}</div>`;
   if (!VIEW && ui.sel) {
     const x = sm[ui.sel] || { name: "?" };
-    h += `<div class="selBar noprint"><b>✋ ${esc(x.name)} 선택됨</b><span>다른 학생을 누르면 <b>자리 바꾸기</b> · 다른 조의 <b>[여기로 이동]</b></span>
-      <span class="sp"></span><button class="btn" data-act="newGrpWith">새 조로 빼기</button><button class="btn danger" data-act="selAbs">${isAbs(cls, ui.sel) ? "출석으로" : "결석 처리"}</button><button class="btn ghost" data-act="selCancel">취소</button></div>`;
+    h += `<div class="selBar noprint"><b>✋ ${esc(x.name)}</b><span class="sp"></span><button class="btn sm" data-act="newGrpWith">새 조</button><button class="btn sm danger" data-act="selAbs">${isAbs(cls, ui.sel) ? "출석" : "결석"}</button><button class="btn sm ghost" data-act="selCancel">취소</button></div>`;
   } else if (!VIEW) h += `<p class="hint noprint">✋ <b>조 바꾸기</b>: 학생을 누르고 → 다른 학생을 누르면 자리 바꾸기, 다른 조의 [여기로 이동]을 누르면 옮기기. 결과를 입력한 뒤에 옮겨도 그 학생의 기록은 남습니다.</p>`;
   h += `<div class="grpGrid">${gs.map((g, gi) => `
-    <div class="grp ${st}"><h4>${grpLabel(cls, gi)} ${g.tag ? `<span class="tag">${g.tag}</span>` : ""}<span class="tag" style="margin-left:auto">${g.m.length}명</span></h4>
+    <div class="grp ${st}"><h4>${grpLabel(cls, gi)}</h4>
     <div class="chips">${g.m.map(s => { const x = sm[s] || { no: "?", name: "(명렬 없음)" }, a = isAbs(cls, s);
       const extra = st === "x3" ? (() => { const r = record(cls, "cu", s); return r.played ? `카운트업 ${r.sum}점` : ""; })() : (x.seed ? "★" : "");
       return `<button class="chip ${ui.sel === s ? "sel" : ""} ${a ? "abs" : ""}" ${VIEW ? "disabled" : `data-act="pick" data-v="${s}"`}><span class="no">${esc(x.no)}</span>${esc(x.name)}${sexBadge(x)}<span class="info">${a ? "결석" : extra}</span></button>`; }).join("")}</div>
-    ${!g.m.length ? `<p class="hint" style="margin:4px 0">비어 있음</p>${VIEW ? "" : `<button class="btn ghost moveHere" data-act="delGrp" data-v="${gi}">이 빈 조 지우기</button>`}` : ""}
-    ${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn moveHere" data-act="moveTo" data-v="${gi}">여기로 이동</button>` : ""}
+    ${!g.m.length ? (VIEW ? "" : `<button class="btn ghost moveHere" data-act="delGrp" data-v="${gi}">빈 조 지우기</button>`) : ""}
+    ${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn moveHere" data-act="moveTo" data-v="${gi}">↓ 여기로</button>` : ""}
     </div>`).join("")}</div>`;
   return h;
 }
 /* 오늘 참여하지 못하는 학생 — 고르면 조 편성에서 빠진다. 날짜가 바뀌면 자동으로 모두 출석 */
 function absPicker(cls, open) {
   const list = roster(cls), out = list.filter(st => isAbs(cls, sidOf(st)));
-  return `<details class="setup noprint" data-k="abs" ${(ui.open.abs ?? open) ? "open" : ""}><summary>🙋 오늘 빠지는 학생 — ${out.length ? `<span style="color:var(--bad)">${out.map(st => esc(st.name)).join(", ")} (${out.length}명)</span>` : "없음"} · 참여 ${list.length - out.length}명</summary>
+  return `<details class="setup noprint" data-k="abs" ${(ui.open.abs ?? open) ? "open" : ""}><summary>🙋 빠지는 학생 ${out.length ? `<span style="color:var(--bad)">&nbsp;${out.length}명</span>` : "없음"}<span class="sp"></span><span class="sumR">참여 ${list.length - out.length}</span></summary>
     <div class="card" style="margin-bottom:14px"><p class="hint" style="margin-top:0">결석·견학 등으로 오늘 경기를 못 하는 학생을 누르세요. <b>참여하는 학생만으로</b> 조를 짭니다. 내일이 되면 자동으로 모두 참여로 돌아갑니다.</p>
     <div class="absGrid">${list.map(st => { const s = sidOf(st), a = isAbs(cls, s); return `<button class="absBtn ${a ? "out" : ""}" data-act="abs" data-v="${s}">${esc(st.no)}. ${esc(st.name)}${a ? "<small>빠짐</small>" : ""}</button>`; }).join("")}</div>
     ${out.length ? `<div class="row" style="margin-top:10px"><button class="btn" data-act="allIn">모두 참여로</button></div>` : ""}</div></details>`;
@@ -943,16 +1038,18 @@ function scEntry() {
   let h = "";
   const pair = (ui.bigCls || []).filter(c => S.rosters[c]);
   if (!VIEW && GRP == null && pair.length > 1 && pair.includes(cls)) h += `<div class="seg">${pair.map(c => `<button class="plain ${c === cls ? "on" : ""}" data-act="cls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div>`;
-  if (VIEW && stuOK && !liveOf(cls)) return joinBox(cls) + `<p class="hint" style="font-size:19px">선생님이 오늘 진행할 경기와 라운드를 정하면(조 편성·프로젝터) 여기에 입력 카드가 나옵니다.</p>`;
+  if (VIEW && stuOK && !liveOf(cls)) return joinBox(cls) + `<p class="wait">⏳ 경기 시작을 기다리는 중</p>`;
   if (VIEW && stuOK) h += `<div class="lockTag">${STAGES[st].mark} ${STAGES[st].name} · ${ui.round}라운드</div>`;
-  else h += stageSeg() + roundSeg(cls, st, "round");
-  if (!gs.length) return (VIEW ? joinBox(cls) : "") + h + (VIEW ? `<p class="hint" style="font-size:19px">선생님이 이 라운드 조를 짜면 입력할 수 있어요.</p>` : `<p class="hint">${STAGES[st].name} ${ui.round}라운드 조 편성을 먼저 하세요.</p><button class="btn pri big" data-act="toGroups">${ui.round}라운드 조 편성하러 가기 →</button>`);
+  else h += gameSeg(cls);
+  if (!gs.length) return (VIEW ? joinBox(cls) : "") + h + (VIEW ? `<p class="wait">⏳ 조 편성을 기다리는 중</p>` : `<div class="go one"><button class="btn pri big nextBig" data-act="startNext">▶ 경기 시작</button></div>`);
   const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi)), closed = isClosed(cls, st, ui.round);
   if (!VIEW && GRP == null) {
-    if (closed) h += `<div class="banner" style="background:var(--soft);border-color:var(--line);color:var(--sub)">🔒 ${STAGES[st].name} ${ui.round}라운드 경기 종료됨 — 학생 입력이 잠겼습니다. 선생님은 고칠 수 있어요.<button class="btn" data-act="reopenRound">다시 열기</button></div>`;
-    else h += `<div class="banner${allDone ? "" : " todo"}">${allDone ? `✔ ${ui.round}라운드 모든 다트 입력 완료!` : `${ui.round}라운드 진행 중`}<button class="btn${allDone ? "" : " ghost"}" data-act="endRound">🏁 종료만</button><button class="btn pri big" data-act="startNext">▶ 다음 경기 시작</button></div>`;
+    const nDone = gs.filter((g, gi) => cardDone(cls, g, rr, "g" + gi)).length;
+    if (closed) h += `<div class="banner" style="background:var(--soft);border-color:var(--line);color:var(--sub)">🔒 종료됨<button class="btn" data-act="reopenRound">다시 열기</button></div>`;
+    else h += `<div class="banner${allDone ? "" : " todo"}"><span class="bcount">${allDone ? "✔ 모두 입력" : `입력 <b>${nDone}</b>/${gs.length}`}</span><button class="btn sm ghost" data-act="endRound" aria-label="경기 종료만">🏁</button><button class="btn pri big nextBig" data-act="startNext">▶ 다음 경기</button></div>`;
+    h += dartStatus(cls, st, ui.round);
   }
-  if (!VIEW && !allDone) h += `<p class="hint">${STAGES[st].hint} 순위가 다르면 순위 단추를 직접 누르면 됩니다.</p>`;
+
   let cards = gs.map((g, gi) => ({ g, gi }));
   if (GRP != null) cards = cards.filter(c => c.gi === +GRP);
   if (VIEW) {
@@ -960,11 +1057,11 @@ function scEntry() {
     if (!stuOK) h = joinBox(cls) + h;
     else {
       const bs = [...new Set(gs.map((g, gi) => boardOf(cls, gi)))];
-      const pick = `<h3 style="margin-top:0">내 다트 번호</h3><div class="seg boardPick">${bs.map(b => `<button class="plain ${ui.board === b ? "on" : ""}" data-act="board1" data-v="${b}">${b}번</button>`).join("")}</div>`;
-      h = joinBox(cls) + pick + h;
-      if (!bs.includes(ui.board)) return h + `<p class="hint" style="font-size:19px">👆 위에서 내가 있는 <b>다트 번호</b>를 누르세요.</p>`;
+      const pick = `<div class="seg boardPick">${bs.map(b => `<button class="plain ${ui.board === b ? "on" : ""}" data-act="board1" data-v="${b}">${b}번</button>`).join("")}</div>`;
+      h = joinBox(cls) + (PIN_BOARD && bs.includes(PIN_BOARD) ? "" : pick) + h;   // 다트 QR로 왔으면 번호 고르기 생략
+      if (!bs.includes(ui.board)) return h + `<p class="wait">👆 내 다트 번호</p>`;
       cards = cards.filter(c => boardOf(cls, c.gi) === ui.board);
-      h += `<p class="hint">${STAGES[st].hint} 잘못 적었으면 고쳐 쓰거나 ✕로 지우세요. 입력하는 사람이 이 다트의 <b>심판</b>으로 기록됩니다.</p>`;
+
     }
   }
   h += `<div class="entryGrid">${cards.map(({ g, gi }) => card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}${g.tag ? " · " + g.tag : ""}`)).join("")}`;
@@ -979,12 +1076,27 @@ function scEntry() {
 /* 이 조 카드 입력이 끝났나 — 결석생, 같은 라운드를 다른 다트에서 이미 기록한(옮긴) 학생은 빼고 본다. 빈 조는 끝난 것으로 */
 /* QR로 들어온 학생: 입력 코드 + 내 이름 → 그날 하루 결과 입력 가능 */
 function joinBox(cls) {
-  if (stuOK && me) return `<div class="joinBox row"><b style="font-size:19px">✏️ ${esc(cls)}반 결과 입력</b><span class="sp"></span><button class="btn ghost" data-act="unjoin">나가기</button></div>`;
+  if (stuOK && me) return `<div class="joinBar"><b>${esc(cls)}반</b><span class="sp"></span><button class="btn sm ghost" data-act="unjoin">나가기</button></div>`;
   if (!fdb && !STU_DEMO) return `<p class="hint">서버에 연결하는 중이에요…</p>`;
-  return `<div class="joinBox"><h3 style="margin-top:0">✏️ 경기 결과 입력하기</h3>
+  return `<div class="joinBox"><h3 style="margin-top:0">✏️ 입력 코드</h3>
     <p class="hint" style="margin-top:0">조마다 정한 <b>심판</b> 1명만 하면 됩니다. 프로젝터 화면의 <b>우리 반 입력 코드 4자리</b>를 넣으세요. 이 휴대폰은 오늘 하루 다시 넣을 필요가 없어요.${PIN_BOARD ? "" : " (반은 맨 위에서 고르기)"}</p>
     <input type="text" id="jCode" class="codeIn" inputmode="numeric" maxlength="4" placeholder="0000">
-    <button class="btn pri big" style="width:100%" data-act="join">입력 시작</button></div>`;
+    <button class="btn pri big" style="width:100%" data-act="join">시작</button></div>`;
+}
+/* 301: 끝난 순서대로 누르는 이름 단추 */
+function tapGrid(cls, key, ids, res, n, ro) {
+  const sm = stuMap(cls);
+  return `${ro ? "" : `<p class="tapHint">🏁 끝난 순서대로 누르세요</p>`}<div class="tapGrid">${ids.map(s => { const x = sm[s] || { name: "?" }, r = (res[s] || {}).r;
+    return `<button class="tapBtn ${r ? "on" : ""} ${r === 1 ? "r1" : ""}" ${ro ? "disabled" : `data-act="tapRank" data-g="${key}" data-s="${s}"`}><span class="ord">${r || ""}</span><span class="tn">${esc(x.name)}</span>${r ? `<small>+${ptsOf(r, n)}</small>` : ""}</button>`; }).join("")}</div>`;
+}
+function dartState(cls, g, rr, gi) {
+  if (cardDone(cls, g, rr, "g" + gi)) return "done";
+  return Object.values((rr || {})["g" + gi] || {}).some(x => x && (x.r >= 1 || typeof x.v === "number")) ? "part" : "none";
+}
+function dartStatus(cls, st, r) {
+  const gs = groupsOf(cls, st, r), rr = roundRes(cls, st, r);
+  return `<div class="dstat" style="grid-template-columns:repeat(${Math.min(Math.max(gs.length, 1), 6)},1fr)">${gs.map((g, gi) => { const s = dartState(cls, g, rr, gi), w = waves(cls) > 1 ? `<sub>${waveOf(cls, gi)}차</sub>` : "";
+    return `<button class="ds ${s}" data-act="jumpCard" data-g="g${gi}"><b>${boardOf(cls, gi)}${w}</b><i>${s === "done" ? "✔" : s === "part" ? "◐" : "○"}</i></button>`; }).join("")}</div>`;
 }
 function cardDone(cls, g, rr, gk) {
   const res = (rr || {})[gk] || {};
@@ -1007,19 +1119,23 @@ function card(cls, st, gk, members, res, title) {
   const live = ids.filter(s => !elsewhere[s] && (!isAbs(cls, s) || res[s]));
   const n = gk === "mk" ? CFG.maxGroup : Math.max(live.length, 1);
   const done = live.length && live.every(s => res[s] && res[s].r >= 1);
-  const rows = ids.map(s => {
+  const simpleCU = gk !== "mk" && st === "cu", tap301 = gk !== "mk" && st === "x3";
+  const rows = tap301 ? tapGrid(cls, key, ids.filter(s => !elsewhere[s] && (!isAbs(cls, s) || res[s])), res, n, RO) : ids.map(s => {
     const x = sm[s] || { no: "?", name: "(명렬 없음)" }, r = res[s] || {};
     if (elsewhere[s]) return `<div class="prow abs"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)} · 이번 라운드는 ${esc(kName(elsewhere[s]))}에서 기록</div></div>`;
     const a = isAbs(cls, s) && !res[s];
     const rk = Array.from({ length: n }, (_, i) => i + 1).map(k => `<button class="${r.r === k ? "on" : ""} ${k === 1 ? "r1" : ""}" ${RO ? "disabled" : `data-act="rank" data-g="${key}" data-s="${s}" data-v="${k}"`}>${k}위</button>`).join("");
     const hasRes = typeof r.v === "number" || r.r >= 1;
+    if (simpleCU) return `<div class="prow cu1 ${a ? "abs" : ""}"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)}${sexBadge(x)}${a ? " · 결석" : ""}</div>
+      <input type="number" inputmode="numeric" placeholder="점수" value="${typeof r.v === "number" ? r.v : ""}" ${RO || a ? "disabled" : ""} data-g="${key}" data-s="${s}" class="vin">
+      <span class="rkBadge ${r.r === 1 ? "r1" : ""}">${r.r ? `${r.r}위<small>+${ptsOf(r.r, n)}</small>` : ""}</span></div>`;
     return `<div class="prow ${a ? "abs" : ""}"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)}${sexBadge(x)}${a ? " · 결석" : ""}${!RO && hasRes ? `<button class="rowX" data-act="clrRow" data-g="${key}" data-s="${s}" aria-label="이 학생 결과 지우기">✕</button>` : ""}</div>
       <input type="number" inputmode="numeric" placeholder="${STAGES[st].vLabel}" value="${typeof r.v === "number" ? r.v : ""}" ${RO || a ? "disabled" : ""} data-g="${key}" data-s="${s}" class="vin">
       <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ 이 경기는 <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 학생이 심판으로 다른 휴대폰에서 입력하고 있어요. 고칠 게 있으면 심판이나 선생님께 말해 주세요.</p>` : ""}${needRef ? refPicker(cls, key, members) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
-    ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${RO ? "" : `<div class="foot"><button class="btn ghost" data-act="clearCard" data-g="${key}">이 다트 결과 모두 지우기</button>${gk !== "mk" && Object.values(res).some(x => x.m) ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 다시</button>` : ""}</div>`}</div>`;
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
+    ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${RO ? "" : `<div class="foot"><button class="btn sm ghost" data-act="clearCard" data-g="${key}">🗑 지우기</button>${gk !== "mk" && st === "cu" && Object.values(res).some(x => x.m) ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 다시</button>` : ""}</div>`}</div>`;
 }
 /* 역할 기록 — 이 다트(조)·이 라운드에서 누가 입력했고, 누가 경기 진행·심판·준비 정리를 했나.
    classes/{반}/roles/{경기}/r{라운드}/{g번호} = { by, byCls, t, j:{sid:1}, s:{sid:1}, p:{sid:1} } → Ⓒ 과제수행에 자동 반영 */
@@ -1028,18 +1144,18 @@ const rolesAt = (cls, st, r, key) => ((((C(cls).roles || {})[st] || {})["r" + r]
 /* 이번 경기 심판 고르기 — 조원 이름이 먼저, 다른 조 학생은 아래 목록에서 */
 function refPicker(cls, key, members) {
   const sm = stuMap(cls), mem = members.filter(s => sm[s] && !isAbs(cls, s)), others = roster(cls).filter(st => !mem.includes(sidOf(st)));
-  return `<div class="refPick"><b>🧑‍⚖️ 이번 경기 심판은 누구인가요?</b><small>심판이 이 휴대폰으로 결과를 입력해요. 심판으로 Ⓒ 점수가 인정됩니다.</small>
+  return `<div class="refPick"><b>🧑‍⚖️ 심판은?</b>
     <div class="refBtns">${mem.map(s => `<button class="btn" data-act="claimRef" data-g="${key}" data-s="${s}">${esc(sm[s].name)}</button>`).join("")}</div>
-    ${others.length ? `<select class="refOther" data-g="${key}"><option value="">다른 조 학생이 심판이에요</option>${others.map(o => `<option value="${sidOf(o)}">${esc(o.no)}. ${esc(o.name)}</option>`).join("")}</select>` : ""}</div>`;
+    ${others.length ? `<select class="refOther" data-g="${key}"><option value="">다른 조 학생</option>${others.map(o => `<option value="${sidOf(o)}">${esc(o.no)}. ${esc(o.name)}</option>`).join("")}</select>` : ""}</div>`;
 }
 function rolesBox(cls, st, key, members, ro) {
   const R = rolesAt(cls, st, ui.round, key);
   const ref = R.by && R.by !== "T" ? (stuMap(R.byCls || cls)[R.by] || {}) : null;
   const tm = R.t ? new Date(R.t).toTimeString().slice(0, 5) : "";
   const mine = ref && stuOK && !canTeach() && R.dev === DEV;
-  return `<div class="refBox ${ref ? "on" : ""}">🧑‍⚖️ <b>심판</b> ${ref ? `${esc(ref.name)}${R.byCls && R.byCls !== cls ? ` (${esc(R.byCls)}반)` : ""}${mine ? " (이 휴대폰)" : ""} <small>Ⓒ 심판 인정${tm ? " · " + tm : ""}</small>` : `<small>아직 없음${canTeach() ? " — 아래에서 골라도 됩니다" : ""}</small>`}
-    ${ref && (canTeach() || mine) ? `<button class="btn ghost" data-act="unclaim" data-g="${key}">심판 바꾸기</button>` : ""}</div>
-    ${canTeach() && !ref ? refPicker(cls, key, members) : ""}`;
+  if (canTeach() && !ref) return `<div class="refBox">🧑‍⚖️ <select class="refOther tRef" data-g="${key}"><option value="">심판 지정</option>${[...members.filter(s => stuMap(cls)[s]), ...roster(cls).map(sidOf).filter(s => !members.includes(s))].map(s => `<option value="${s}">${esc(stuMap(cls)[s].name)}</option>`).join("")}</select></div>`;
+  return `<div class="refBox ${ref ? "on" : ""}">🧑‍⚖️ <b>심판</b> ${ref ? `${esc(ref.name)}${R.byCls && R.byCls !== cls ? ` (${esc(R.byCls)}반)` : ""}${mine ? " 📱" : ""} <small>${tm}</small>` : `<small>없음</small>`}
+    ${ref && (canTeach() || mine) ? `<button class="btn sm ghost" data-act="unclaim" data-g="${key}">바꾸기</button>` : ""}</div>`;
 }
 function rolesBoxOld(cls, st, key, members, ro) {
   const R = rolesAt(cls, st, ui.round, key), sm = stuMap(cls);
@@ -1085,6 +1201,9 @@ function missingBox(cls, st, gs, rr) {
 }
 
 /* ④ 순위·성적 */
+const isPhone = () => matchMedia("(max-width:700px)").matches;
+let lastPhone = isPhone();
+addEventListener("resize", () => { if (isPhone() !== lastPhone) { lastPhone = isPhone(); render(); } });
 function scStand() {
   const cls = ui.cls, list = roster(cls), RC = roleCounts(cls);
   const rows = list.map(st => {
@@ -1094,25 +1213,38 @@ function scStand() {
   });
   if (ui.sort === "score") rows.sort((x, y) => (y.a.sum + y.b.sum) - (x.a.sum + x.b.sum) || numSort(x.st.no, y.st.no));
   const done = rows.filter(r => r.full).length;
-  const cell = r => r ? `<td title="${r.rank}위">${r.pts}</td>` : `<td class="miss">·</td>`;
-  let h = `<div class="row noprint" style="margin-bottom:10px"><h2 style="margin:0">${esc(cls)}반 ${VIEW ? "승점 순위" : "순위·성적"}</h2><span class="sp"></span>
+  const cell = r => r ? `<td class="rcol" title="${r.rank}위">${r.pts}</td>` : `<td class="miss rcol">·</td>`;
+  let h = `<div class="row noprint" style="margin-bottom:10px"><h2 style="margin:0">${esc(cls)}반</h2><span class="sp"></span>
     <div class="seg" style="margin:0"><button class="plain ${ui.sort === "no" ? "on" : ""}" data-act="sort" data-v="no">번호순</button><button class="plain ${ui.sort === "score" ? "on" : ""}" data-act="sort" data-v="score">승점순</button></div></div>`;
-  if (!VIEW) h += `<p class="hint noprint">칸의 숫자는 그 라운드 <b>승점</b>(4명 조 4·3·2·1, 3명 조 4·3·1, 5명 조 4·3·3·2·1). 노란 칸 = 기록 없음. 6라운드 모두 끝난 학생 ${done}/${rows.length}명.
+  if (!VIEW) h += `<p class="hint noprint" hidden>칸의 숫자는 그 라운드 <b>승점</b>(4명 조 4·3·2·1, 3명 조 4·3·1, 5명 조 4·3·3·2·1). 노란 칸 = 기록 없음. 6라운드 모두 끝난 학생 ${done}/${rows.length}명.
     Ⓒ <b>심판</b>은 경기 결과를 입력한 학생에게 자동 인정(연두색, 숫자 = 횟수)되고, 준비·정리와 경기 진행은 선생님이 단추를 눌러 인정합니다(누르면 인정 ↔ 취소).</p>
-    <div class="row noprint" style="margin-bottom:10px"><button class="btn pri" data-act="xlsx">⬇ 엑셀 내려받기 (반별 시트)</button><button class="btn" data-act="print">🖨 인쇄</button></div>`;
+    <div class="row noprint" style="margin-bottom:10px"><button class="btn sm pri" data-act="xlsx">⬇ 엑셀</button><button class="btn sm" data-act="print">🖨 인쇄</button></div>`;
+  if (isPhone()) {
+    h += `<div class="slist">${rows.map(r => {
+      // 선생님: 영역 점수 / 학생: 합산 승점
+      const va = VIEW ? r.a.sum : (r.a.played ? r.a.area : "-"), vb = VIEW ? r.b.sum : (r.b.played ? r.b.area : "-");
+      const ab = `<span class="sa">Ⓐ <b>${va}</b></span><span class="sb">Ⓑ <b>${vb}</b></span>`;
+      const tasks = VIEW ? "" : `<span class="stk">${TASKS.map(([k, l]) => { const n = ((RC[r.s] || {})[k]) || 0, m = ((C(cls).task || {})[r.s] || {})[k], on = taskOn(cls, r.s, k, RC);
+        return `<button class="tk ${on ? (m === 1 ? "on" : "auto") : ""}" data-act="task" data-v="${r.s}" data-k="${k}" title="${l}">${{ p: "준비", j: "진행", s: "심판" }[k]}</button>`; }).join("")}</span>`;
+      if (VIEW) return `<div class="srow"><div class="s1"><span class="sno">${esc(r.st.no)}</span><span class="snm">${esc(r.st.name)}</span>${ab}</div></div>`;
+      return `<div class="srow"><div class="s1"><span class="sno">${esc(r.st.no)}</span><span class="snm">${esc(r.st.name)}</span><b class="sg">${r.grade}<small>점</small>${r.full ? "" : "<i>진행중</i>"}</b></div><div class="s2">${ab}<span class="sp"></span>${tasks}</div></div>`;
+    }).join("")}</div>`;
+    if (!VIEW) h += `<details class="setup" style="margin-top:14px"><summary>📏 채점 기준</summary>${rulesTable()}</details>`;
+    return h;
+  }
   h += `<div class="tblWrap"><table><thead><tr><th rowspan="2">번호</th><th rowspan="2">이름</th>
-    <th class="cu" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓐ 카운트 업</th><th class="x3" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓑ 301 게임</th>
-    ${VIEW ? "" : `<th rowspan="2">Ⓒ 과제수행</th><th rowspan="2">Ⓐ+Ⓑ+Ⓒ</th><th rowspan="2">점수</th>`}</tr><tr>
-    ${["cu", "x3"].map(k => Array.from({ length: CFG.rounds }, (_, i) => `<th class="${k}">${i + 1}R</th>`).join("") + `<th class="${k}">합</th>` + (VIEW ? "" : `<th class="${k}">${STAGES[k].mark}</th>`)).join("")}
+    <th class="cu" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓐ<span class="stx"> 카운트 업</span></th><th class="x3" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓑ<span class="stx"> 301 게임</span></th>
+    ${VIEW ? "" : `<th rowspan="2">Ⓒ</th><th rowspan="2" class="rcol">합</th><th rowspan="2">점수</th>`}</tr><tr>
+    ${["cu", "x3"].map(k => Array.from({ length: CFG.rounds }, (_, i) => `<th class="${k} rcol">${i + 1}R</th>`).join("") + `<th class="${k}">합</th>` + (VIEW ? "" : `<th class="${k}">${STAGES[k].mark}</th>`)).join("")}
     </tr></thead><tbody>${rows.map(r => `<tr>
       <td>${esc(r.st.no)}</td><td class="nm">${esc(r.st.name)}</td>
       ${r.a.rounds.map(cell).join("")}<td class="sum">${r.a.sum}</td>${VIEW ? "" : `<td class="sum">${r.a.played ? r.a.area : "-"}</td>`}
       ${r.b.rounds.map(cell).join("")}<td class="sum">${r.b.sum}</td>${VIEW ? "" : `<td class="sum">${r.b.played ? r.b.area : "-"}</td>`}
       ${VIEW ? "" : `<td>${TASKS.map(([k, l]) => { const n = ((RC[r.s] || {})[k]) || 0, m = ((C(cls).task || {})[r.s] || {})[k], on = taskOn(cls, r.s, k, RC);
-        return `<button class="tk ${on ? (m === 1 ? "on" : "auto") : ""}" data-act="task" data-v="${r.s}" data-k="${k}" title="${n ? "역할 기록 " + n + "회" : ""}${m === 0 ? " · 선생님이 뺌" : ""}">${l}${n ? " " + n : ""}</button>`; }).join("")}</td>
-      <td class="sum">${r.tot}</td><td class="grade">${r.grade}${r.full ? "" : `<span style="font-size:14px;color:var(--warn)"> 진행중</span>`}</td>`}
+        return `<button class="tk ${on ? (m === 1 ? "on" : "auto") : ""}" data-act="task" data-v="${r.s}" data-k="${k}" title="${l}${n ? " " + n + "회" : ""}">${{ p: "준비", j: "진행", s: "심판" }[k]}${n ? " " + n : ""}</button>`; }).join("")}</td>
+      <td class="sum rcol">${r.tot}</td><td class="grade">${r.grade}${r.full ? "" : `<span class="inprog">…</span>`}</td>`}
     </tr>`).join("")}</tbody></table></div>`;
-  if (!VIEW) h += rulesTable();
+  if (!VIEW) h += `<details class="setup" style="margin-top:14px"><summary>📏 채점 기준</summary>${rulesTable()}</details>`;
   return h;
 }
 /* 🏆 학년 전체 카운트 업 순위 — 반을 넘어 같은 학년 모두를 점수로 줄 세운다.
@@ -1258,7 +1390,8 @@ function showBig() {
     ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ ${ui.round}라운드 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기 시작</button></div>` : ""}
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">${isClosed(ui.cls, st, ui.round) ? `🏁 ${ui.round}라운드 경기 종료` : `${STAGES[st].name} ${ui.round}라운드`}<small>다음 경기 조 편성을 기다리는 중</small></div>`}
     <div class="arena" style="grid-template-columns:repeat(${onBoards().length <= 5 ? onBoards().length : Math.ceil(onBoards().length / 2)},1fr)">${onBoards().map(b => { const g = slot[b] || [];
-      return `<div class="bd2 ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}${g.length > 1 ? "<br>⚠ 겹침" : ""}</span>` : `<span class="c" style="color:#7D82B8">비어 있음</span>`}</div>
+      const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), gg = groupsOf(c, st, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, st, r0), g[0].gi) : "none"; })() : "none";
+      return `<div class="bd2 ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}${g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}${g.length > 1 ? "<br>⚠ 겹침" : ""}</span>` : `<span class="c" style="color:#7D82B8">비어 있음</span>`}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
         ${next[b] ? `<div class="nx">다음 ${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
@@ -1349,6 +1482,12 @@ document.addEventListener("click", e => {
     case "nextRound": ui.round = +v; ui.tab = "groups"; ui.sel = null; render(); scrollTo(0, 0); break;
     case "toGroups": ui.tab = "groups"; render(); scrollTo(0, 0); break;
     case "startNext": startNext(cls); break;
+    case "jumpCard": { ui.focus = v || b.dataset.g; render(); const el = $("card-" + ui.focus); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); break; }
+    case "gm": {
+      const [st, r] = v.split("|"); ui.stage = st; ui.round = +r; ui.sel = null; ui.focus = null;
+      if (ui.tab === "groups" && groupsOf(cls, st, +r).length && !isClosed(cls, st, +r)) setLive(cls, st, +r);
+      render(); break;
+    }
     case "wipeGames": case "wipeAll": {
       const all = act === "wipeAll";
       const what = all ? "모든 반의 명렬·조 편성·경기 기록·과제수행" : "모든 반의 조 편성·경기 기록·과제수행·출결 (명렬은 남김)";
@@ -1463,6 +1602,18 @@ document.addEventListener("click", e => {
     case "bcount": put("settings/count", Math.min(20, Math.max(1, boardCount() + +v))); break;
     case "boardsSet": put(P(cls, "boards"), v ? { day: today(), list: v.split(",").map(Number) } : null); break;
     case "closeBig": $("big").classList.remove("show"); break;
+    case "tapRank": {
+      const gk = b.dataset.g, s = b.dataset.s, res = curCard(gk), x = res[s] || {};
+      if (x.r >= 1) {   // 취소 — 뒤 순위를 하나씩 당긴다
+        const was = x.r; delete x.r; delete x.m;
+        Object.values(res).forEach(y => { if (y && y.r > was) y.r--; });
+        if (typeof x.v !== "number") delete res[s]; else res[s] = x;
+      } else {
+        const next = 1 + Math.max(0, ...Object.values(res).map(y => (y && y.r) || 0));
+        res[s] = { ...x, r: next, m: true };
+      }
+      writeCard(gk, res); break;
+    }
     case "rank": {
       const gk = b.dataset.g, s = b.dataset.s, res = curCard(gk), x = res[s] || {};
       if (x.r === +v && x.m) { delete x.r; delete x.m; } else { x.r = +v; x.m = true; }
@@ -1524,7 +1675,8 @@ document.addEventListener("change", e => {
     const [g2, s2] = nextKey.split("|"); const n2 = document.querySelector(`.vin[data-g="${g2}"][data-s="${s2}"]`); if (n2) n2.focus();
   }
 });
-document.addEventListener("toggle", e => { const k = e.target.dataset && e.target.dataset.k; if (k) ui.open[k] = e.target.open; }, true);
+// 접는 칸은 선생님이 직접 열고 닫은 것만 기억한다 (처음 그릴 때 자동으로 열린 것은 기억하지 않음)
+document.addEventListener("click", e => { const sm = e.target.closest("details[data-k] > summary"); if (!sm) return; const d = sm.parentElement; setTimeout(() => { ui.open[d.dataset.k] = d.open; }, 0); });
 document.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.target.classList && e.target.classList.contains("vin")) { e.target.dataset.enter = "1"; e.target.blur(); }
   if (e.key === "Escape") $("big").classList.remove("show");
