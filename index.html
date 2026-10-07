@@ -249,14 +249,24 @@
   #big .bd2 .n{font-family:"Barlow Condensed",sans-serif; font-size:clamp(26px,4.6vh,42px); font-weight:700; color:var(--ink); line-height:1}
   #big .bd2 .n::after{content:"번"; font-family:"Noto Sans KR",sans-serif; font-size:18px; font-weight:700; color:var(--sub); margin-left:2px}
   #big .bd2 .c{font-size:17px; font-weight:700; color:var(--sub)}
-  #big .bd2 .nm{font-size:min(2.3vw,4.4vh,40px); font-weight:700; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  #big .bd2 .nm .sx{font-size:15px; vertical-align:4px}
+  #big .bd2 .nm{flex:none; font-size:var(--nf, 28px); font-weight:700; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  #big .bd2 .nm .sx{font-size:.5em; vertical-align:.35em; padding:1px 5px; border-radius:6px}
   #big .bd2 .nx{margin-top:auto; padding-top:.6vh; border-top:1px dashed var(--line2); font-size:min(1.3vw,2.2vh,17px); font-weight:600; color:var(--sub); line-height:1.4}
   #big .bd2 .ok2{margin-left:auto; width:36px; height:36px; border-radius:50%; background:#2E9E60; color:#fff; font-size:20px; font-weight:800; display:flex; align-items:center; justify-content:center}
   #big .bd2 .ok2.part{background:transparent; border:2px solid var(--gc); color:var(--gc)}
   #big .bd2.done{background:#F2FBF5; border-color:#BFE6CF; border-top-color:#2E9E60}
   #big .bd2.clash{border-color:var(--bad)}
-  @media (max-width:900px){ #big .arena{grid-template-columns:repeat(2,1fr)!important} }
+  /* 휴대폰 세로: 2칸, 칸 높이는 내용대로, 큰 글씨로 스크롤 */
+  @media (orientation:portrait) and (max-width:700px){
+    #big{padding:12px 12px 20px}
+    #big .gName{font-size:26px} #big .gRound{font-size:22px}
+    #big .joinQR{margin-left:0; padding:6px 12px} #big .joinQR b{font-size:28px}
+    #big .arena{flex:none; grid-template-columns:repeat(2,minmax(0,1fr))!important; grid-auto-rows:auto; gap:10px}
+    #big .bd2{padding:10px 12px 12px; border-radius:14px}
+    #big .bd2 .n{font-size:30px}
+    #big .bd2 .nm{font-size:22px; line-height:1.4}
+    #big .bd2 .nx{font-size:15px}
+  }
   #toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:14px 22px; border-radius:14px;
     font-size:18px; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; max-width:90vw; text-align:center; box-shadow:0 10px 30px rgba(28,32,66,.3)}
   #toast.show{opacity:1}
@@ -1516,9 +1526,8 @@ function showBig() {
     });
   });
   const pick = classNames().filter(c => groupsOf(c, st).length || show.includes(c));
-  const joinUrl = location.origin + location.pathname + "?in=1";
   const multi = show.length > 1, running = groupsOf(ui.cls, st).length && liveOf(ui.cls);
-  const qr = teacher && show.some(c => pinOf(c)) ? `<div class="joinQR"><div id="bigQR"></div><div><small>📱 입력 코드</small>${show.map(c => pinOf(c) ? `<div class="pinLine">${multi ? `<span>${esc(c)}반</span>` : ""}<b>${esc(pinOf(c))}</b></div>` : "").join("")}</div></div>` : "";
+  const qr = teacher && show.some(c => pinOf(c)) ? `<div class="joinQR"><div><small>📱 입력 코드</small>${show.map(c => pinOf(c) ? `<div class="pinLine">${multi ? `<span>${esc(c)}반</span>` : ""}<b>${esc(pinOf(c))}</b></div>` : "").join("")}</div></div>` : "";
   const waveBtns = maxW > 1 ? `<span class="waves">${Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("")}</span>` : "";
   const ctl = `<div class="bigCtl">${canTeach() ? `<button class="btn nextBtn" data-act="startNext">▶ ${running ? "다음 경기" : "경기 시작"}</button><button class="iconB ${ui.bigMenu ? "on" : ""}" data-act="bigMenu" aria-label="메뉴">⋯</button>` : ""}<button class="iconB" data-act="closeBig" aria-label="닫기">✕</button></div>`;
   const menu = ui.bigMenu && canTeach() ? `<div class="bigMenu">
@@ -1535,8 +1544,24 @@ function showBig() {
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
         ${next[b] ? `<div class="nx">${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
-  if ($("bigQR")) qrImg(joinUrl, 96).then(src => { if ($("bigQR")) $("bigQR").innerHTML = `<img src="${src}" alt="">`; }).catch(() => {});
+  fitBig();
 }
+/* 다트 칸 크기에 맞춰 이름 글씨 크기를 정한다 — 가장 많은 인원·가장 긴 이름이 넘치지 않게 */
+function fitBig() {
+  const big = $("big"); if (!big || !big.classList.contains("show")) return;
+  const ar = big.querySelector(".arena"), c = ar && ar.querySelector(".bd2"); if (!c) return;
+  if (matchMedia("(orientation:portrait) and (max-width:700px)").matches) { ar.style.removeProperty("--nf"); return; }
+  ar.style.setProperty("--nf", "20px");
+  const cs = getComputedStyle(c), padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const hd = c.querySelector(".hd"), nx = [...ar.querySelectorAll(".nx")].reduce((a, x) => Math.max(a, x.offsetHeight), 0);
+  const cards = [...ar.querySelectorAll(".bd2")];
+  const rows = Math.max(...cards.map(x => x.querySelectorAll(".nm").length), 1);
+  const chars = Math.max(...[...ar.querySelectorAll(".nm")].map(x => (x.firstChild ? x.firstChild.textContent : x.textContent).trim().length), 3) + 1.2;
+  const w = c.clientWidth - padX, hgt = c.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - hd.offsetHeight - nx - 6;
+  const fs = Math.max(16, Math.min(64, w / chars, hgt / (rows * 1.3)));
+  ar.style.setProperty("--nf", Math.floor(fs) + "px");
+}
+addEventListener("resize", () => fitBig());
 
 /* ---------- 동작 ---------- */
 function saveGroups(cls, st, list, method, r = ui.round) {
