@@ -1981,7 +1981,16 @@ function restore(file) {
 render();
 updStatus();
 if (!params.has("local")) initFB();   // ?local=1 — 서버에 올리지 않고 이 기기에서만 시험
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(r => { r.update(); addEventListener("visibilitychange", () => { if (!document.hidden) r.update(); }); }).catch(() => {});
+  // 새 버전이 설치되면 한 번 새로 고친다 — 입력 중이면 화면을 떠날 때까지 기다린다
+  let reloaded = false;
+  const reloadNow = () => { if (reloaded) return; reloaded = true; location.reload(); };
+  if (navigator.serviceWorker.controller) navigator.serviceWorker.addEventListener("controllerchange", () => {
+    const typing = document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+    if (!typing) reloadNow(); else addEventListener("visibilitychange", () => { if (document.hidden) reloadNow(); });
+  });
+}
 </script>
 </body>
 </html>
