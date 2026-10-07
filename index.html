@@ -225,6 +225,21 @@
   #big .nextBtn{background:var(--good)!important; color:#fff!important; border:0!important; font-size:20px!important}
   #big .doneBar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:#1E5A3C; border:2px solid var(--good); color:#fff; border-radius:16px; padding:10px 16px; margin-bottom:12px; font-size:28px; font-weight:700}
   #big .doneBar .btn{margin-left:auto; min-height:60px; font-size:24px!important; padding:0 26px}
+  #big .bigTop h2{display:flex; align-items:center; gap:10px; font-size:36px}
+  #big .bigTop h2 b{font-family:"Barlow Condensed",sans-serif; font-size:44px; color:#FFC876}
+  #big .bigTop h2 .mk{width:48px; height:48px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:28px}
+  #big .bigTop h2 .mk.cu{background:var(--cu); color:var(--cuInk)} #big .bigTop h2 .mk.x3{background:var(--x3); color:var(--x3Ink)}
+  #big .bigCtl{margin-left:auto; display:flex; align-items:center; gap:10px}
+  #big .bigCtl .nextBtn{min-height:58px; font-size:22px!important; padding:0 24px}
+  #big .iconB{width:58px; height:58px; padding:0; border-radius:50%!important; font-size:26px!important; line-height:1}
+  #big .iconB.on{background:#3A3F78!important; color:#fff!important}
+  #big .waves{display:flex; gap:6px}
+  #big .bigMenu{display:flex; flex-wrap:wrap; align-items:center; gap:8px; background:#1A1F45; border:1px solid #2C326A; border-radius:16px; padding:10px 12px; margin:0 0 12px}
+  #big .bigMenu i{width:1px; height:30px; background:#3A3F78; margin:0 4px}
+  #big .bigMenu button{min-height:50px; border-radius:999px; border:1px solid #3A3F78; background:transparent; color:#C9C5FF; font-size:18px; font-weight:700; padding:0 16px}
+  #big .bigMenu button.on{background:var(--pri2); border-color:var(--pri2); color:#fff}
+  #big .bd2.empty{opacity:.22}
+  #big .bd2 .hd .ok2{margin-left:auto}
   #big .waitMsg{text-align:center; font-size:40px; font-weight:700; color:#fff; padding:18px 0 10px} #big .waitMsg small{display:block; font-size:22px; color:#C9C5FF; font-weight:600; margin-top:6px}
   #big .bd2[data-act]{cursor:pointer}
   #big .bd2[data-act]:hover{border-color:var(--pri2)}
@@ -1380,20 +1395,23 @@ function showBig() {
   });
   const pick = classNames().filter(c => groupsOf(c, st).length || show.includes(c));
   const joinUrl = location.origin + location.pathname + "?in=1";
-  $("big").innerHTML = `<div class="bigTop">${teacher && show.some(c => pinOf(c)) ? `<div class="joinQR"><div id="bigQR"></div><div><small>📱 결과 입력 코드</small>${show.map(c => pinOf(c) ? `<div class="pinLine">${show.length > 1 ? `<span>${esc(c)}반</span>` : ""}<b>${esc(pinOf(c))}</b></div>` : "").join("")}</div></div>` : ""}<h2>🎯 ${STAGES[st].name} ${ui.round}라운드${maxW > 1 ? ` · ${wv}차` : ""}</h2>
-    ${Object.entries(STAGES).map(([k, s]) => `<button class="${st === k ? "on" : ""}" data-act="bigStage" data-v="${k}">${s.mark} ${s.name}</button>`).join("")}
-    <span style="width:12px"></span>${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}
-    ${maxW > 1 ? `<span style="width:12px"></span>` + Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("") : ""}
-    <span style="width:12px"></span>${pick.map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}
-    <button class="btn close" data-act="closeBig">닫기</button><button class="btn" style="background:var(--cu);color:var(--cuInk);border:0" data-act="bigEntry">✏️ 결과 입력</button>
-    ${canTeach() ? `<button class="btn nextBtn" data-act="startNext">▶ ${groupsOf(ui.cls, st).length && liveOf(ui.cls) ? "다음 경기 시작" : "경기 시작"}</button>` : ""}</div>
-    ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ ${ui.round}라운드 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기 시작</button></div>` : ""}
-    ${Object.keys(slot).length ? "" : `<div class="waitMsg">${isClosed(ui.cls, st, ui.round) ? `🏁 ${ui.round}라운드 경기 종료` : `${STAGES[st].name} ${ui.round}라운드`}<small>다음 경기 조 편성을 기다리는 중</small></div>`}
+  const multi = show.length > 1, running = groupsOf(ui.cls, st).length && liveOf(ui.cls);
+  const qr = teacher && show.some(c => pinOf(c)) ? `<div class="joinQR"><div id="bigQR"></div><div><small>📱 입력 코드</small>${show.map(c => pinOf(c) ? `<div class="pinLine">${multi ? `<span>${esc(c)}반</span>` : ""}<b>${esc(pinOf(c))}</b></div>` : "").join("")}</div></div>` : "";
+  const waveBtns = maxW > 1 ? `<span class="waves">${Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("")}</span>` : "";
+  const ctl = `<div class="bigCtl">${canTeach() ? `<button class="btn nextBtn" data-act="startNext">▶ ${running ? "다음 경기" : "경기 시작"}</button><button class="iconB ${ui.bigMenu ? "on" : ""}" data-act="bigMenu" aria-label="메뉴">⋯</button>` : ""}<button class="iconB" data-act="closeBig" aria-label="닫기">✕</button></div>`;
+  const menu = ui.bigMenu && canTeach() ? `<div class="bigMenu">
+      ${Object.entries(STAGES).map(([k, s]) => `<button class="${st === k ? "on" : ""}" data-act="bigStage" data-v="${k}">${s.mark} ${s.name}</button>`).join("")}
+      <i></i>${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}
+      <i></i>${pick.map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}
+      <i></i><button data-act="bigEntry">✏️ 결과 입력</button></div>` : "";
+  $("big").innerHTML = `<div class="bigTop">${qr}<h2><span class="mk ${st}">${STAGES[st].mark}</span>${STAGES[st].name} <b>${ui.round}R</b></h2>${waveBtns}${ctl}</div>${menu}
+    ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기</button></div>` : ""}
+    ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
     <div class="arena" style="grid-template-columns:repeat(${onBoards().length <= 5 ? onBoards().length : Math.ceil(onBoards().length / 2)},1fr)">${onBoards().map(b => { const g = slot[b] || [];
       const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), gg = groupsOf(c, st, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, st, r0), g[0].gi) : "none"; })() : "none";
-      return `<div class="bd2 ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}${g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}${g.length > 1 ? "<br>⚠ 겹침" : ""}</span>` : `<span class="c" style="color:#7D82B8">비어 있음</span>`}</div>
+      return `<div class="bd2 ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${multi && g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}</span>` : ""}${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
-        ${next[b] ? `<div class="nx">다음 ${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
+        ${next[b] ? `<div class="nx">${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
   if ($("bigQR")) qrImg(joinUrl, 96).then(src => { if ($("bigQR")) $("bigQR").innerHTML = `<img src="${src}" width="96" height="96" alt="">`; }).catch(() => {});
 }
@@ -1557,6 +1575,7 @@ document.addEventListener("click", e => {
     }
     case "addGrp": { const list = groupsOf(cls, ui.stage); list.push({ m: [], tag: "" }); saveGroups(cls, ui.stage, list); break; }
     case "big": openBig(cls); break;
+    case "bigMenu": ui.bigMenu = !ui.bigMenu; showBig(); break;
     case "bigWave": ui.wave = +v; showBig(); break;
     case "bigCls": { const s = new Set(ui.bigCls || []); s.has(v) ? s.delete(v) : s.add(v); if (!s.size) s.add(cls); ui.bigCls = [...s]; saveUI(); showBig(); break; }
     case "bigStage": ui.stage = v; ui.round = openRound(cls, v); render(); showBig(); break;
