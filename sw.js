@@ -1,7 +1,7 @@
 /* 스포츠다트 리그 — 홈 화면 설치용 서비스 워커.
    앱 화면은 '새것 먼저(네트워크 우선)'로 받고, 끊겼을 때만 보관본을 보여 준다.
    Firebase 실시간 통신은 건드리지 않는다 — 기록은 항상 최신이어야 한다. */
-const CACHE = "darts-shell-v25";
+const CACHE = "darts-shell-v26";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
