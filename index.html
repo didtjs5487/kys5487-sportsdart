@@ -258,9 +258,21 @@
   #big .bd2.clash{border-color:var(--bad)}
   /* 휴대폰 세로: 2칸, 칸 높이는 내용대로, 큰 글씨로 스크롤 */
   @media (orientation:portrait) and (max-width:700px){
-    #big{padding:12px 12px 20px}
+    #big{padding:calc(10px + env(safe-area-inset-top)) 12px calc(20px + env(safe-area-inset-bottom))}
+    #big .bigTop{gap:10px; margin-bottom:10px}
+    #big .gTitle{flex:1 1 100%; flex-wrap:wrap; gap:8px 12px}
     #big .gName{font-size:26px} #big .gRound{font-size:22px}
-    #big .joinQR{margin-left:0; padding:6px 12px} #big .joinQR b{font-size:28px}
+    /* 순서: 제목 → [▶][⋯][✕] → 입력 코드 한 줄 */
+    #big .bigCtl{order:2; flex:1 1 100%; margin-left:0}
+    #big .bigCtl .nextBtn{flex:1; min-height:52px; font-size:19px}
+    #big .joinQR{order:3; flex:1 1 100%; margin-left:0; padding:8px 14px}
+    #big .joinQR > div{display:flex; flex-wrap:wrap; align-items:baseline; gap:2px 18px}
+    #big .joinQR small{flex:1 1 100%; font-size:15px}
+    #big .joinQR .pinLine span{font-size:17px} #big .joinQR b{font-size:30px}
+    #big .bigMenu{gap:8px; padding:10px; margin:0 0 12px}
+    #big .bigMenu i{display:none}
+    #big .bigMenu button{min-height:46px; font-size:17px; padding:0 14px}
+    #big .waitMsg{font-size:24px; padding:40px 0}
     #big .arena{flex:none; grid-template-columns:repeat(2,minmax(0,1fr))!important; grid-auto-rows:auto; gap:10px}
     #big .bd2{padding:10px 12px 12px; border-radius:14px}
     #big .bd2 .n{font-size:30px}
