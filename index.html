@@ -1866,7 +1866,10 @@ document.addEventListener("click", e => {
       if (!confirm(`${cls}반 ${nm}를 리셋할까요?
 
 이 라운드의 조 편성과 입력한 결과가 지워집니다. 다른 라운드는 그대로입니다.`)) break;
-      ["groups", "games", "roles", "closed", "absr"].forEach(k => put(P(cls, k, st, "r" + r), null, true));
+      ["games", "roles", "closed", "absr"].forEach(k => put(P(cls, k, st, "r" + r), null, true));
+      // 옛 형식(라운드 구분 전, 예전 앱이 저장)은 1라운드로 읽히므로 통째로 지운다
+      const all = ((C(cls).groups || {})[st]) || {};
+      if (all.list) { if (r === 1) put(P(cls, "groups", st), null, true); } else put(P(cls, "groups", st, "r" + r), null, true);
       ui.sel = null; ui.focus = null; ui.gOpen = []; toast(`${nm}를 리셋했습니다`); render(); break;
     }
     case "resetGroups":
