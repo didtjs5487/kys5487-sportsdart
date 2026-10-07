@@ -237,6 +237,12 @@
   #big .bigMenu{display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) auto; align-items:center; gap:10px; background:#fff; border:1px solid var(--line); border-radius:16px; padding:10px; margin:-4px 0 14px; max-width:820px}
   #big .bigMenu .segc button{min-height:48px; font-size:18px}
   #big .bmEntry{min-height:56px; border-radius:12px; border:1px solid var(--line2); background:#fff; color:var(--pri); font-size:18px; font-weight:800; padding:0 16px; white-space:nowrap}
+  #big .bmCls{grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding-top:8px; border-top:1px solid var(--line)}
+  #big .bmCls b{font-size:17px; color:var(--sub); margin-right:4px}
+  #big .bmCls .plus{font-style:normal; font-size:22px; font-weight:800; color:var(--sub)}
+  #big .bmCls button{min-height:48px; min-width:84px; border-radius:999px; border:1px solid var(--line2); background:#fff; color:var(--sub); font-size:18px; font-weight:800; padding:0 16px}
+  #big .bmCls button.on{background:var(--pri); border-color:var(--pri); color:#fff}
+  #big .bmCls button:disabled{opacity:1; background:var(--ink); border-color:var(--ink)}
   #big .gCls{font-size:clamp(18px,1.8vw,26px); font-weight:800; color:var(--pri); background:var(--priSoft); border-radius:999px; padding:4px 14px}
   #big .doneBar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:#E3F6EB; border:1px solid #BFE6CF; color:#1E6B42; border-radius:14px; padding:8px 14px; margin-bottom:14px; font-size:24px; font-weight:800}
   #big .doneBar .nextBtn{margin-left:auto}
@@ -1518,19 +1524,21 @@ async function drawQR() {
 /* 크게 보기 (프로젝터) */
 /* 화면 띄우기 — 지난번 함께 띄운 반(같은 시간 수업)이 있으면 같이 띄운다 */
 function openBig(cls) {
-  const prev = ui.bigDay === today() ? (ui.bigCls || []).filter(c => c !== cls && S.rosters[c] && liveOf(c)) : [];
+  const prev = ui.bigDay === today() ? (ui.bigCls || []).filter(c => c !== cls && S.rosters[c] && halfOf(c) !== halfOf(cls)).slice(0, 1) : [];
   ui.bigCls = [cls, ...prev]; ui.bigDay = today(); ui.wave = 1; saveUI();
   setLive(cls, ui.stage, ui.round);
   showBig();
 }
 /* 10대 경기장 전체를 한 화면에 — 같이 수업하는 반을 골라 함께 띄운다 */
-// 같은 시간에 수업하는 반 = 오늘 지난 1시간 안에 라운드를 시작한 반
-const nowLive = c => { const L = liveOf(c); return !!L && (!L.t || Date.now() - L.t < 60 * 60e3); };
+/* 2026-10-07: 1~6반은 정우철, 7~10반은 김양선 선생님 — 같이 수업하는 건 늘 정우철 반 하나 + 김양선 반 하나 */
+const HALF_T = ["정우철", "김양선"], HALF_FROM = 7;   // 7반부터 김양선
+const halfOf = c => { const m = String(c).match(/(\d+)\D*$/); return m && +m[1] >= HALF_FROM ? 1 : 0; };
+const partnerCls = cls => classNames().filter(c => halfOf(c) !== halfOf(cls));
+const bigPair = () => ui.bigDay === today() ? (ui.bigCls || []).filter(c => c !== ui.cls && S.rosters[c] && halfOf(c) !== halfOf(ui.cls)).slice(0, 1) : [];
 function showBig() {
-  const st = ui.stage, show = [ui.cls, ...classNames().filter(c => c !== ui.cls && S.rosters[c] && nowLive(c))];
-  ui.bigCls = show;
+  const st = ui.stage, show = [ui.cls, ...bigPair()];
   // 함께 띄운 다른 반은 그 반의 진행 중 라운드를 보여 준다
-  const rOf = c => { if (c === ui.cls) return ui.round; const L = liveOf(c); return L && L.st === st ? L.r : 0; };
+  const rOf = c => { if (c === ui.cls) return ui.round; const L = liveOf(c); return L && L.st === st ? L.r : groupsOf(c, st, ui.round).length ? ui.round : 0; };
   const gOf = c => rOf(c) ? groupsOf(c, st, rOf(c)) : [];
   const maxW = Math.max(1, ...show.map(c => Math.ceil((gOf(c).length || 1) / boardsOf(c).length)));
   if (!(ui.wave >= 1 && ui.wave <= maxW)) ui.wave = 1;
@@ -1551,7 +1559,8 @@ function showBig() {
   const menu = ui.bigMenu && canTeach() ? `<div class="bigMenu">
       <div class="segc">${Object.entries(STAGES).map(([k, s]) => `<button class="${st === k ? "on" : ""}" data-act="bigStage" data-v="${k}">${k === "cu" ? "카운트업" : "301"}</button>`).join("")}</div>
       <div class="segc">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}</div>
-      <button class="bmEntry" data-act="bigEntry">✏️ 결과 입력</button></div>` : "";
+      <button class="bmEntry" data-act="bigEntry">✏️ 결과 입력</button>
+      <div class="bmCls"><b>학급</b><button class="on" disabled>${esc(ui.cls)}반</button><i class="plus">+</i>${partnerCls(ui.cls).map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div></div>` : "";
   $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle"><span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b>라운드</span>${multi ? `<span class="gCls">${show.map(esc).join(" · ")}반</span>` : ""}${waveBtns}</div>${qr}${ctl}</div>${menu}
     ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기</button></div>` : ""}
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
@@ -1756,6 +1765,7 @@ document.addEventListener("click", e => {
     }
     case "addGrp": { const list = groupsOf(cls, ui.stage); list.push({ m: [], tag: "" }); saveGroups(cls, ui.stage, list); break; }
     case "big": openBig(cls); break;
+    case "bigCls": { const on = bigPair().includes(v); ui.bigCls = on ? [cls] : [cls, v]; ui.bigDay = today(); saveUI(); showBig(); break; }
     case "bigMenu": ui.bigMenu = !ui.bigMenu; showBig(); break;
     case "bigWave": ui.wave = +v; showBig(); break;
     case "bigStage": ui.stage = v; ui.round = openRound(cls, v); render(); showBig(); break;
