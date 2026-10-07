@@ -551,14 +551,16 @@ const canTeach = () => (!!TEST && !STU_DEMO) || (fbFailed && !STU_DEMO) || !!tea
 const canEnter = () => canTeach() || stuOK;
 const stuPath = p => /^classes\/[^/]+\/(games|roles)\/[^/]+\/r\d+\/[^/]+$/.test(p);
 const GRP = params.get("grp");                   // 조 입력 전용 링크 (?cls=1-3&grp=2)
-const ui = Object.assign({ tab: "groups", cls: "", stage: "cu", round: 1, sel: null, method: { cu: "seed", x3: "grank" }, split: false, sort: "no", gsort: "best" }, lsGet(LSU) || {});
+const ui = Object.assign({ tab: "groups", cls: "", stage: "cu", round: 1, sel: null, method: { cu: "random", x3: "random" }, split: false, sort: "no", gsort: "best" }, lsGet(LSU) || {});
 ui.sel = null; ui.open = {};   // 접는 칸(오늘 빠지는 학생·편성 설정)을 열어 둔 채로 고를 수 있게
 if (params.get("cls")) ui.cls = params.get("cls");
 if (params.has("in")) ui.tab = "entry";            // 프로젝터 QR로 들어온 학생은 바로 결과 입력
 const PIN_BOARD = +params.get("board") || 0;   // 다트기에 붙인 QR로 들어온 경우 그 다트로 고정
 if (PIN_BOARD) ui.board = PIN_BOARD;
 if (GRP != null) ui.tab = "entry";
-const saveUI = () => lsSet(LSU, { tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gsort: ui.gsort, bigCls: ui.bigCls, bigDay: ui.bigDay, fit: ui.fit, board: ui.board, boardKey: ui.boardKey });
+// 편성 기본은 랜덤 (2026-10-07) — 예전에 저장된 기기도 한 번 랜덤으로 맞춘다
+if (ui.mver !== 2) { ui.method = { cu: "random", x3: "random" }; ui.mver = 2; }
+const saveUI = () => lsSet(LSU, { mver: ui.mver, tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gsort: ui.gsort, bigCls: ui.bigCls, bigDay: ui.bigDay, fit: ui.fit, board: ui.board, boardKey: ui.boardKey });
 
 function getAt(o, path) { for (const k of path.split("/")) { if (o == null) return undefined; o = o[k]; } return o; }
 function setAt(o, path, v) {
@@ -796,7 +798,7 @@ const groupsOf = (cls, stage, r = ui.round) => ((grpRec(cls, stage, r) || {}).li
 /* 지금 진행 중인 라운드 — 선생님이 조를 짜거나 프로젝터에 띄운 라운드. 학생 입력은 이 라운드로 고정된다(오입력 방지) */
 const liveOf = cls => { const L = C(cls).live; return L && L.day === today() ? L : null; };
 /* 경기마다 기본 편성 방법 — 조 편성 화면에서 마지막으로 고른 방법을 쓴다 */
-const METHOD_OPTS = { cu: ["seed", "random", "no"], x3: ["grank", "rank", "seed", "random"] };
+const METHOD_OPTS = { cu: ["random", "seed", "no"], x3: ["random", "grank", "rank", "seed"] };
 const methodFor = st => METHOD_OPTS[st].includes(ui.method[st]) ? ui.method[st] : METHOD_OPTS[st][0];
 /* 지금 진행 중(또는 막 시작할) 경기 — 진행 중 라운드가 있으면 그것, 없으면 아직 안 끝난 첫 라운드 */
 function curGame(cls) {
@@ -1061,7 +1063,7 @@ function scGroups() {
   if (!VIEW && gs.length) h += `<div class="acts2 noprint"><button class="btn big nextBig" data-act="startNext">▶ 다음 경기</button><button class="btn big soft" data-act="big" aria-label="프로젝터 화면">📺</button></div>`;
   if (!VIEW) h += absPicker(cls, !gs.length);
   if (!VIEW) {
-    const opts = st === "cu" ? ["seed", "random", "no"] : ["grank", "rank", "seed", "random"];
+    const opts = METHOD_OPTS[st];
     if (!opts.includes(ui.method[st])) ui.method[st] = opts[0];
     const n0 = roster(cls).filter(s => !isAbs(cls, sidOf(s))).length, sz0 = sizes(n0, CFG.size, boardsOf(cls).length, fitOn());
     h += `<details class="setup noprint" data-k="setup" ${ui.open.setup ? "open" : ""}><summary>⚙ 편성 설정</summary>
