@@ -211,51 +211,53 @@
   .tk.auto{background:var(--goodSoft); border-color:#BFE6CF; color:var(--good)}
 
   /* 프로젝터 크게 보기 — 타바타 무대처럼 어두운 남색 */
-  #big{position:fixed; inset:0; background:#141833; color:#fff; z-index:50; overflow:auto; padding:20px 16px; display:none}
+
+  /* ── 프로젝터 (2026-10-07 다시 디자인) — 게임 색 띠: 카운트 업 = 주황, 301 = 청록 ── */
+  #big{position:fixed; inset:0; z-index:50; overflow:auto; display:none; background:#11152E; color:#fff; padding:16px 18px 20px}
   #big.show{display:block}
-  #big h2{font-size:34px; margin:0 0 16px; display:flex; align-items:center; gap:12px; color:#fff}
-  #big .close{margin-left:auto; background:#fff; color:var(--ink); box-shadow:none}
-  #big .bigTop{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px}
-  #big .bigTop h2{margin:0; font-size:34px}
-  #big .bigTop button{min-height:50px; border-radius:999px; border:1px solid #3A3F78; background:transparent; color:#C9C5FF; font-size:18px; font-weight:700; padding:0 16px}
-  #big .bigTop button.on{background:var(--pri2); border-color:var(--pri2); color:#fff}
-  #big .arena{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; min-height:calc(100vh - 130px); grid-auto-rows:1fr}
-  #big .bd2{background:#1F2450; border-radius:18px; padding:14px 16px; display:flex; flex-direction:column; min-width:0; border:2px solid #2C326A}
-  #big .bd2.empty{opacity:.35}
-  #big .nextBtn{background:var(--good)!important; color:#fff!important; border:0!important; font-size:20px!important}
-  #big .doneBar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:#1E5A3C; border:2px solid var(--good); color:#fff; border-radius:16px; padding:10px 16px; margin-bottom:12px; font-size:28px; font-weight:700}
-  #big .doneBar .btn{margin-left:auto; min-height:60px; font-size:24px!important; padding:0 26px}
-  #big .bigTop h2{display:flex; align-items:center; gap:10px; font-size:36px}
-  #big .bigTop h2 b{font-family:"Barlow Condensed",sans-serif; font-size:44px; color:#FFC876}
-  #big .bigTop h2 .mk{width:48px; height:48px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:28px}
-  #big .bigTop h2 .mk.cu{background:var(--cu); color:var(--cuInk)} #big .bigTop h2 .mk.x3{background:var(--x3); color:var(--x3Ink)}
-  #big .bigCtl{margin-left:auto; display:flex; align-items:center; gap:10px}
-  #big .bigCtl .nextBtn{min-height:58px; font-size:22px!important; padding:0 24px}
-  #big .iconB{width:58px; height:58px; padding:0; border-radius:50%!important; font-size:26px!important; line-height:1}
-  #big .iconB.on{background:#3A3F78!important; color:#fff!important}
+  #big .bigTop{display:flex; align-items:center; gap:16px; flex-wrap:wrap; border-radius:22px; padding:14px 16px 14px 28px; margin-bottom:14px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  #big .bigTop.g-cu{background:linear-gradient(120deg,#FF9F1C,#FFC15E); color:#4A2800}
+  #big .bigTop.g-x3{background:linear-gradient(120deg,#20B2A5,#52DACC); color:#063B36}
+  #big .gTitle{display:flex; align-items:center; gap:18px; min-width:0}
+  #big .gName{font-size:clamp(40px,4.2vw,64px); font-weight:800; letter-spacing:-1px; line-height:1; white-space:nowrap}
+  #big .gRound{display:inline-flex; align-items:baseline; gap:4px; background:#fff; color:#2B3160; border-radius:999px; padding:4px 22px 8px; box-shadow:0 4px 10px rgba(0,0,0,.15)}
+  #big .gRound b{font-family:"Barlow Condensed",sans-serif; font-size:52px; line-height:1}
+  #big .gRound small{font-size:22px; font-weight:800}
   #big .waves{display:flex; gap:6px}
-  #big .bigMenu{display:flex; flex-wrap:wrap; align-items:center; gap:8px; background:#1A1F45; border:1px solid #2C326A; border-radius:16px; padding:10px 12px; margin:0 0 12px}
+  #big .waves button{min-height:52px; padding:0 18px; border-radius:999px; border:2px solid rgba(255,255,255,.7); background:rgba(255,255,255,.25); color:inherit; font-size:20px; font-weight:800}
+  #big .waves button.on{background:#fff; color:#2B3160}
+  #big .joinQR{margin-left:auto; display:flex; align-items:center; gap:12px; background:#fff; color:#2B3160; border-radius:16px; padding:8px 18px 8px 8px; box-shadow:0 4px 10px rgba(0,0,0,.15)}
+  #big .joinQR small{display:block; font-size:16px; font-weight:800; color:#5E6493}
+  #big .joinQR b{font-family:"Barlow Condensed",sans-serif; font-size:46px; letter-spacing:5px; color:#5B51E8; line-height:1}
+  #big .joinQR .pinLine{display:flex; align-items:baseline; gap:8px} #big .joinQR .pinLine span{font-size:18px; font-weight:800}
+  #big .bigCtl{display:flex; align-items:center; gap:10px; margin-left:auto}
+  #big .joinQR + .bigCtl{margin-left:0}
+  #big .nextBtn{min-height:60px; font-size:22px; padding:0 26px; border-radius:16px; background:#2E9E60; color:#fff; border:0; font-weight:800; box-shadow:0 6px 14px rgba(0,0,0,.25)}
+  #big .iconB{width:58px; height:58px; padding:0; border-radius:50%; border:0; background:rgba(255,255,255,.4); color:inherit; font-size:28px; font-weight:800; line-height:1}
+  #big .iconB.on{background:#fff; color:#2B3160}
+  #big .bigMenu{display:flex; flex-wrap:wrap; align-items:center; gap:8px; background:#1D2247; border:1px solid #2C326A; border-radius:16px; padding:10px 12px; margin:0 0 12px}
   #big .bigMenu i{width:1px; height:30px; background:#3A3F78; margin:0 4px}
   #big .bigMenu button{min-height:50px; border-radius:999px; border:1px solid #3A3F78; background:transparent; color:#C9C5FF; font-size:18px; font-weight:700; padding:0 16px}
-  #big .bigMenu button.on{background:var(--pri2); border-color:var(--pri2); color:#fff}
-  #big .bd2.empty{opacity:.22}
-  #big .bd2 .hd .ok2{margin-left:auto}
-  #big .waitMsg{text-align:center; font-size:40px; font-weight:700; color:#fff; padding:18px 0 10px} #big .waitMsg small{display:block; font-size:22px; color:#C9C5FF; font-weight:600; margin-top:6px}
-  #big .bd2[data-act]{cursor:pointer}
-  #big .bd2[data-act]:hover{border-color:var(--pri2)}
-  #big .bd2.clash{border-color:var(--bad)}
-  #big .bd2 .hd{display:flex; align-items:center; gap:10px; margin-bottom:8px}
-  #big .bd2 .n{width:60px; height:60px; border-radius:50%; background:var(--pri); color:#fff; font-size:36px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none}
-  #big .bd2 .c{font-size:20px; font-weight:700; color:var(--cu); line-height:1.2}
-  #big .bd2 .nm{font-size:clamp(22px,2.3vw,36px); font-weight:700; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  #big .bd2 .nm .sx{font-size:16px; vertical-align:4px}
+  #big .bigMenu button.on{background:#8B80F9; border-color:#8B80F9; color:#fff}
+  #big .doneBar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:#173F35; border:2px solid #2E9E60; color:#fff; border-radius:18px; padding:10px 18px; margin-bottom:14px; font-size:30px; font-weight:800}
+  #big .doneBar .nextBtn{margin-left:auto; min-height:62px; font-size:24px}
+  #big .waitMsg{text-align:center; font-size:40px; font-weight:800; color:#C9C5FF; padding:16px 0 12px}
+  #big .arena{display:grid; gap:14px; grid-auto-rows:1fr; min-height:calc(100vh - 150px)}
+  #big .bd2{--gc:#8B80F9; position:relative; background:#1D2247; border-radius:20px; padding:14px 18px 16px; display:flex; flex-direction:column; min-width:0; border:2px solid #2A3068; border-top:10px solid var(--gc)}
+  #big .bd2.g-cu{--gc:#FF9F1C} #big .bd2.g-x3{--gc:#2EC4B6}
+  #big .bd2[data-act]{cursor:pointer} #big .bd2[data-act]:hover{border-color:#8B80F9; border-top-color:var(--gc)}
+  #big .bd2 .hd{display:flex; align-items:center; gap:10px; margin-bottom:10px}
+  #big .bd2 .n{width:66px; height:66px; border-radius:18px; background:var(--gc); color:#11152E; font-family:"Barlow Condensed",sans-serif; font-size:44px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none}
+  #big .bd2 .c{font-size:20px; font-weight:800; color:#FFC876; line-height:1.2}
+  #big .bd2 .nm{font-size:clamp(24px,2.4vw,38px); font-weight:700; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  #big .bd2 .nm .sx{font-size:16px; vertical-align:5px}
   #big .bd2 .nx{margin-top:auto; padding-top:8px; border-top:1px dashed #3A3F78; font-size:18px; font-weight:600; color:#FFC876; line-height:1.4}
-  #big .joinQR{display:flex; align-items:center; gap:12px; background:#fff; color:var(--ink); border-radius:14px; padding:6px 14px 6px 6px}
-  #big .joinQR b{font-size:36px; letter-spacing:4px; color:var(--pri)}
-  #big .joinQR .pinLine{display:flex; align-items:baseline; gap:8px; line-height:1.1} #big .joinQR .pinLine span{font-size:18px; font-weight:700; color:var(--ink)}
-  #big .joinQR small{display:block; font-size:15px; font-weight:700; color:var(--sub)}
-  @media (max-width:900px){ #big .arena{grid-template-columns:repeat(2,1fr)!important; min-height:0} }
-
+  #big .bd2 .ok2{margin-left:auto; width:46px; height:46px; border-radius:50%; background:#2E9E60; color:#fff; font-size:28px; font-weight:800; display:flex; align-items:center; justify-content:center}
+  #big .bd2 .ok2.part{background:transparent; border:3px solid var(--gc); color:var(--gc)}
+  #big .bd2.done{background:#173F35; border-color:#2E9E60; border-top-color:#2E9E60}
+  #big .bd2.empty{opacity:.16} #big .bd2.empty .n{background:#3A3F78; color:#fff}
+  #big .bd2.clash{border-color:#E5485A}
+  @media (max-width:900px){ #big .arena{grid-template-columns:repeat(2,1fr)!important; min-height:0} #big .bigTop{padding-left:18px} }
   #toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:14px 22px; border-radius:14px;
     font-size:18px; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; max-width:90vw; text-align:center; box-shadow:0 10px 30px rgba(28,32,66,.3)}
   #toast.show{opacity:1}
@@ -292,9 +294,6 @@
   .ds i{font-style:normal; font-size:15px; font-weight:800}
   .ds.part{border-style:solid; border-color:var(--pri); color:var(--pri); background:var(--priSoft)}
   .ds.done{border-style:solid; border-color:var(--good); background:var(--good); color:#fff}
-  #big .bd2.done{border-color:var(--good); background:#1E3F46}
-  #big .bd2 .ok2{margin-left:auto; width:40px; height:40px; border-radius:50%; background:var(--good); color:#fff; font-size:24px; font-weight:800; display:flex; align-items:center; justify-content:center}
-  #big .bd2 .ok2.part{background:transparent; border:2px solid var(--pri2); color:var(--pri2)}
   .slist{display:flex; flex-direction:column; gap:6px}
   .srow{background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:6px 10px 8px}
   .s1{display:flex; align-items:center; gap:8px}
@@ -307,6 +306,68 @@
   .sg{text-align:right; font-family:"Barlow Condensed",sans-serif; font-size:28px; color:var(--pri)} .sg small{font-size:15px; margin-left:1px} .sg i{display:block; font-size:12px; color:var(--warn); font-style:normal; font-family:"Noto Sans KR",sans-serif; text-align:right; margin-top:-4px}
   .s2{display:flex; align-items:center; gap:10px; margin-top:4px}
   .stk{display:flex; gap:5px} .stk .tk{min-height:40px; padding:0 10px; margin:0}
+  details.gPick{margin-bottom:12px}
+  details.gPick > summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:10px; min-height:60px; padding:0 14px; border-radius:16px; background:var(--panel); border:1px solid var(--line); box-shadow:var(--shadow); font-size:19px}
+  details.gPick > summary::-webkit-details-marker{display:none}
+  details.gPick[open] > summary{margin-bottom:8px}
+  .gchip{border-radius:999px; padding:6px 14px; font-size:18px; font-weight:800; white-space:nowrap}
+  details.gPick > summary b, details.gPick > summary small{white-space:nowrap}
+  details.gPick .chev{font-size:20px}
+  .gchip.cu{background:var(--cu); color:var(--cuInk)} .gchip.x3{background:var(--x3); color:var(--x3Ink)}
+  details.gPick small{font-size:15px; font-weight:700; color:var(--sub)} details.gPick small.live{color:var(--good)}
+  .chev{font-size:15px; font-weight:700; color:var(--pri); white-space:nowrap}
+  .acts2{display:grid; grid-template-columns:1fr 76px; gap:8px; margin-bottom:12px}
+  .acts2 .btn{min-height:62px; font-size:21px}
+  .glist, .clist{display:flex; flex-direction:column; gap:8px}
+  .growW{display:flex; gap:6px}
+  .grow, .crow{flex:1; min-width:0; display:flex; align-items:center; gap:10px; min-height:58px; border-radius:14px; border:1px solid var(--line); background:var(--panel); padding:0 12px; text-align:left; color:var(--ink); box-shadow:0 2px 8px rgba(91,81,232,.06)}
+  .gno{flex:none; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:"Barlow Condensed",sans-serif; font-size:24px; font-weight:700}
+  .gno.cu{background:var(--cu); color:var(--cuInk)} .gno.x3{background:var(--x3); color:var(--x3Ink)}
+  .gnames{flex:1; min-width:0; font-size:17px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .grow small, .ghd small{font-size:14px; font-weight:700; color:var(--sub)}
+  .moveTo2{flex:none; background:var(--pri); color:#fff; box-shadow:none}
+  .ghd{width:100%; display:flex; align-items:center; gap:10px; border:0; background:transparent; padding:0 0 8px}
+  .crow .gnames .who{font-size:17px} .crow .gnames small{margin-left:8px; font-size:15px; color:var(--sub); font-family:"Barlow Condensed",sans-serif; font-size:18px}
+  .crow .ci{flex:none; width:28px; font-size:20px; font-weight:800; color:#B9B5DA; text-align:center}
+  .crow.part .ci{color:var(--pri)} .crow.done .ci{color:var(--good)}
+  .crow.done{background:var(--goodSoft); border-color:#BFE6CF}
+  .clist .ecard{margin:0}
+  .pane{display:flex; flex-direction:column; gap:12px; padding:14px}
+  .prow2{display:flex; align-items:center; gap:10px}
+  .plbl{flex:none; width:40px; font-size:16px; font-weight:800; color:var(--sub)}
+  .segc{flex:1; display:flex; background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:4px; gap:4px; min-width:0}
+  .segc button{flex:1; min-width:0; min-height:46px; border:0; border-radius:10px; background:transparent; font-size:16px; font-weight:700; color:var(--sub); white-space:nowrap; padding:0 2px}
+  .segc button.on{background:var(--pri); color:#fff; box-shadow:0 3px 10px rgba(91,81,232,.28)}
+  .boards.mini{grid-template-columns:repeat(5,1fr)!important; gap:6px; margin-left:50px}
+  .boards.mini .bd{min-height:46px; font-size:20px}
+  .pane .switch{margin:0}
+  .sumline{text-align:center; font-size:18px; color:var(--sub)} .sumline b{color:var(--ink); font-size:20px} .sumline span{font-size:15px}
+  .linkBtn{border:0; background:transparent; color:var(--pri); font-size:16px; font-weight:700; min-height:44px; text-decoration:underline; text-underline-offset:3px}
+  .linkBtn.danger{color:var(--bad)}
+  .eq2{display:grid; grid-template-columns:1fr 1fr; gap:8px} .eq3{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  .gHead{display:flex; flex-direction:column; gap:8px; margin-bottom:14px}
+  .gt{position:relative; min-height:60px; border-radius:16px; border:2px solid var(--line); background:var(--panel); font-size:21px; font-weight:800; color:var(--sub)}
+  .gt i{position:absolute; top:6px; right:10px; font-style:normal; font-size:13px}
+  .gt.cu.on{background:var(--cu); border-color:var(--cu); color:var(--cuInk); box-shadow:0 6px 14px rgba(255,159,28,.30)}
+  .gt.x3.on{background:var(--x3); border-color:var(--x3); color:var(--x3Ink); box-shadow:0 6px 14px rgba(46,196,182,.30)}
+  .rt{min-height:58px; border-radius:14px; border:1px solid var(--line); background:var(--soft); color:var(--sub); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.15; padding:2px}
+  .rt b{font-size:18px} .rt small{font-size:13px; font-weight:700; margin-top:2px}
+  .rt.cu.on{background:var(--cuSoft); border:2px solid var(--cu); color:var(--cuInk)}
+  .rt.x3.on{background:var(--x3Soft); border:2px solid var(--x3); color:var(--x3Ink)}
+  .acts{display:flex; flex-direction:column; gap:8px; margin-bottom:14px}
+  .btn.wide{width:100%}
+  .btn.soft{background:var(--panel); color:var(--ink); box-shadow:inset 0 0 0 1px var(--line2)}
+  .pane{margin-bottom:12px; padding:14px}
+  .lbl{font-size:16px; font-weight:800; color:var(--sub); margin-bottom:8px} .lbl small{font-weight:700; color:var(--pri); margin-left:4px}
+  .opts{margin-bottom:10px}
+  .opt{min-height:52px; border-radius:12px; border:1px solid var(--line); background:var(--soft); font-size:17px; font-weight:700; color:var(--sub); padding:0 6px}
+  .opt.on{background:var(--pri); border-color:var(--pri); color:#fff}
+  .pane .boards{grid-template-columns:repeat(5,1fr)!important}
+  .pane .bd{min-height:54px}
+  .switch{width:100%; min-height:56px; display:flex; align-items:center; justify-content:space-between; border-radius:12px; border:1px solid var(--line); background:var(--soft); padding:0 14px; font-size:17px; font-weight:700; color:var(--ink); margin-bottom:10px}
+  .switch i{width:52px; height:30px; border-radius:999px; background:#CFCBE9; position:relative; flex:none}
+  .switch i::after{content:""; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; transition:left .15s}
+  .switch.on i{background:var(--good)} .switch.on i::after{left:25px}
   .gseg{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-bottom:12px}
   .gseg button{position:relative; min-height:54px; border:1px solid var(--line); background:var(--soft); border-radius:12px; font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-size:21px; font-weight:700; color:var(--sub); padding:0}
   .gseg button .gm{font-size:15px; margin-right:1px}
@@ -853,6 +914,7 @@ function makeGroups(cls, stage, method) {
   });
   return out;
 }
+const SHORT_M = { seed: "시드", random: "랜덤", no: "번호순", grank: "조 순위", rank: "전체 순위" };
 const METHODS = {
   seed: ["시드 분산", "★ 시드 학생을 조마다 한 명씩 흩어 놓고 나머지는 무작위"],
   random: ["완전 랜덤", "모두 무작위로 섞기"],
@@ -941,34 +1003,37 @@ function roundSeg(cls, st, act) {
 }
 /* 경기·라운드 단추 한 줄 — ● 진행 중 · 🔒 종료 · 점 = 조 있음 */
 function gameSeg(cls) {
-  const L = liveOf(cls);
-  return `<div class="gseg">${["cu", "x3"].map(st => Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => {
-    const gs = groupsOf(cls, st, r), live = L && L.st === st && L.r === r, cl = isClosed(cls, st, r);
-    return `<button class="${st} ${ui.stage === st && ui.round === r ? "on" : ""} ${gs.length ? "has" : ""}" data-act="gm" data-v="${st}|${r}"><span class="gm">${STAGES[st].mark}</span>${r}R<i>${live ? "●" : cl ? "🔒" : ""}</i></button>`;
-  }).join("")).join("")}</div>`;
+  const L = liveOf(cls), st = ui.stage;
+  const roundFor = s => s === ui.stage ? ui.round : (L && L.st === s ? L.r : openRound(cls, s));
+  const tabs = ["cu", "x3"].map(s => `<button class="gt ${s} ${st === s ? "on" : ""}" data-act="gm" data-v="${s}|${roundFor(s)}">${STAGES[s].name}${L && L.st === s ? "<i>●</i>" : ""}</button>`).join("");
+  const rounds = Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => {
+    const has = groupsOf(cls, st, r).length, live = L && L.st === st && L.r === r, cl = isClosed(cls, st, r);
+    const sub = live ? "● 진행 중" : cl ? "종료" : has ? "조 있음" : "";
+    return `<button class="rt ${st} ${ui.round === r ? "on" : ""}" data-act="gm" data-v="${st}|${r}"><b>${r}라운드</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
+  }).join("");
+  const live = L && L.st === st && L.r === ui.round, cl = isClosed(cls, st, ui.round);
+  return `<details class="gPick noprint" data-k="gpick" ${ui.open.gpick ? "open" : ""}><summary><span class="gchip ${st}">${STAGES[st].name}</span><b>${ui.round}라운드</b>${live ? "<small class=live>● 진행 중</small>" : cl ? "<small>🔒 종료</small>" : ""}<span class="sp"></span><span class="chev">▾</span></summary>
+    <div class="gHead"><div class="eq2 gTabs">${tabs}</div><div class="eq3 rTabs">${rounds}</div></div></details>`;
 }
 function scGroups() {
   const cls = ui.cls, st = ui.stage, r = ui.round, sm = stuMap(cls), gs = groupsOf(cls, st);
   const info = grpRec(cls, st, r);
   let h = gameSeg(cls);
-  if (!VIEW && !gs.length && !liveOf(cls)) h += `<div class="go one noprint"><button class="btn pri big nextBig" data-act="startNext">▶ 경기 시작${curGame(cls) ? ` · ${STAGES[curGame(cls).st].mark}${curGame(cls).r}R` : ""}</button></div>`;
-  if (!VIEW && gs.length) h += `<div class="go three noprint"><button class="btn pri big nextBig" data-act="startNext">▶ 다음 경기</button><button class="btn pri big" data-act="big">📺 화면</button><button class="btn pri big alt" data-act="goEntry">✏️ 입력</button></div>`;
+  if (!VIEW && !gs.length && !liveOf(cls)) h += `<div class="acts noprint"><button class="btn big nextBig wide" data-act="startNext">▶ 경기 시작</button></div>`;
+  if (!VIEW && gs.length) h += `<div class="acts2 noprint"><button class="btn big nextBig" data-act="startNext">▶ 다음 경기</button><button class="btn big soft" data-act="big" aria-label="프로젝터 화면">📺</button></div>`;
   if (!VIEW) h += absPicker(cls, !gs.length);
   if (!VIEW) {
     const opts = st === "cu" ? ["seed", "random", "no"] : ["grank", "rank", "seed", "random"];
     if (!opts.includes(ui.method[st])) ui.method[st] = opts[0];
-    h += `<details class="setup noprint" data-k="setup" ${(ui.open.setup ?? !gs.length) ? "open" : ""}><summary>⚙ 편성 설정 · 다시 편성</summary>${boardPicker(cls)}
-    <div class="card noprint" style="margin-bottom:14px">
-      <div class="seg" style="margin-bottom:6px">${opts.map(k => `<button class="plain ${ui.method[st] === k ? "on" : ""}" data-act="method" data-v="${k}">${METHODS[k][0]}</button>`).join("")}</div>
-      <p class="hint" style="margin-top:0">${METHODS[ui.method[st]][1]}. 결석 학생은 빠집니다.</p>
-      <div class="seg" style="margin-bottom:6px"><button class="plain ${fitOn() ? "" : "on"}" data-act="fit" data-v="0">4명 조 (남으면 3명 조)</button><button class="plain ${fitOn() ? "on" : ""}" data-act="fit" data-v="1">다트 수에 맞추기 (5명 조 허용)</button></div>
-      <p class="hint" style="margin-top:0">${(() => { const n = roster(cls).filter(s => !isAbs(cls, sidOf(s))).length, sz = sizes(n, CFG.size, boardsOf(cls).length, fitOn());
-        return n ? `출석 ${n}명 · 다트 ${boardsOf(cls).length}대 → <b>${sz.length}개 조 (${sz.join("·")}명)</b>${sz.length > boardsOf(cls).length ? " — 2차 경기 생김" : ""}` : ""; })()}</p>
-      <p class="hint keep" style="margin-top:0">${(() => { const n = roster(cls).filter(s => !isAbs(cls, sidOf(s))).length, sz = sizes(n, CFG.size, boardsOf(cls).length, fitOn()); return n ? `${n}명 → ${sz.length}개 조 (${sz.join("·")})` : ""; })()}</p>
-      <div class="row">${gs.length ? `<button class="btn danger" data-act="clrGroups">${r}R 조 지우기</button>` : ""}
-        ${!gs.length && r > 1 && groupsOf(cls, st, r - 1).length ? `<button class="btn" data-act="copyPrev">${r - 1}R 조 그대로</button>` : ""}
-        <span class="sp"></span><button class="btn pri big" data-act="make">${STAGES[st].mark}${r}R ${gs.length ? "다시 편성" : "편성"}</button></div>
-      ${st === "x3" && !hasAny(cls, "cu") ? `<div class="note">카운트업 결과가 아직 없어 순위 편성은 무작위와 같습니다.</div>` : ""}
+    const n0 = roster(cls).filter(s => !isAbs(cls, sidOf(s))).length, sz0 = sizes(n0, CFG.size, boardsOf(cls).length, fitOn());
+    h += `<details class="setup noprint" data-k="setup" ${(ui.open.setup ?? !gs.length) ? "open" : ""}><summary>⚙ 편성 설정</summary>
+    <div class="card pane">
+      ${boardPicker(cls)}
+      <div class="prow2"><span class="plbl">편성</span><div class="segc">${opts.map(k => `<button class="${ui.method[st] === k ? "on" : ""}" data-act="method" data-v="${k}">${SHORT_M[k]}</button>`).join("")}</div></div>
+      <button class="switch ${fitOn() ? "on" : ""}" data-act="fit" data-v="${fitOn() ? 0 : 1}"><span>다트가 모자라면 5명 조</span><i></i></button>
+      <div class="sumline">${n0 ? `<b>${n0}명</b> → <b>${sz0.length}개 조</b> <span>(${sz0.join("·")}명)</span>` : "참여 학생 없음"}</div>
+      <button class="btn pri big wide" data-act="make">${gs.length ? "다시 편성" : "편성하기"}</button>
+      ${gs.length ? `<button class="linkBtn danger" data-act="clrGroups">이 라운드 조 지우기</button>` : r > 1 && groupsOf(cls, st, r - 1).length ? `<button class="linkBtn" data-act="copyPrev">${r - 1}라운드 조 그대로 쓰기</button>` : ""}
     </div></details>`;
   }
   if (!gs.length) return h;
@@ -980,14 +1045,15 @@ function scGroups() {
     const x = sm[ui.sel] || { name: "?" };
     h += `<div class="selBar noprint"><b>✋ ${esc(x.name)}</b><span class="sp"></span><button class="btn sm" data-act="newGrpWith">새 조</button><button class="btn sm danger" data-act="selAbs">${isAbs(cls, ui.sel) ? "출석" : "결석"}</button><button class="btn sm ghost" data-act="selCancel">취소</button></div>`;
   } else if (!VIEW) h += `<p class="hint noprint">✋ <b>조 바꾸기</b>: 학생을 누르고 → 다른 학생을 누르면 자리 바꾸기, 다른 조의 [여기로 이동]을 누르면 옮기기. 결과를 입력한 뒤에 옮겨도 그 학생의 기록은 남습니다.</p>`;
-  h += `<div class="grpGrid">${gs.map((g, gi) => `
-    <div class="grp ${st}"><h4>${grpLabel(cls, gi)}</h4>
+  const opened = new Set(ui.gOpen || []);
+  h += `<div class="glist">${gs.map((g, gi) => (opened.has(gi) || (ui.sel && g.m.includes(ui.sel))) ? `
+    <div class="grp ${st}"><button class="ghd" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="sp"></span><span class="chev">접기 ▴</span></button>
     <div class="chips">${g.m.map(s => { const x = sm[s] || { no: "?", name: "(명렬 없음)" }, a = isAbs(cls, s);
       const extra = st === "x3" ? (() => { const r = record(cls, "cu", s); return r.played ? `카운트업 ${r.sum}점` : ""; })() : (x.seed ? "★" : "");
       return `<button class="chip ${ui.sel === s ? "sel" : ""} ${a ? "abs" : ""}" ${VIEW ? "disabled" : `data-act="pick" data-v="${s}"`}><span class="no">${esc(x.no)}</span>${esc(x.name)}${sexBadge(x)}<span class="info">${a ? "결석" : extra}</span></button>`; }).join("")}</div>
     ${!g.m.length ? (VIEW ? "" : `<button class="btn ghost moveHere" data-act="delGrp" data-v="${gi}">빈 조 지우기</button>`) : ""}
     ${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn moveHere" data-act="moveTo" data-v="${gi}">↓ 여기로</button>` : ""}
-    </div>`).join("")}</div>`;
+    </div>` : `<div class="growW"><button class="grow" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="gnames">${g.m.map(s => esc((sm[s] || {}).name || "?")).join(" · ") || "비어 있음"}</span><span class="chev">▾</span></button>${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn sm moveTo2" data-act="moveTo" data-v="${gi}">여기로</button>` : ""}</div>`).join("")}</div>`;
   return h;
 }
 /* 오늘 참여하지 못하는 학생 — 고르면 조 편성에서 빠진다. 날짜가 바뀌면 자동으로 모두 출석 */
@@ -1019,24 +1085,24 @@ const waveOf = (cls, gi) => Math.floor(gi / boardsOf(cls).length) + 1;
 const waves = (cls, st) => Math.ceil((groupsOf(cls, st || ui.stage).length || 1) / boardsOf(cls).length);
 const grpLabel = (cls, gi) => `${boardOf(cls, gi)}번 다트${waves(cls) > 1 ? ` · ${waveOf(cls, gi)}차` : ""}`;
 function boardPicker(cls) {
-  const mine = boardsOf(cls), explicit = !!chosenBoards(cls).length, on = onBoards(), power = ui.bmode === "power";
-  const others = {};   // 다른 반이 오늘 직접 고른 위치
+  const mine = boardsOf(cls), on = onBoards(), explicit = !!chosenBoards(cls).length;
+  const others = {};   // 다른 반이 오늘 고른 위치
   classNames().filter(c => c !== cls && chosenBoards(c).length).forEach(c => boardsOf(c).forEach(b => (others[b] ||= []).push(c)));
   const half = Math.ceil(on.length / 2), A = on.slice(0, half), B = on.slice(half);
-  const rng = a => !a.length ? "" : a.length === 1 ? `${a[0]}번` : a[a.length - 1] - a[0] === a.length - 1 ? `${a[0]}~${a[a.length - 1]}번` : `${a.join("·")}번`;
-  const cols = Math.min(10, allBoards().length);
-  let h = `<div class="card noprint" style="margin-bottom:14px">
-    <div class="seg" style="margin-bottom:8px"><button class="plain ${power ? "" : "on"}" data-act="bmode" data-v="pick">🎯 ${esc(cls)}반 다트 위치</button><button class="plain ${power ? "on" : ""}" data-act="bmode" data-v="power">🔌 다트기 켜기·끄기</button></div>`;
-  if (power) {
-    h += `<div class="boards" style="grid-template-columns:repeat(${cols},1fr)">${allBoards().map(n => `<button class="bd pw ${isOff(n) ? "off" : "on"}" data-act="power" data-v="${n}">${n}<small>${isOff(n) ? "꺼짐" : "켜짐"}</small></button>`).join("")}</div>
-      <div class="row" style="margin-top:10px"><b>다트기 수</b><button class="btn" data-act="bcount" data-v="-1" aria-label="한 대 빼기">－</button><b style="font-size:24px;min-width:40px;text-align:center">${allBoards().length}</b><button class="btn" data-act="bcount" data-v="1" aria-label="한 대 더하기">＋</button></div>
-      <p class="hint" style="margin-bottom:0">고장 났거나 오늘 쓰지 않는 다트기를 누르면 <b>꺼짐</b> — 모든 반의 조 배정과 프로젝터 화면에서 빠집니다. 지금 켜진 다트 <b>${on.length}대</b>.</p>`;
-  } else {
-    h += `<div class="row" style="margin-bottom:8px">${B.length ? `<button class="btn" data-act="boardsSet" data-v="${A.join(",")}">${rng(A)}</button><button class="btn" data-act="boardsSet" data-v="${B.join(",")}">${rng(B)}</button>` : ""}<button class="btn" data-act="boardsSet" data-v="">켜진 다트 전체</button></div>
-      <div class="boards" style="grid-template-columns:repeat(${cols},1fr)">${allBoards().map(n => isOff(n) ? `<button class="bd dead" disabled>${n}<small>꺼짐</small></button>` : `<button class="bd ${mine.includes(n) ? "on" : ""} ${mine.includes(n) && others[n] ? "clash" : ""}" data-act="board" data-v="${n}">${n}${others[n] ? `<small>${others[n].map(esc).join(",")}</small>` : ""}</button>`).join("")}</div>
-      <p class="hint" style="margin-bottom:0">${explicit ? "" : `지금은 켜진 다트 ${on.length}대 모두 사용. `}두 반이 함께 수업하면 반마다 위치를 나눠 고르세요 — 조가 고른 위치에 차례로 배정되고 남은 조는 2차 경기. 고른 위치는 <b>오늘만</b> 쓰고, 다음 수업에는 다시 전체로 돌아갑니다. 작은 글씨는 다른 반이 오늘 고른 위치.</p>`;
-  }
-  return h + `</div>`;
+  const rng = a => a[a.length - 1] - a[0] === a.length - 1 ? `${a[0]}~${a[a.length - 1]}` : a.join("·");
+  const same = a => a.length === mine.length && a.every(n => mine.includes(n));
+  const mode = !explicit ? "all" : same(A) ? "A" : same(B) ? "B" : "custom";
+  const custom = mode === "custom" || ui.boardCustom;
+  return `<div class="prow2"><span class="plbl">다트</span><div class="segc">
+      <button class="${mode === "all" && !ui.boardCustom ? "on" : ""}" data-act="boardsSet" data-v="">전체</button>
+      ${B.length ? `<button class="${mode === "A" && !ui.boardCustom ? "on" : ""}" data-act="boardsSet" data-v="${A.join(",")}">${rng(A)}</button><button class="${mode === "B" && !ui.boardCustom ? "on" : ""}" data-act="boardsSet" data-v="${B.join(",")}">${rng(B)}</button>` : ""}
+      <button class="${custom ? "on" : ""}" data-act="boardCustom">직접</button></div></div>
+    ${custom ? `<div class="boards mini">${allBoards().map(n => isOff(n) ? `<button class="bd dead" disabled>${n}</button>` : `<button class="bd ${mine.includes(n) ? "on" : ""} ${mine.includes(n) && others[n] ? "clash" : ""}" data-act="board" data-v="${n}">${n}${others[n] ? `<small>${others[n].map(esc).join(",")}</small>` : ""}</button>`).join("")}</div>` : ""}`;
+}
+/* 고장 난 다트 끄기 · 다트기 수 — 설정 화면에서 */
+function powerPicker() {
+  return `<div class="boards">${allBoards().map(n => `<button class="bd pw ${isOff(n) ? "off" : "on"}" data-act="power" data-v="${n}">${n}<small>${isOff(n) ? "꺼짐" : "켜짐"}</small></button>`).join("")}</div>
+    <div class="row" style="margin-top:10px"><b>다트기 수</b><span class="sp"></span><button class="btn sm" data-act="bcount" data-v="-1" aria-label="한 대 빼기">－</button><b style="font-size:24px;min-width:40px;text-align:center">${allBoards().length}</b><button class="btn sm" data-act="bcount" data-v="1" aria-label="한 대 더하기">＋</button></div>`;
 }
 function hasAny(cls, stage) { const g = (C(cls).games || {})[stage] || {}; return Object.values(g).some(r => Object.values(r || {}).some(x => Object.values(x || {}).some(y => y && y.r >= 1))); }
 
@@ -1062,7 +1128,7 @@ function scEntry() {
     const nDone = gs.filter((g, gi) => cardDone(cls, g, rr, "g" + gi)).length;
     if (closed) h += `<div class="banner" style="background:var(--soft);border-color:var(--line);color:var(--sub)">🔒 종료됨<button class="btn" data-act="reopenRound">다시 열기</button></div>`;
     else h += `<div class="banner${allDone ? "" : " todo"}"><span class="bcount">${allDone ? "✔ 모두 입력" : `입력 <b>${nDone}</b>/${gs.length}`}</span><button class="btn sm ghost" data-act="endRound" aria-label="경기 종료만">🏁</button><button class="btn pri big nextBig" data-act="startNext">▶ 다음 경기</button></div>`;
-    h += dartStatus(cls, st, ui.round);
+
   }
 
   let cards = gs.map((g, gi) => ({ g, gi }));
@@ -1079,7 +1145,18 @@ function scEntry() {
 
     }
   }
-  h += `<div class="entryGrid">${cards.map(({ g, gi }) => card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}${g.tag ? " · " + g.tag : ""}`)).join("")}`;
+  // 선생님 화면: 다트마다 한 줄 — 누른 다트 하나만 펼친다(처음엔 아직 안 끝난 첫 다트)
+  if (!VIEW && GRP == null && cards.length > 1) {
+    if (ui.focus == null) ui.focus = "none";
+    const sm = stuMap(cls);
+    h += `<div class="clist">${cards.map(({ g, gi }) => {
+      if (ui.focus === "g" + gi) return card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}`);
+      const s = dartState(cls, g, rr, gi), res = rr["g" + gi] || {}, R = rolesAt(cls, st, ui.round, "g" + gi);
+      const live = g.m.filter(x => !isAbs(cls, x) || res[x]), got = live.filter(x => res[x] && res[x].r >= 1).length;
+      const who = R.by && R.by !== "T" ? `📱 ${esc((stuMap(R.byCls || cls)[R.by] || {}).name || "")}` : R.by === "T" ? "👤 선생님" : "대기";
+      return `<button class="crow ${s}" data-act="jumpCard" data-g="g${gi}"><span class="ci">${s === "done" ? "✔" : s === "part" ? "◐" : "○"}</span><span class="gno ${st}">${boardOf(cls, gi)}</span><span class="gnames"><span class="who">${who}</span><small>${got}/${live.length}명</small></span><span class="chev">입력 ▾</span></button>`;
+    }).join("")}`;
+  } else h += `<div class="entryGrid">${cards.map(({ g, gi }) => card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}${g.tag ? " · " + g.tag : ""}`)).join("")}`;
   if (GRP == null) {
     const mk = rr.mk || {};
     if (Object.keys(mk).length) h += card(cls, st, "mk", Object.keys(mk), mk, "보충 경기");
@@ -1149,7 +1226,7 @@ function card(cls, st, gk, members, res, title) {
       <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
     ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${RO ? "" : `<div class="foot"><button class="btn sm ghost" data-act="clearCard" data-g="${key}">🗑 지우기</button>${gk !== "mk" && st === "cu" && Object.values(res).some(x => x.m) ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 다시</button>` : ""}</div>`}</div>`;
 }
 /* 역할 기록 — 이 다트(조)·이 라운드에서 누가 입력했고, 누가 경기 진행·심판·준비 정리를 했나.
@@ -1329,6 +1406,7 @@ function scSet() {
     <button class="btn pri" data-act="printQR">🖨 다트 1~${allBoards().length}번 QR 인쇄</button>
 
     </div>` : ""}
+    <div class="card" style="margin-top:14px"><h3 style="margin-top:0">🔌 다트기 켜기·끄기</h3><p class="hint" style="margin-top:0">고장 났거나 쓰지 않는 다트를 끄면 조 배정과 프로젝터에서 빠집니다.</p>${powerPicker()}</div>
     <div class="card" style="margin-top:14px"><h3 style="margin-top:0">🗂 학기 자료 정리 (개인정보)</h3>
     <p class="hint" style="margin-top:0">평가가 끝나면 ① 엑셀을 내려받아 학교 규정대로 보관하고 ② 서버 기록을 지우세요. 내려받은 엑셀·백업 파일에도 학생 정보가 있으니 교사 PC에만 두세요.</p>
     <div class="row"><button class="btn pri" data-act="xlsx">① ⬇ 엑셀 내려받기 (모든 반)</button></div>
@@ -1404,12 +1482,12 @@ function showBig() {
       <i></i>${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}
       <i></i>${pick.map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}
       <i></i><button data-act="bigEntry">✏️ 결과 입력</button></div>` : "";
-  $("big").innerHTML = `<div class="bigTop">${qr}<h2><span class="mk ${st}">${STAGES[st].mark}</span>${STAGES[st].name} <b>${ui.round}R</b></h2>${waveBtns}${ctl}</div>${menu}
+  $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle"><span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b><small>라운드</small></span>${waveBtns}</div>${qr}${ctl}</div>${menu}
     ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기</button></div>` : ""}
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
     <div class="arena" style="grid-template-columns:repeat(${onBoards().length <= 5 ? onBoards().length : Math.ceil(onBoards().length / 2)},1fr)">${onBoards().map(b => { const g = slot[b] || [];
       const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), gg = groupsOf(c, st, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, st, r0), g[0].gi) : "none"; })() : "none";
-      return `<div class="bd2 ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${multi && g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}</span>` : ""}${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
+      return `<div class="bd2 g-${st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${multi && g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}</span>` : ""}${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
         ${next[b] ? `<div class="nx">${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
@@ -1441,7 +1519,7 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-act]"); if (!b) return;
   const act = b.dataset.act, v = b.dataset.v, cls = ui.cls;
   switch (act) {
-    case "tab": ui.tab = v; ui.sel = null; ui.focus = null; if (v === "entry" || v === "groups") ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
+    case "tab": ui.tab = v; ui.sel = null; ui.focus = null; ui.gOpen = []; if (v === "entry" || v === "groups") ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
     case "stage": ui.stage = v; ui.sel = null; ui.focus = null; ui.round = openRound(cls, v); if (ui.tab === "groups" && groupsOf(cls, v).length) setLive(cls, v, ui.round); render(); break;
     case "cls": ui.open = {}; ui.cls = v; ui.focus = null; ui.round = openRound(v, ui.stage); render(); break;
     case "goEntry": ui.tab = "entry"; ui.focus = null; ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
@@ -1500,9 +1578,11 @@ document.addEventListener("click", e => {
     case "nextRound": ui.round = +v; ui.tab = "groups"; ui.sel = null; render(); scrollTo(0, 0); break;
     case "toGroups": ui.tab = "groups"; render(); scrollTo(0, 0); break;
     case "startNext": startNext(cls); break;
-    case "jumpCard": { ui.focus = v || b.dataset.g; render(); const el = $("card-" + ui.focus); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); break; }
+    case "jumpCard": { const k = v || b.dataset.g; ui.focus = ui.focus === k ? "none" : k; render(); const el = $("card-" + ui.focus); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); break; }
+    case "gOpen": { const s = new Set(ui.gOpen || []), i = +v; s.has(i) ? s.delete(i) : s.add(i); ui.gOpen = [...s]; render(); break; }
     case "gm": {
-      const [st, r] = v.split("|"); ui.stage = st; ui.round = +r; ui.sel = null; ui.focus = null;
+      const [st, r] = v.split("|"); ui.stage = st; ui.round = +r; ui.sel = null; ui.focus = null; ui.gOpen = [];
+      if (b.classList.contains("rt")) ui.open.gpick = false;   // 라운드까지 고르면 접는다
       if (ui.tab === "groups" && groupsOf(cls, st, +r).length && !isClosed(cls, st, +r)) setLive(cls, st, +r);
       render(); break;
     }
@@ -1619,7 +1699,8 @@ document.addEventListener("click", e => {
       put("settings/off", Object.keys(off).length ? off : null); break;
     }
     case "bcount": put("settings/count", Math.min(20, Math.max(1, boardCount() + +v))); break;
-    case "boardsSet": put(P(cls, "boards"), v ? { day: today(), list: v.split(",").map(Number) } : null); break;
+    case "boardCustom": ui.boardCustom = !ui.boardCustom; render(); break;
+    case "boardsSet": ui.boardCustom = false; put(P(cls, "boards"), v ? { day: today(), list: v.split(",").map(Number) } : null); break;
     case "closeBig": $("big").classList.remove("show"); break;
     case "tapRank": {
       const gk = b.dataset.g, s = b.dataset.s, res = curCard(gk), x = res[s] || {};
