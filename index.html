@@ -135,6 +135,7 @@
   details.setup summary::before{content:"▸"; margin-right:10px; color:var(--pri)}
   details.setup[open] summary{color:var(--pri)}
   details.setup[open] summary::before{content:"▾"}
+  .banner .endBtn{min-height:52px; font-size:17px; font-weight:800; color:var(--sub); background:var(--panel); white-space:nowrap}
   .banner{display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:var(--goodSoft); border:1px solid #BFE6CF; border-radius:14px; padding:12px 16px; margin-bottom:12px; font-size:19px; font-weight:700; color:var(--good)}
   .banner .btn:first-of-type{margin-left:auto}
   .banner.todo{background:var(--priSoft); border-color:#D3CEFB; color:var(--pri)}
@@ -1200,7 +1201,7 @@ function scEntry() {
   if (!VIEW && GRP == null) {
     const nDone = gs.filter((g, gi) => cardDone(cls, g, rr, "g" + gi)).length;
     if (closed) h += `<div class="banner" style="background:var(--soft);border-color:var(--line);color:var(--sub)">🔒 종료됨<button class="btn" data-act="reopenRound">다시 열기</button></div>`;
-    else h += `<div class="banner${allDone ? "" : " todo"}"><span class="bcount">${allDone ? "✔ 모두 입력" : `입력 <b>${nDone}</b>/${gs.length}`}</span><button class="btn sm ghost" data-act="endRound" aria-label="경기 종료만">🏁</button><button class="btn pri big nextBig" data-act="startNext">▶ 다음 경기</button></div>`;
+    else h += `<div class="banner${allDone ? "" : " todo"}"><span class="bcount">${allDone ? "✔ 모두 입력" : `입력 <b>${nDone}</b>/${gs.length}`}</span><button class="btn sm ghost endBtn" data-act="endRound">경기 종료</button><button class="btn pri big nextBig" data-act="startNext">▶ 다음 경기</button></div>`;
 
   }
 
