@@ -129,7 +129,7 @@
 
   .go{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px}
   .go .btn{min-height:68px; font-size:22px}
-  .go .nextBig{background:var(--good)}
+  .go .nextBig{background:var(--pri)}
   details.setup{margin-bottom:14px}
   details.setup summary{cursor:pointer; min-height:54px; display:flex; align-items:center; font-size:18px; font-weight:700; color:var(--sub); background:var(--soft); border:1px solid var(--line); border-radius:12px; padding:0 16px; margin-bottom:10px; list-style:none}
   details.setup summary::before{content:"▸"; margin-right:10px; color:var(--pri)}
@@ -212,52 +212,51 @@
 
   /* 프로젝터 크게 보기 — 타바타 무대처럼 어두운 남색 */
 
-  /* ── 프로젝터 (2026-10-07 다시 디자인) — 게임 색 띠: 카운트 업 = 주황, 301 = 청록 ── */
-  #big{position:fixed; inset:0; z-index:50; overflow:auto; display:none; background:#11152E; color:#fff; padding:16px 18px 20px}
-  #big.show{display:block}
-  #big .bigTop{display:flex; align-items:center; gap:16px; flex-wrap:wrap; border-radius:22px; padding:14px 16px 14px 28px; margin-bottom:14px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
-  #big .bigTop.g-cu{background:linear-gradient(120deg,#FF9F1C,#FFC15E); color:#4A2800}
-  #big .bigTop.g-x3{background:linear-gradient(120deg,#20B2A5,#52DACC); color:#063B36}
-  #big .gTitle{display:flex; align-items:center; gap:18px; min-width:0}
-  #big .gName{font-size:clamp(40px,4.2vw,64px); font-weight:800; letter-spacing:-1px; line-height:1; white-space:nowrap}
-  #big .gRound{display:inline-flex; align-items:baseline; gap:4px; background:#fff; color:#2B3160; border-radius:999px; padding:4px 22px 8px; box-shadow:0 4px 10px rgba(0,0,0,.15)}
-  #big .gRound b{font-family:"Barlow Condensed",sans-serif; font-size:52px; line-height:1}
-  #big .gRound small{font-size:22px; font-weight:800}
+  /* ── 프로젝터 (2026-10-07) 밝고 차분하게: 흰 카드, 게임 색은 얇은 선과 작은 표시에만 ── */
+  #big{position:fixed; inset:0; z-index:50; overflow:auto; display:none; flex-direction:column; background:#F4F3FC; color:var(--ink); padding:1.6vh 22px 2vh}
+  #big.show{display:flex}
+  #big .bigTop{flex:none; display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:1.6vh}
+  #big .gTitle{display:flex; align-items:center; gap:14px; min-width:0}
+  #big .gName{display:flex; align-items:center; gap:10px; font-size:clamp(30px,2.8vw,42px); font-weight:800; white-space:nowrap}
+  #big .gName::before{content:""; width:16px; height:16px; border-radius:50%; background:var(--gc)}
+  #big .bigTop.g-cu{--gc:#FF9F1C} #big .bigTop.g-x3{--gc:#2EC4B6}
+  #big .gRound{font-size:clamp(26px,2.4vw,36px); font-weight:700; color:var(--sub)} #big .gRound b{font-family:"Barlow Condensed",sans-serif; color:var(--ink); margin-right:2px}
   #big .waves{display:flex; gap:6px}
-  #big .waves button{min-height:52px; padding:0 18px; border-radius:999px; border:2px solid rgba(255,255,255,.7); background:rgba(255,255,255,.25); color:inherit; font-size:20px; font-weight:800}
-  #big .waves button.on{background:#fff; color:#2B3160}
-  #big .joinQR{margin-left:auto; display:flex; align-items:center; gap:12px; background:#fff; color:#2B3160; border-radius:16px; padding:8px 18px 8px 8px; box-shadow:0 4px 10px rgba(0,0,0,.15)}
-  #big .joinQR small{display:block; font-size:16px; font-weight:800; color:#5E6493}
-  #big .joinQR b{font-family:"Barlow Condensed",sans-serif; font-size:46px; letter-spacing:5px; color:#5B51E8; line-height:1}
-  #big .joinQR .pinLine{display:flex; align-items:baseline; gap:8px} #big .joinQR .pinLine span{font-size:18px; font-weight:800}
-  #big .bigCtl{display:flex; align-items:center; gap:10px; margin-left:auto}
+  #big .waves button{min-height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--line2); background:#fff; color:var(--sub); font-size:17px; font-weight:700}
+  #big .waves button.on{background:var(--ink); border-color:var(--ink); color:#fff}
+  #big .joinQR{margin-left:auto; display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:6px 14px 6px 6px}
+  #big .joinQR img{width:76px; height:76px}
+  #big .joinQR small{display:block; font-size:14px; font-weight:700; color:var(--sub)}
+  #big .joinQR b{font-family:"Barlow Condensed",sans-serif; font-size:34px; letter-spacing:4px; color:var(--pri); line-height:1}
+  #big .joinQR .pinLine{display:flex; align-items:baseline; gap:6px} #big .joinQR .pinLine span{font-size:15px; font-weight:700; color:var(--sub)}
+  #big .bigCtl{display:flex; align-items:center; gap:8px; margin-left:auto}
   #big .joinQR + .bigCtl{margin-left:0}
-  #big .nextBtn{min-height:60px; font-size:22px; padding:0 26px; border-radius:16px; background:#2E9E60; color:#fff; border:0; font-weight:800; box-shadow:0 6px 14px rgba(0,0,0,.25)}
-  #big .iconB{width:58px; height:58px; padding:0; border-radius:50%; border:0; background:rgba(255,255,255,.4); color:inherit; font-size:28px; font-weight:800; line-height:1}
-  #big .iconB.on{background:#fff; color:#2B3160}
-  #big .bigMenu{display:flex; flex-wrap:wrap; align-items:center; gap:8px; background:#1D2247; border:1px solid #2C326A; border-radius:16px; padding:10px 12px; margin:0 0 12px}
-  #big .bigMenu i{width:1px; height:30px; background:#3A3F78; margin:0 4px}
-  #big .bigMenu button{min-height:50px; border-radius:999px; border:1px solid #3A3F78; background:transparent; color:#C9C5FF; font-size:18px; font-weight:700; padding:0 16px}
-  #big .bigMenu button.on{background:#8B80F9; border-color:#8B80F9; color:#fff}
-  #big .doneBar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:#173F35; border:2px solid #2E9E60; color:#fff; border-radius:18px; padding:10px 18px; margin-bottom:14px; font-size:30px; font-weight:800}
-  #big .doneBar .nextBtn{margin-left:auto; min-height:62px; font-size:24px}
-  #big .waitMsg{text-align:center; font-size:40px; font-weight:800; color:#C9C5FF; padding:16px 0 12px}
-  #big .arena{display:grid; gap:14px; grid-auto-rows:1fr; min-height:calc(100vh - 150px)}
-  #big .bd2{--gc:#8B80F9; position:relative; background:#1D2247; border-radius:20px; padding:14px 18px 16px; display:flex; flex-direction:column; min-width:0; border:2px solid #2A3068; border-top:10px solid var(--gc)}
+  #big .nextBtn{min-height:50px; font-size:18px; padding:0 18px; border-radius:12px; background:var(--pri); color:#fff; border:0; font-weight:800}
+  #big .iconB{width:48px; height:48px; padding:0; border-radius:50%; border:1px solid var(--line2); background:#fff; color:var(--sub); font-size:22px; font-weight:800; line-height:1}
+  #big .iconB.on{background:var(--ink); color:#fff}
+  #big .bigMenu{display:flex; flex-wrap:wrap; align-items:center; gap:8px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:10px 12px; margin:-4px 0 14px}
+  #big .bigMenu i{width:1px; height:28px; background:var(--line); margin:0 4px}
+  #big .bigMenu button{min-height:46px; border-radius:999px; border:1px solid var(--line2); background:#fff; color:var(--sub); font-size:17px; font-weight:700; padding:0 14px}
+  #big .bigMenu button.on{background:var(--pri); border-color:var(--pri); color:#fff}
+  #big .doneBar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:#E3F6EB; border:1px solid #BFE6CF; color:#1E6B42; border-radius:14px; padding:8px 14px; margin-bottom:14px; font-size:24px; font-weight:800}
+  #big .doneBar .nextBtn{margin-left:auto}
+  #big .waitMsg{text-align:center; font-size:34px; font-weight:700; color:var(--sub); padding:80px 0}
+  #big .arena{flex:1; min-height:0; display:grid; gap:1.4vh 14px; grid-auto-rows:minmax(0,1fr)}
+  #big .bd2{--gc:#8B80F9; background:#fff; border-radius:18px; padding:1.2vh 16px 1.4vh; overflow:hidden; display:flex; flex-direction:column; min-width:0; border:1px solid var(--line); border-top:5px solid var(--gc); box-shadow:0 6px 18px rgba(91,81,232,.08)}
   #big .bd2.g-cu{--gc:#FF9F1C} #big .bd2.g-x3{--gc:#2EC4B6}
-  #big .bd2[data-act]{cursor:pointer} #big .bd2[data-act]:hover{border-color:#8B80F9; border-top-color:var(--gc)}
-  #big .bd2 .hd{display:flex; align-items:center; gap:10px; margin-bottom:10px}
-  #big .bd2 .n{width:66px; height:66px; border-radius:18px; background:var(--gc); color:#11152E; font-family:"Barlow Condensed",sans-serif; font-size:44px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none}
-  #big .bd2 .c{font-size:20px; font-weight:800; color:#FFC876; line-height:1.2}
-  #big .bd2 .nm{font-size:clamp(24px,2.4vw,38px); font-weight:700; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  #big .bd2 .nm .sx{font-size:16px; vertical-align:5px}
-  #big .bd2 .nx{margin-top:auto; padding-top:8px; border-top:1px dashed #3A3F78; font-size:18px; font-weight:600; color:#FFC876; line-height:1.4}
-  #big .bd2 .ok2{margin-left:auto; width:46px; height:46px; border-radius:50%; background:#2E9E60; color:#fff; font-size:28px; font-weight:800; display:flex; align-items:center; justify-content:center}
-  #big .bd2 .ok2.part{background:transparent; border:3px solid var(--gc); color:var(--gc)}
-  #big .bd2.done{background:#173F35; border-color:#2E9E60; border-top-color:#2E9E60}
-  #big .bd2.empty{opacity:.16} #big .bd2.empty .n{background:#3A3F78; color:#fff}
-  #big .bd2.clash{border-color:#E5485A}
-  @media (max-width:900px){ #big .arena{grid-template-columns:repeat(2,1fr)!important; min-height:0} #big .bigTop{padding-left:18px} }
+  #big .bd2[data-act]{cursor:pointer}
+  #big .bd2 .hd{display:flex; align-items:center; gap:10px; margin-bottom:.6vh}
+  #big .bd2 .n{font-family:"Barlow Condensed",sans-serif; font-size:clamp(26px,4.6vh,42px); font-weight:700; color:var(--ink); line-height:1}
+  #big .bd2 .n::after{content:"번"; font-family:"Noto Sans KR",sans-serif; font-size:18px; font-weight:700; color:var(--sub); margin-left:2px}
+  #big .bd2 .c{font-size:17px; font-weight:700; color:var(--sub)}
+  #big .bd2 .nm{font-size:min(2.3vw,4.4vh,40px); font-weight:700; line-height:1.4; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  #big .bd2 .nm .sx{font-size:15px; vertical-align:4px}
+  #big .bd2 .nx{margin-top:auto; padding-top:.6vh; border-top:1px dashed var(--line2); font-size:min(1.3vw,2.2vh,17px); font-weight:600; color:var(--sub); line-height:1.4}
+  #big .bd2 .ok2{margin-left:auto; width:36px; height:36px; border-radius:50%; background:#2E9E60; color:#fff; font-size:20px; font-weight:800; display:flex; align-items:center; justify-content:center}
+  #big .bd2 .ok2.part{background:transparent; border:2px solid var(--gc); color:var(--gc)}
+  #big .bd2.done{background:#F2FBF5; border-color:#BFE6CF; border-top-color:#2E9E60}
+  #big .bd2.clash{border-color:var(--bad)}
+  @media (max-width:900px){ #big .arena{grid-template-columns:repeat(2,1fr)!important} }
   #toast{position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--ink); color:#fff; padding:14px 22px; border-radius:14px;
     font-size:18px; z-index:60; opacity:0; transition:opacity .2s; pointer-events:none; max-width:90vw; text-align:center; box-shadow:0 10px 30px rgba(28,32,66,.3)}
   #toast.show{opacity:1}
@@ -278,13 +277,13 @@
   .tapBtn.on{background:var(--priSoft); border-color:var(--pri)}
   .tapBtn.on .ord{background:var(--pri); color:#fff; border:0}
   .tapBtn.r1 .ord{background:var(--r1)}
-  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:14px; transition:transform .08s, box-shadow .15s, background .15s; -webkit-tap-highlight-color:transparent}
+  .btn{max-width:100%; display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:14px; transition:transform .08s, box-shadow .15s, background .15s; -webkit-tap-highlight-color:transparent}
   .btn:active{transform:scale(.97)}
   .btn.pri{box-shadow:0 6px 14px rgba(91,81,232,.28)}
   .btn.alt{box-shadow:0 6px 14px rgba(255,159,28,.28)}
   .btn.ghost{background:var(--panel); box-shadow:inset 0 0 0 1px var(--line2)}
   .btn.danger{box-shadow:inset 0 0 0 1px #F6B9C1}
-  .nextBig, .go .nextBig{background:var(--good)!important; color:#fff!important; box-shadow:0 6px 14px rgba(46,158,96,.30)!important}
+  .nextBig, .go .nextBig{background:var(--pri)!important; color:#fff!important; box-shadow:0 6px 14px rgba(91,81,232,.30)!important}
   .gseg button, .seg button, .tapBtn, .ranks button, .ds, .chip, .absBtn, .bd{transition:transform .08s, background .15s}
   .gseg button:active, .seg button:active, .tapBtn:active, .ds:active, .chip:active{transform:scale(.96)}
   .bcount{font-size:20px} .bcount b{font-family:"Barlow Condensed",sans-serif; font-size:26px}
@@ -307,7 +306,7 @@
   .s2{display:flex; align-items:center; gap:10px; margin-top:4px}
   .stk{display:flex; gap:5px} .stk .tk{min-height:40px; padding:0 10px; margin:0}
   details.gPick{margin-bottom:12px}
-  details.gPick > summary{list-style:none; cursor:pointer; display:flex; align-items:center; gap:10px; min-height:60px; padding:0 14px; border-radius:16px; background:var(--panel); border:1px solid var(--line); box-shadow:var(--shadow); font-size:19px}
+  details.gPick > summary{list-style:none; cursor:pointer; display:flex; flex-wrap:wrap; row-gap:6px; align-items:center; gap:10px; padding-top:8px; padding-bottom:8px; min-height:60px; padding:0 14px; border-radius:16px; background:var(--panel); border:1px solid var(--line); box-shadow:var(--shadow); font-size:19px}
   details.gPick > summary::-webkit-details-marker{display:none}
   details.gPick[open] > summary{margin-bottom:8px}
   .gchip{border-radius:999px; padding:6px 14px; font-size:18px; font-weight:800; white-space:nowrap}
@@ -316,7 +315,7 @@
   .gchip.cu{background:var(--cu); color:var(--cuInk)} .gchip.x3{background:var(--x3); color:var(--x3Ink)}
   details.gPick small{font-size:15px; font-weight:700; color:var(--sub)} details.gPick small.live{color:var(--good)}
   .chev{font-size:15px; font-weight:700; color:var(--pri); white-space:nowrap}
-  .acts2{display:grid; grid-template-columns:1fr 76px; gap:8px; margin-bottom:12px}
+  .acts2{display:grid; grid-template-columns:minmax(0,1fr) 76px; gap:8px; margin-bottom:12px}
   .acts2 .btn{min-height:62px; font-size:21px}
   .glist, .clist{display:flex; flex-direction:column; gap:8px}
   .growW{display:flex; gap:6px}
@@ -336,7 +335,7 @@
   .prow2{display:flex; align-items:center; gap:10px}
   .plbl{flex:none; width:40px; font-size:16px; font-weight:800; color:var(--sub)}
   .segc{flex:1; display:flex; background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:4px; gap:4px; min-width:0}
-  .segc button{flex:1; min-width:0; min-height:46px; border:0; border-radius:10px; background:transparent; font-size:16px; font-weight:700; color:var(--sub); white-space:nowrap; padding:0 2px}
+  .segc button{flex:1; min-width:0; min-height:46px; border:0; border-radius:10px; background:transparent; font-size:16px; font-weight:700; color:var(--sub); line-height:1.15; padding:2px; overflow-wrap:anywhere}
   .segc button.on{background:var(--pri); color:#fff; box-shadow:0 3px 10px rgba(91,81,232,.28)}
   .boards.mini{grid-template-columns:repeat(5,1fr)!important; gap:6px; margin-left:50px}
   .boards.mini .bd{min-height:46px; font-size:20px}
@@ -391,13 +390,14 @@
     body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
     nav{position:fixed; left:0; right:0; bottom:0; z-index:30; background:var(--panel); border-top:1px solid var(--line); box-shadow:0 -6px 20px rgba(91,81,232,.10);
       padding:4px 4px calc(4px + env(safe-area-inset-bottom)); gap:2px; overflow:visible}
-    nav button{flex:1 1 0; min-width:0; min-height:62px; border:0; border-radius:12px; background:transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2px; font-size:14px; line-height:1.2}
+    nav button{flex:1 1 0; min-width:0; overflow:hidden; min-height:62px; border:0; border-radius:12px; background:transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:2px; font-size:14px; line-height:1.2}
     nav button .ti{font-size:22px; margin:0}
+    nav button .tl{max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
     nav button.on{background:var(--priSoft); color:var(--pri)}
     nav.few button{flex-direction:row; gap:6px; font-size:17px}
     main{border-radius:16px; padding:14px 12px 18px; margin-top:8px}
     .gseg button{font-size:19px; min-height:50px}
-    .go .btn{min-height:60px; font-size:18px; padding:0 6px; white-space:nowrap}
+    .go .btn{min-height:60px; font-size:18px; padding:0 6px}
     .banner{gap:8px} .banner .btn.big{min-height:52px; font-size:18px; padding:0 14px}
     .ecard .foot{justify-content:flex-end}
     .grpGrid{grid-template-columns:1fr 1fr; gap:8px}
@@ -1482,16 +1482,16 @@ function showBig() {
       <i></i>${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}
       <i></i>${pick.map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}
       <i></i><button data-act="bigEntry">✏️ 결과 입력</button></div>` : "";
-  $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle"><span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b><small>라운드</small></span>${waveBtns}</div>${qr}${ctl}</div>${menu}
+  $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle"><span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b>라운드</span>${waveBtns}</div>${qr}${ctl}</div>${menu}
     ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기</button></div>` : ""}
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
-    <div class="arena" style="grid-template-columns:repeat(${onBoards().length <= 5 ? onBoards().length : Math.ceil(onBoards().length / 2)},1fr)">${onBoards().map(b => { const g = slot[b] || [];
+    <div class="arena" style="grid-template-columns:repeat(${(() => { const k = onBoards().filter(b => slot[b]).length || 1; return k <= 5 ? k : Math.ceil(k / 2); })()},1fr)">${onBoards().filter(b => slot[b]).map(b => { const g = slot[b] || [];
       const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), gg = groupsOf(c, st, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, st, r0), g[0].gi) : "none"; })() : "none";
       return `<div class="bd2 g-${st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${multi && g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}</span>` : ""}${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
         ${next[b] ? `<div class="nx">${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
-  if ($("bigQR")) qrImg(joinUrl, 96).then(src => { if ($("bigQR")) $("bigQR").innerHTML = `<img src="${src}" width="96" height="96" alt="">`; }).catch(() => {});
+  if ($("bigQR")) qrImg(joinUrl, 96).then(src => { if ($("bigQR")) $("bigQR").innerHTML = `<img src="${src}" alt="">`; }).catch(() => {});
 }
 
 /* ---------- 동작 ---------- */
