@@ -338,6 +338,8 @@
   details.gPick small{font-size:15px; font-weight:700; color:var(--sub)} details.gPick small.live{color:var(--good)}
   .chev{font-size:15px; font-weight:700; color:var(--pri); white-space:nowrap}
   .acts2{display:grid; grid-template-columns:minmax(0,1fr) 92px 76px; gap:8px; margin-bottom:12px}
+  .acts2 .nextBig{padding:0 8px; white-space:nowrap}
+  @media (max-width:420px){ .acts2{grid-template-columns:minmax(0,1fr) 82px 60px} }
   .acts2 .reMake{flex-direction:column; gap:0; padding:0 4px; line-height:1.1} .acts2 .reMake small{font-size:15px; font-weight:800; white-space:nowrap}
   .acts2 .btn{min-height:62px; font-size:21px}
   .glist, .clist{display:flex; flex-direction:column; gap:8px}
@@ -407,7 +409,7 @@
   @media (max-width:700px){
     /* 휴대폰: 설명 문구는 숨기고, 탭은 아래쪽 막대로 */
     .hint:not(.keep){display:none!important}
-    .ttl, .stx, .rcol{display:none!important}
+    .stx, .rcol{display:none!important}
     #status{margin-left:auto; padding:6px 10px}
     #who{min-height:44px; padding:0 12px}
     body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
