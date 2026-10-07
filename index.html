@@ -1026,7 +1026,7 @@ function scGroups() {
     const opts = st === "cu" ? ["seed", "random", "no"] : ["grank", "rank", "seed", "random"];
     if (!opts.includes(ui.method[st])) ui.method[st] = opts[0];
     const n0 = roster(cls).filter(s => !isAbs(cls, sidOf(s))).length, sz0 = sizes(n0, CFG.size, boardsOf(cls).length, fitOn());
-    h += `<details class="setup noprint" data-k="setup" ${(ui.open.setup ?? !gs.length) ? "open" : ""}><summary>⚙ 편성 설정</summary>
+    h += `<details class="setup noprint" data-k="setup" ${ui.open.setup ? "open" : ""}><summary>⚙ 편성 설정</summary>
     <div class="card pane">
       ${boardPicker(cls)}
       <div class="prow2"><span class="plbl">편성</span><div class="segc">${opts.map(k => `<button class="${ui.method[st] === k ? "on" : ""}" data-act="method" data-v="${k}">${SHORT_M[k]}</button>`).join("")}</div></div>
@@ -1059,7 +1059,7 @@ function scGroups() {
 /* 오늘 참여하지 못하는 학생 — 고르면 조 편성에서 빠진다. 날짜가 바뀌면 자동으로 모두 출석 */
 function absPicker(cls, open) {
   const list = roster(cls), out = list.filter(st => isAbs(cls, sidOf(st)));
-  return `<details class="setup noprint" data-k="abs" ${(ui.open.abs ?? open) ? "open" : ""}><summary>🙋 빠지는 학생 ${out.length ? `<span style="color:var(--bad)">&nbsp;${out.length}명</span>` : "없음"}<span class="sp"></span><span class="sumR">참여 ${list.length - out.length}</span></summary>
+  return `<details class="setup noprint" data-k="abs" ${ui.open.abs ? "open" : ""}><summary>🙋 빠지는 학생 ${out.length ? `<span style="color:var(--bad)">&nbsp;${out.length}명</span>` : "없음"}<span class="sp"></span><span class="sumR">참여 ${list.length - out.length}</span></summary>
     <div class="card" style="margin-bottom:14px"><p class="hint" style="margin-top:0">결석·견학 등으로 오늘 경기를 못 하는 학생을 누르세요. <b>참여하는 학생만으로</b> 조를 짭니다. 내일이 되면 자동으로 모두 참여로 돌아갑니다.</p>
     <div class="absGrid">${list.map(st => { const s = sidOf(st), a = isAbs(cls, s); return `<button class="absBtn ${a ? "out" : ""}" data-act="abs" data-v="${s}">${esc(st.no)}. ${esc(st.name)}${a ? "<small>빠짐</small>" : ""}</button>`; }).join("")}</div>
     ${out.length ? `<div class="row" style="margin-top:10px"><button class="btn" data-act="allIn">모두 참여로</button></div>` : ""}</div></details>`;
