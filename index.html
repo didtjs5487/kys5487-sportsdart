@@ -93,7 +93,7 @@
   /* 명렬 */
   .stuGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:10px}
   .stu{display:flex; align-items:center; gap:8px; border:1px solid var(--line); border-radius:14px; background:var(--soft); min-height:60px; padding:6px 6px 6px 12px}
-  .stu .nm{flex:1; text-align:left; border:0; background:transparent; font-size:19px; font-weight:700; min-height:50px; padding:0}
+  .stu .nm{flex:1; display:flex; flex-direction:column; justify-content:center; text-align:left; border:0; background:transparent; font-size:19px; font-weight:700; min-height:50px; padding:0}
   .stu .nm small{display:block; font-size:14px; font-weight:600; color:var(--sub)}
   .stu.abs{background:var(--panel); border-style:dashed}
   .stu.abs .nm{color:#A3A7C7; text-decoration:line-through}
@@ -284,6 +284,7 @@
   .btn.ghost{background:var(--panel); box-shadow:inset 0 0 0 1px var(--line2)}
   .btn.danger{box-shadow:inset 0 0 0 1px #F6B9C1}
   .nextBig, .go .nextBig{background:var(--pri)!important; color:#fff!important; box-shadow:0 6px 14px rgba(91,81,232,.30)!important}
+  .absBtn.out.un{background:#7A2232; border-color:#7A2232; color:#fff; text-decoration:none} .absBtn.out.un small{color:#FFD3DA}
   .gseg button, .seg button, .tapBtn, .ranks button, .ds, .chip, .absBtn, .bd{transition:transform .08s, background .15s}
   .gseg button:active, .seg button:active, .tapBtn:active, .ds:active, .chip:active{transform:scale(.96)}
   .bcount{font-size:20px} .bcount b{font-family:"Barlow Condensed",sans-serif; font-size:26px}
@@ -293,6 +294,11 @@
   .ds i{font-style:normal; font-size:15px; font-weight:800}
   .ds.part{border-style:solid; border-color:var(--pri); color:var(--pri); background:var(--priSoft)}
   .ds.done{border-style:solid; border-color:var(--good); background:var(--good); color:#fff}
+  td.fillc, td.zeroc{cursor:pointer; color:var(--pri); font-weight:700} td.fillc small, td.zeroc small{display:block; font-size:11px; color:var(--sub)}
+  td.zeroc{color:var(--bad)}
+  .fx{display:inline-block; margin-left:4px; min-height:30px; padding:0 8px; border-radius:999px; border:1px solid #D3CEFB; background:var(--priSoft); color:var(--pri); font-size:12px; font-weight:800; vertical-align:middle; font-family:"Noto Sans KR",sans-serif}
+  .fx.z{border-color:#F6B9C1; background:var(--badSoft); color:var(--bad)}
+  .fx.man{border-color:var(--warn); background:var(--warnSoft); color:#6B4A00}
   .slist{display:flex; flex-direction:column; gap:6px}
   .srow{background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:6px 10px 8px}
   .s1{display:flex; align-items:center; gap:8px}
@@ -716,9 +722,15 @@ const C = cls => S.classes[cls] || {};
 const today = () => new Date().toLocaleDateString("sv");   // 2026-10-01
 const absMap = cls => C(cls).absentDay === today() ? (C(cls).absent || {}) : {};
 const isAbs = (cls, sid) => !!absMap(cls)[sid];
+const isUn = (cls, sid) => absMap(cls)[sid] === "un";
+function stampAbs(cls, st, r) {
+  const m = {}; Object.entries(absMap(cls)).forEach(([s, v]) => m[s] = v === "un" ? "un" : "ok");
+  if (Object.keys(m).length) put(P(cls, "absr", st, "r" + r), m, true);
+}
+const absWhy = (cls, st, r, sid) => ((((C(cls).absr || {})[st]) || {})["r" + r] || {})[sid];
 function setAbs(cls, sid, on) {
   const m = { ...absMap(cls) };
-  if (on) m[sid] = true; else delete m[sid];
+  if (on) m[sid] = on === "un" ? "un" : true; else delete m[sid];
   put(P(cls, "absentDay"), today(), true);
   put(P(cls, "absent"), Object.keys(m).length ? m : null);
 }
@@ -806,7 +818,7 @@ function startNext(cls) {
     const left = gs.map((g, gi) => cardDone(cls, g, rr, "g" + gi) ? null : grpLabel(cls, gi)).filter(Boolean);
     const nx = nextStep(cur.st, cur.r);
     if (!confirm(`${STAGES[cur.st].name} ${cur.r}라운드를 끝내고 ${nx ? `${STAGES[nx.st].name} ${nx.r}라운드를 시작할까요?` : "모든 경기를 마칠까요?"}${left.length ? `\n\n⚠ 아직 입력이 안 끝난 다트: ${left.join(", ")}` : ""}`)) return;
-    put(P(cls, "closed", cur.st, "r" + cur.r), Date.now(), true);
+    put(P(cls, "closed", cur.st, "r" + cur.r), Date.now(), true); stampAbs(cls, cur.st, cur.r);
     put(P(cls, "live"), null, true);
     if (!nx) { ui.tab = "stand"; $("big").classList.remove("show"); toast("모든 경기가 끝났습니다 — 순위·성적을 확인하세요"); render(); return; }
     target = nx;
@@ -853,9 +865,21 @@ function record(cls, stage, sid) {
     rounds.push(hit);
   }
   const played = rounds.filter(Boolean).length;
-  const sum = rounds.reduce((a, x) => a + (x ? x.pts : 0), 0);
+  const realSum = rounds.reduce((a, x) => a + (x ? x.pts : 0), 0);
   const vsum = rounds.reduce((a, x) => a + (x && typeof x.v === "number" ? x.v : 0), 0);
-  return { rounds, played, sum, vsum, area: played ? convArea(sum) : 0 };
+  const man = (((C(cls).manual || {})[sid]) || {})[stage];
+  const avg = played ? Math.round(realSum / played * 10) / 10 : 0;
+  let filled = 0, zeroed = 0, open = 0;
+  for (let i = 0; i < rounds.length; i++) {
+    if (rounds[i]) continue;
+    if (!isClosed(cls, stage, i + 1)) { open++; continue; }
+    if (absWhy(cls, stage, i + 1, sid) === "un") { rounds[i] = { zero: true, pts: ptsOf(4, 4), r: i + 1 }; zeroed++; }
+    else if (played) { rounds[i] = { fill: true, pts: avg, r: i + 1 }; filled++; }
+    else open++;   // 인정 결석인데 참여한 경기가 하나도 없음 → 선생님이 직접
+  }
+  const sum = Math.round(rounds.reduce((a, x) => a + (x ? x.pts : 0), 0) * 10) / 10;
+  const area = typeof man === "number" ? man : (played || zeroed) ? convArea(sum) : 0;
+  return { rounds, played, sum, realSum, vsum, area, filled, zeroed, manual: typeof man === "number" ? man : null, noPlay: !played && rounds.every((x, i) => x || isClosed(cls, stage, i + 1)) && rounds.some(x => !x), complete: rounds.every(Boolean) || (typeof man === "number") };
 }
 /* 역할 기록 횟수 {sid:{p,j,s}} — 모든 경기·라운드·다트를 더한다 */
 function roleCounts(cls) {
@@ -906,7 +930,7 @@ function byCU(cls, list) {
    (평균 1위 근처끼리, 2위 근처끼리 …). 같으면 합산 승점 → 총점 */
 function byGroupRank(cls, list) {
   const rec = {}; list.forEach(st => rec[sidOf(st)] = record(cls, "cu", sidOf(st)));
-  const place = s => { const rs = rec[s].rounds.filter(Boolean); return rs.length ? rs.reduce((a, x) => a + x.rank, 0) / rs.length : 9; };
+  const place = s => { const rs = rec[s].rounds.filter(x => x && x.rank); return rs.length ? rs.reduce((a, x) => a + x.rank, 0) / rs.length : 9; };
   return shuffle(list).sort((a, b) => place(sidOf(a)) - place(sidOf(b)) || rec[sidOf(b)].sum - rec[sidOf(a)].sum || rec[sidOf(b)].vsum - rec[sidOf(a)].vsum);
 }
 function makeGroups(cls, stage, method) {
@@ -986,15 +1010,13 @@ function stageSeg() {
 /* ① 명렬·출석 */
 function scRoster() {
   const cls = ui.cls, list = roster(cls);
-  const abs = list.filter(st => isAbs(cls, sidOf(st))).length;
-  let h = `<h2>명렬·출석</h2>`;
+  let h = `<h2>명렬</h2>`;
   if (cls) {
-    h += `<div class="row"><b style="font-size:20px">${esc(cls)}반 — 출석 ${list.length - abs}명${abs ? ` · <span class="bad">결석 ${abs}명</span>` : ""}</b><span class="sp"></span>
-      ${abs ? `<button class="btn" data-act="allIn">모두 출석으로</button>` : ""}</div>
-      <p class="hint">이름을 누르면 <b>오늘 결석</b>으로 바뀝니다(조 편성에서 빠짐, 다음 날 자동으로 출석). ★ 는 <b>시드</b>(잘하는 학생) — '시드 분산' 편성 때 조마다 흩어 놓습니다.</p>
-      <div class="stuGrid">${list.map(st => { const s = sidOf(st), a = isAbs(cls, s); return `
-        <div class="stu ${a ? "abs" : ""}"><button class="nm" data-act="abs" data-v="${s}">${esc(st.no)}. ${esc(st.name)}<small>${a ? "결석" : "출석"}${st.sex ? " · " + st.sex : ""}</small></button>
-        <button class="star ${st.seed ? "on" : ""}" data-act="seed" data-v="${esc(st.no)}" aria-label="시드">★</button></div>`; }).join("")}</div>`;
+    h += `<div class="row"><b style="font-size:20px">${esc(cls)}반 ${list.length}명</b></div>
+      <p class="hint">★ 는 <b>시드</b>(잘하는 학생) — '시드 분산' 편성 때 조마다 흩어 놓습니다.</p>
+      <div class="stuGrid">${list.map(st => `
+        <div class="stu"><div class="nm">${esc(st.no)}. ${esc(st.name)}${st.sex ? `<small>${esc(st.sex)}</small>` : ""}</div>
+        <button class="star ${st.seed ? "on" : ""}" data-act="seed" data-v="${esc(st.no)}" aria-label="시드">★</button></div>`).join("")}</div>`;
   }
   h += `<h3>${cls ? "명렬표 다시 등록 / 다른 반 추가" : "명렬표 등록"}</h3>
     <p class="hint"><b>엑셀 학년 전체 명렬표</b>(반·번호·성명·성별 머리글 포함)를 그대로 복사해 붙여넣으면 모든 반이 한 번에 등록됩니다.<br>
@@ -1076,8 +1098,8 @@ function scGroups() {
 function absPicker(cls, open) {
   const list = roster(cls), out = list.filter(st => isAbs(cls, sidOf(st)));
   return `<details class="setup noprint" data-k="abs" ${ui.open.abs ? "open" : ""}><summary>🙋 빠지는 학생 ${out.length ? `<span style="color:var(--bad)">&nbsp;${out.length}명</span>` : "없음"}<span class="sp"></span><span class="sumR">참여 ${list.length - out.length}</span></summary>
-    <div class="card" style="margin-bottom:14px"><p class="hint" style="margin-top:0">결석·견학 등으로 오늘 경기를 못 하는 학생을 누르세요. <b>참여하는 학생만으로</b> 조를 짭니다. 내일이 되면 자동으로 모두 참여로 돌아갑니다.</p>
-    <div class="absGrid">${list.map(st => { const s = sidOf(st), a = isAbs(cls, s); return `<button class="absBtn ${a ? "out" : ""}" data-act="abs" data-v="${s}">${esc(st.no)}. ${esc(st.name)}${a ? "<small>빠짐</small>" : ""}</button>`; }).join("")}</div>
+    <div class="card" style="margin-bottom:14px"><p class="hint" style="margin-top:0">한 번 누르면 <b>인정 결석</b>(참여한 경기 평균), 한 번 더 누르면 <b>미인정</b>(꼴찌)</p>
+    <div class="absGrid">${list.map(st => { const s = sidOf(st), a = isAbs(cls, s); return `<button class="absBtn ${a ? "out" : ""} ${a && isUn(cls, s) ? "un" : ""}" data-act="abs" data-v="${s}">${esc(st.no)}. ${esc(st.name)}${a ? `<small>${isUn(cls, s) ? "미인정 · 꼴찌" : "인정 · 평균"}</small>` : ""}</button>`; }).join("")}</div>
     ${out.length ? `<div class="row" style="margin-top:10px"><button class="btn" data-act="allIn">모두 참여로</button></div>` : ""}</div></details>`;
 }
 /* 여학생은 투구거리를 다르게(핸디캡) — 심판이 투구선을 확인할 수 있게 표시만 한다 */
@@ -1312,16 +1334,28 @@ function missingBox(cls, st, gs, rr) {
 const isPhone = () => matchMedia("(max-width:700px)").matches;
 let lastPhone = isPhone();
 addEventListener("resize", () => { if (isPhone() !== lastPhone) { lastPhone = isPhone(); render(); } });
+/* 영역 점수 칸 — 결석 보정 표시와 단추를 함께 */
+function areaCell(rec, s, k) {
+  if (rec.manual != null) return `${rec.manual}<button class="fx man" data-act="manual" data-v="${s}" data-k="${k}">직접</button>`;
+  if (rec.noPlay) return `<button class="fx man" data-act="manual" data-v="${s}" data-k="${k}">점수 입력</button>`;
+  if (!rec.played && !rec.zeroed) return "-";
+  const tag = rec.filled ? `<button class="fx" data-act="absfix" data-v="${s}" data-k="${k}" title="인정 결석 라운드는 평균 — 누르면 미인정(꼴찌)">평균</button>`
+    : rec.zeroed ? `<button class="fx z" data-act="absfix" data-v="${s}" data-k="${k}" title="미인정 라운드는 꼴찌 — 누르면 인정(평균)">미인정</button>` : "";
+  return `${rec.area}${tag}`;
+}
 function scStand() {
   const cls = ui.cls, list = roster(cls), RC = roleCounts(cls);
   const rows = list.map(st => {
     const s = sidOf(st), a = record(cls, "cu", s), b = record(cls, "x3", s), c = taskPts(cls, s);
     const tot = a.area + b.area + c;
-    return { st, s, a, b, c, tot, grade: convTotal(tot), full: a.played === CFG.rounds && b.played === CFG.rounds };
+    return { st, s, a, b, c, tot, grade: convTotal(tot), full: a.complete && b.complete };
   });
   if (ui.sort === "score") rows.sort((x, y) => (y.a.sum + y.b.sum) - (x.a.sum + x.b.sum) || numSort(x.st.no, y.st.no));
   const done = rows.filter(r => r.full).length;
-  const cell = r => r ? `<td class="rcol" title="${r.rank}위">${r.pts}</td>` : `<td class="miss rcol">·</td>`;
+  const cell = (r, s, k) => !r ? `<td class="miss rcol">·</td>`
+    : r.fill ? `<td class="rcol fillc" ${VIEW ? "" : `data-act="absfix" data-v="${s}" data-k="${k}" data-r="${r.r}"`} title="인정 결석 — 참여한 경기 평균 (누르면 미인정·꼴찌)">${r.pts}<small>평균</small></td>`
+    : r.zero ? `<td class="rcol zeroc" ${VIEW ? "" : `data-act="absfix" data-v="${s}" data-k="${k}" data-r="${r.r}"`} title="미인정 결석 — 꼴찌(4위) (누르면 인정·평균)">${r.pts}<small>미인정</small></td>`
+    : `<td class="rcol" title="${r.rank}위">${r.pts}</td>`;
   let h = `<div class="row noprint" style="margin-bottom:10px"><h2 style="margin:0">${esc(cls)}반</h2><span class="sp"></span>
     <div class="seg" style="margin:0"><button class="plain ${ui.sort === "no" ? "on" : ""}" data-act="sort" data-v="no">번호순</button><button class="plain ${ui.sort === "score" ? "on" : ""}" data-act="sort" data-v="score">승점순</button></div></div>`;
   if (!VIEW) h += `<p class="hint noprint" hidden>칸의 숫자는 그 라운드 <b>승점</b>(4명 조 4·3·2·1, 3명 조 4·3·1, 5명 조 4·3·3·2·1). 노란 칸 = 기록 없음. 6라운드 모두 끝난 학생 ${done}/${rows.length}명.
@@ -1330,8 +1364,8 @@ function scStand() {
   if (isPhone()) {
     h += `<div class="slist">${rows.map(r => {
       // 선생님: 영역 점수 / 학생: 합산 승점
-      const va = VIEW ? r.a.sum : (r.a.played ? r.a.area : "-"), vb = VIEW ? r.b.sum : (r.b.played ? r.b.area : "-");
-      const ab = `<span class="sa">Ⓐ <b>${va}</b></span><span class="sb">Ⓑ <b>${vb}</b></span>`;
+      const ab = VIEW ? `<span class="sa">Ⓐ <b>${r.a.realSum}</b></span><span class="sb">Ⓑ <b>${r.b.realSum}</b></span>`
+        : `<span class="sa">Ⓐ <b>${areaCell(r.a, r.s, "cu")}</b></span><span class="sb">Ⓑ <b>${areaCell(r.b, r.s, "x3")}</b></span>`;
       const tasks = VIEW ? "" : `<span class="stk">${TASKS.map(([k, l]) => { const n = ((RC[r.s] || {})[k]) || 0, m = ((C(cls).task || {})[r.s] || {})[k], on = taskOn(cls, r.s, k, RC);
         return `<button class="tk ${on ? (m === 1 ? "on" : "auto") : ""}" data-act="task" data-v="${r.s}" data-k="${k}" title="${l}">${{ p: "준비", j: "진행", s: "심판" }[k]}</button>`; }).join("")}</span>`;
       if (VIEW) return `<div class="srow"><div class="s1"><span class="sno">${esc(r.st.no)}</span><span class="snm">${esc(r.st.name)}</span>${ab}</div></div>`;
@@ -1346,8 +1380,8 @@ function scStand() {
     ${["cu", "x3"].map(k => Array.from({ length: CFG.rounds }, (_, i) => `<th class="${k} rcol">${i + 1}R</th>`).join("") + `<th class="${k}">합</th>` + (VIEW ? "" : `<th class="${k}">${STAGES[k].mark}</th>`)).join("")}
     </tr></thead><tbody>${rows.map(r => `<tr>
       <td>${esc(r.st.no)}</td><td class="nm">${esc(r.st.name)}</td>
-      ${r.a.rounds.map(cell).join("")}<td class="sum">${r.a.sum}</td>${VIEW ? "" : `<td class="sum">${r.a.played ? r.a.area : "-"}</td>`}
-      ${r.b.rounds.map(cell).join("")}<td class="sum">${r.b.sum}</td>${VIEW ? "" : `<td class="sum">${r.b.played ? r.b.area : "-"}</td>`}
+      ${r.a.rounds.map(x => cell(x, r.s, "cu")).join("")}<td class="sum">${r.a.sum}</td>${VIEW ? "" : `<td class="sum">${areaCell(r.a, r.s, "cu")}</td>`}
+      ${r.b.rounds.map(x => cell(x, r.s, "x3")).join("")}<td class="sum">${r.b.sum}</td>${VIEW ? "" : `<td class="sum">${areaCell(r.b, r.s, "x3")}</td>`}
       ${VIEW ? "" : `<td>${TASKS.map(([k, l]) => { const n = ((RC[r.s] || {})[k]) || 0, m = ((C(cls).task || {})[r.s] || {})[k], on = taskOn(cls, r.s, k, RC);
         return `<button class="tk ${on ? (m === 1 ? "on" : "auto") : ""}" data-act="task" data-v="${r.s}" data-k="${k}" title="${l}${n ? " " + n + "회" : ""}">${{ p: "준비", j: "진행", s: "심판" }[k]}${n ? " " + n : ""}</button>`; }).join("")}</td>
       <td class="sum rcol">${r.tot}</td><td class="grade">${r.grade}${r.full ? "" : `<span class="inprog">…</span>`}</td>`}
@@ -1551,7 +1585,7 @@ document.addEventListener("click", e => {
     case "method": ui.method[ui.stage] = v; render(); break;
     case "sort": ui.sort = v; render(); break;
     case "gsort": ui.gsort = v; render(); break;
-    case "abs": setAbs(cls, v, !isAbs(cls, v)); break;
+    case "abs": setAbs(cls, v, !isAbs(cls, v) ? true : isUn(cls, v) ? false : "un"); break;
     case "allIn": put(P(cls, "absent"), null); break;
     case "seed": {
       const list = (S.rosters[cls] || []).map(st => String(st.no) === v ? { ...st, seed: !st.seed } : st);
@@ -1594,6 +1628,21 @@ document.addEventListener("click", e => {
     case "nextRound": ui.round = +v; ui.tab = "groups"; ui.sel = null; render(); scrollTo(0, 0); break;
     case "toGroups": ui.tab = "groups"; render(); scrollTo(0, 0); break;
     case "startNext": startNext(cls); break;
+    case "absfix": {   // 칸(data-r)이면 그 라운드만, 요약 단추면 그 경기의 빠진 라운드 모두
+      const k = b.dataset.k, rec = record(cls, k, v);
+      const rs = b.dataset.r ? [+b.dataset.r] : rec.rounds.filter(x => x && (x.fill || x.zero)).map(x => x.r);
+      const toUn = !rs.every(r => absWhy(cls, k, r, v) === "un");
+      rs.forEach(r => put(P(cls, "absr", k, "r" + r, v), toUn ? "un" : "ok", true));
+      toast(toUn ? "미인정 — 그 경기 꼴찌(4위)로 넣었습니다" : "인정 결석 — 참여한 경기 평균으로 채웠습니다"); render(); break;
+    }
+    case "manual": {
+      const k = b.dataset.k, nm = (stuMap(cls)[v] || {}).name || "", cur = (((C(cls).manual || {})[v]) || {})[k];
+      const a = prompt(`${nm} — ${STAGES[k].mark} ${STAGES[k].name} 점수 (2~10)\n비워 두면 지웁니다`, cur ?? "");
+      if (a === null) return;
+      const n = a.trim() === "" ? null : Math.max(0, Math.min(10, Math.round(+a)));
+      if (n !== null && !Number.isFinite(n)) { toast("숫자를 넣어 주세요"); return; }
+      put(P(cls, "manual", v, k), n); break;
+    }
     case "jumpCard": { const k = v || b.dataset.g; ui.focus = ui.focus === k ? "none" : k; render(); const el = $("card-" + ui.focus); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); break; }
     case "gOpen": { const s = new Set(ui.gOpen || []), i = +v; s.has(i) ? s.delete(i) : s.add(i); ui.gOpen = [...s]; render(); break; }
     case "gm": {
@@ -1623,7 +1672,7 @@ document.addEventListener("click", e => {
       const st = ui.stage, r = ui.round, gs = groupsOf(cls, st), rr = roundRes(cls, st, r);
       const left = gs.map((g, gi) => cardDone(cls, g, rr, "g" + gi) ? null : grpLabel(cls, gi)).filter(Boolean);
       if (!confirm(`${STAGES[st].name} ${r}라운드 경기를 종료할까요?${left.length ? `\n\n⚠ 아직 입력이 안 끝난 다트: ${left.join(", ")}` : ""}\n\n종료하면 학생 입력이 잠기고 다트가 비워집니다. 결과는 그대로 남고, 선생님은 나중에도 고칠 수 있어요.`)) return;
-      put(P(cls, "closed", st, "r" + r), Date.now(), true);
+      put(P(cls, "closed", st, "r" + r), Date.now(), true); stampAbs(cls, st, r);
       const L = liveOf(cls); if (L && L.st === st && L.r === r) put(P(cls, "live"), null, true);
       const nx = nextStep(st, r);
       ui.sel = null; ui.focus = null;
@@ -1763,7 +1812,7 @@ document.addEventListener("click", e => {
     case "copyGrp": copy(`${location.origin}${location.pathname}?cls=${encodeURIComponent(cls)}&grp=${v}`); break;
     case "backup": download(`다트리그_백업_${new Date().toISOString().slice(0, 10)}.json`, JSON.stringify(S, null, 1), "application/json"); break;
     case "resetGames":
-      if (confirm(`${cls}반의 경기 결과와 과제수행 체크를 모두 지울까요? 되돌릴 수 없습니다.`)) { put(P(cls, "games"), null, true); put(P(cls, "roles"), null, true); put(P(cls, "closed"), null, true); put(P(cls, "live"), null, true); put(P(cls, "task"), null); }
+      if (confirm(`${cls}반의 경기 결과와 과제수행 체크를 모두 지울까요? 되돌릴 수 없습니다.`)) { put(P(cls, "games"), null, true); put(P(cls, "roles"), null, true); put(P(cls, "closed"), null, true); put(P(cls, "absr"), null, true); put(P(cls, "manual"), null, true); put(P(cls, "live"), null, true); put(P(cls, "task"), null); }
       break;
     case "resetGroups":
       if (confirm(`${cls}반 조 편성을 지울까요?`)) put(P(cls, "groups"), null);
@@ -1845,8 +1894,10 @@ function studentRow(cls, st) {
   const t = on, c = taskPts(cls, s, rc), tot = a.area + b.area + c;
   const cnt = rc[s] || {}, roleText = TASKS.filter(([k]) => cnt[k]).map(([k, l]) => l + " " + cnt[k] + "회").join(" · ");
   const miss = [];
-  if (a.played < CFG.rounds) miss.push(`카운트업 ${CFG.rounds - a.played}R 미응시`);
-  if (b.played < CFG.rounds) miss.push(`301 ${CFG.rounds - b.played}R 미응시`);
+  [["카운트업", a], ["301", b]].forEach(([nm, rec]) => {
+    if (rec.manual != null) { miss.push(`${nm} 직접 ${rec.manual}점`); return; }
+    rec.rounds.forEach((x, i) => { if (!x) miss.push(`${nm} ${i + 1}R 미응시`); else if (x.fill) miss.push(`${nm} ${i + 1}R 인정 결석(평균 ${x.pts})`); else if (x.zero) miss.push(`${nm} ${i + 1}R 미인정(4위)`); });
+  });
   return { s, a, b, t, c, tot, roleText, grade: convTotal(tot), note: miss.join(" / ") };
 }
 async function downloadXLSX() {
@@ -1878,9 +1929,9 @@ async function downloadXLSX() {
     const rows = [top, sub];
     roster(cls).forEach(st => {
       const r = studentRow(cls, st), row = [+st.no || st.no, st.name];
-      r.a.rounds.forEach(x => row.push(x ? dash(x.v) : "", x ? x.rank : "", x ? x.n : "", x ? x.pts : ""));
+      r.a.rounds.forEach(x => row.push(x ? dash(x.v) : "", x ? (x.rank || (x.fill ? "인정·평균" : "미인정 4위")) : "", x ? (x.n || "") : "", x ? x.pts : ""));
       row.push(r.a.sum, r.a.played ? r.a.area : 0);
-      r.b.rounds.forEach(x => row.push(x ? x.rank : "", x ? dash(x.v) : "", x ? x.n : "", x ? x.pts : ""));
+      r.b.rounds.forEach(x => row.push(x ? (x.rank || (x.fill ? "인정·평균" : "미인정 4위")) : "", x ? dash(x.v) : "", x ? (x.n || "") : "", x ? x.pts : ""));
       row.push(r.b.sum, r.b.played ? r.b.area : 0);
       row.push(...TASKS.map(([k]) => r.t[k] ? 1 : 0), r.c, r.roleText, r.tot, r.grade, r.note);
       rows.push(row);
