@@ -239,10 +239,8 @@
   #big .bmEntry{min-height:56px; border-radius:12px; border:1px solid var(--line2); background:#fff; color:var(--pri); font-size:18px; font-weight:800; padding:0 16px; white-space:nowrap}
   #big .bmCls{grid-column:1/-1; display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding-top:8px; border-top:1px solid var(--line)}
   #big .bmCls b{font-size:17px; color:var(--sub); margin-right:4px}
-  #big .bmCls .plus{font-style:normal; font-size:22px; font-weight:800; color:var(--sub)}
   #big .bmCls button{min-height:48px; min-width:84px; border-radius:999px; border:1px solid var(--line2); background:#fff; color:var(--sub); font-size:18px; font-weight:800; padding:0 16px}
   #big .bmCls button.on{background:var(--pri); border-color:var(--pri); color:#fff}
-  #big .bmCls button:disabled{opacity:1; background:var(--ink); border-color:var(--ink)}
   #big .gCls{font-size:clamp(18px,1.8vw,26px); font-weight:800; color:var(--pri); background:var(--priSoft); border-radius:999px; padding:4px 14px}
   #big .doneBar{display:flex; align-items:center; gap:14px; flex-wrap:wrap; background:#E3F6EB; border:1px solid #BFE6CF; color:#1E6B42; border-radius:14px; padding:8px 14px; margin-bottom:14px; font-size:24px; font-weight:800}
   #big .doneBar .nextBtn{margin-left:auto}
@@ -1524,17 +1522,14 @@ async function drawQR() {
 /* 크게 보기 (프로젝터) */
 /* 화면 띄우기 — 지난번 함께 띄운 반(같은 시간 수업)이 있으면 같이 띄운다 */
 function openBig(cls) {
-  const prev = ui.bigDay === today() ? (ui.bigCls || []).filter(c => c !== cls && S.rosters[c] && halfOf(c) !== halfOf(cls)).slice(0, 1) : [];
+  const prev = ui.bigDay === today() ? (ui.bigCls || []).filter(c => c !== cls && S.rosters[c]).slice(0, 1) : [];
   ui.bigCls = [cls, ...prev]; ui.bigDay = today(); ui.wave = 1; saveUI();
   setLive(cls, ui.stage, ui.round);
   showBig();
 }
 /* 10대 경기장 전체를 한 화면에 — 같이 수업하는 반을 골라 함께 띄운다 */
-/* 2026-10-07: 1~6반은 정우철, 7~10반은 김양선 선생님 — 같이 수업하는 건 늘 정우철 반 하나 + 김양선 반 하나 */
-const HALF_T = ["정우철", "김양선"], HALF_FROM = 7;   // 7반부터 김양선
-const halfOf = c => { const m = String(c).match(/(\d+)\D*$/); return m && +m[1] >= HALF_FROM ? 1 : 0; };
-const partnerCls = cls => classNames().filter(c => halfOf(c) !== halfOf(cls));
-const bigPair = () => ui.bigDay === today() ? (ui.bigCls || []).filter(c => c !== ui.cls && S.rosters[c] && halfOf(c) !== halfOf(ui.cls)).slice(0, 1) : [];
+/* 2026-10-07: 학급 줄에 모든 반 단추 — 1학급 또는 2학급을 고르고 그날만 유지 */
+const bigPair = () => ui.bigDay === today() ? (ui.bigCls || []).filter(c => c !== ui.cls && S.rosters[c]).slice(0, 1) : [];
 function showBig() {
   const st = ui.stage, show = [ui.cls, ...bigPair()];
   // 함께 띄운 다른 반은 그 반의 진행 중 라운드를 보여 준다
@@ -1560,8 +1555,8 @@ function showBig() {
       <div class="segc">${Object.entries(STAGES).map(([k, s]) => `<button class="${st === k ? "on" : ""}" data-act="bigStage" data-v="${k}">${k === "cu" ? "카운트업" : "301"}</button>`).join("")}</div>
       <div class="segc">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}</div>
       <button class="bmEntry" data-act="bigEntry">✏️ 결과 입력</button>
-      <div class="bmCls"><b>학급</b><button class="on" disabled>${esc(ui.cls)}반</button><i class="plus">+</i>${partnerCls(ui.cls).map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div></div>` : "";
-  $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle"><span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b>라운드</span>${multi ? `<span class="gCls">${show.map(esc).join(" · ")}반</span>` : ""}${waveBtns}</div>${qr}${ctl}</div>${menu}
+      <div class="bmCls"><b>학급</b>${classNames().map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div></div>` : "";
+  $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle"><span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b>라운드</span>${multi ? `<span class="gCls">${show.slice().sort(numSort).map(esc).join(" · ")}반</span>` : ""}${waveBtns}</div>${qr}${ctl}</div>${menu}
     ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기</button></div>` : ""}
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
     <div class="arena" style="grid-template-columns:repeat(${(() => { const k = onBoards().filter(b => slot[b]).length || 1; return k <= 5 ? k : Math.ceil(k / 2); })()},1fr)">${onBoards().filter(b => slot[b]).map(b => { const g = slot[b] || [];
@@ -1765,7 +1760,13 @@ document.addEventListener("click", e => {
     }
     case "addGrp": { const list = groupsOf(cls, ui.stage); list.push({ m: [], tag: "" }); saveGroups(cls, ui.stage, list); break; }
     case "big": openBig(cls); break;
-    case "bigCls": { const on = bigPair().includes(v); ui.bigCls = on ? [cls] : [cls, v]; ui.bigDay = today(); saveUI(); showBig(); break; }
+    case "bigCls": {   // 1학급 또는 2학급: 고른 반을 누르면 빠지고(하나는 남김), 새 반을 누르면 더한다(이미 둘이면 짝을 바꿈)
+      const sel = [cls, ...bigPair()];
+      if (sel.includes(v)) { if (sel.length < 2) break; const rest = sel.filter(c => c !== v); ui.cls = rest[0]; ui.bigCls = rest; }
+      else ui.bigCls = [cls, v];
+      if (ui.cls !== cls) { const L = liveOf(ui.cls); ui.round = L && L.st === ui.stage ? L.r : openRound(ui.cls, ui.stage); }
+      ui.bigDay = today(); saveUI(); render(); showBig(); break;
+    }
     case "bigMenu": ui.bigMenu = !ui.bigMenu; showBig(); break;
     case "bigWave": ui.wave = +v; showBig(); break;
     case "bigStage": ui.stage = v; ui.round = openRound(cls, v); render(); showBig(); break;
