@@ -1071,7 +1071,7 @@ function roundSeg(cls, st, act) {
   const L = liveOf(cls);
   return `<div class="seg">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => {
     const gs = groupsOf(cls, st, r), res = roundRes(cls, st, r), done = gs.filter((g, gi) => cardDone(cls, g, res, "g" + gi)).length;
-    const mark = L && L.st === st && L.r === r ? "● " : isClosed(cls, st, r) ? "🔒 " : "";
+    const mark = L && L.st === st && L.r === r && gs.length ? "● " : isClosed(cls, st, r) ? "🔒 " : "";
     const sub = act === "round" ? (gs.length ? `${done}/${gs.length}` : "조 없음") : (gs.length ? "✓" : "");
     return `<button class="plain ${ui.round === r ? "on" : ""}" data-act="${act}" data-v="${r}">${mark}${r}라운드<span class="done">${sub}</span></button>`; }).join("")}</div>`;
 }
@@ -1080,12 +1080,12 @@ function roundSeg(cls, st, act) {
 function gameSeg(cls) {
   const L = liveOf(cls), st = ui.stage, r = ui.round, other = st === "cu" ? "x3" : "cu";
   const otherR = L && L.st === other ? L.r : openRound(cls, other);
-  const live = L && L.st === st && L.r === r, cl = isClosed(cls, st, r), has = groupsOf(cls, st, r).length;
+  const has = groupsOf(cls, st, r).length, live = L && L.st === st && L.r === r && has, cl = isClosed(cls, st, r);
   const sub = live ? "<small class=live>● 진행 중</small>" : cl ? "<small>🔒 종료</small>" : has ? "<small>조 있음</small>" : "<small>조 없음</small>";
-  const dots = Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(k => `<i class="${k === r ? "on" : ""} ${L && L.st === st && L.r === k ? "live" : ""}"></i>`).join("");
+  const dots = Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(k => `<i class="${k === r ? "on" : ""} ${L && L.st === st && L.r === k && groupsOf(cls, st, k).length ? "live" : ""}"></i>`).join("");
   return `<div class="gBar noprint">
     <div class="gTog">${["cu", "x3"].map(s => `<button class="${s} ${s === st ? "on" : ""}" ${s === st ? "" : `data-act="gm" data-v="${other}|${otherR}"`}>${s === "cu" ? "카운트업" : "301"}</button>`).join("")}</div>
-    <div class="rPills">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(k => { const lv = L && L.st === st && L.r === k, c2 = isClosed(cls, st, k);
+    <div class="rPills">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(k => { const lv = L && L.st === st && L.r === k && groupsOf(cls, st, k).length, c2 = isClosed(cls, st, k);
       return `<button class="${k === r ? "on" : ""} ${st}" data-act="gm" data-v="${st}|${k}"><b>${k}R</b><small>${lv ? "● 진행" : c2 ? "🔒" : groupsOf(cls, st, k).length ? "조 있음" : ""}</small></button>`; }).join("")}</div>
   </div>`;
 }
@@ -1870,6 +1870,7 @@ document.addEventListener("click", e => {
       // 옛 형식(라운드 구분 전, 예전 앱이 저장)은 1라운드로 읽히므로 통째로 지운다
       const all = ((C(cls).groups || {})[st]) || {};
       if (all.list) { if (r === 1) put(P(cls, "groups", st), null, true); } else put(P(cls, "groups", st, "r" + r), null, true);
+      const L = liveOf(cls); if (L && L.st === st && L.r === r) put(P(cls, "live"), null, true);
       ui.sel = null; ui.focus = null; ui.gOpen = []; toast(`${nm}를 리셋했습니다`); render(); break;
     }
     case "resetGroups":
