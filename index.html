@@ -1093,7 +1093,7 @@ function scGroups() {
   const info = grpRec(cls, st, r);
   let h = gameSeg(cls);
   if (!VIEW && !gs.length && !liveOf(cls)) h += `<div class="acts noprint"><button class="btn big nextBig wide" data-act="startNext">▶ 경기 시작</button></div>`;
-  if (!VIEW && gs.length) h += `<div class="acts2 noprint"><button class="btn big nextBig" data-act="startNext">▶ 다음 경기</button><button class="btn big soft reMake" data-act="make" aria-label="이 라운드 다시 편성">🔀<small>다시 편성</small></button><button class="btn big soft" data-act="big" aria-label="프로젝터 화면">📺</button></div>`;
+  if (!VIEW && gs.length) h += `<div class="acts2 noprint"><button class="btn big nextBig" data-act="startNext">▶ 다음 경기</button><button class="btn big soft reMake" data-act="resetRound" aria-label="이 라운드 리셋">↺<small>리셋</small></button><button class="btn big soft" data-act="big" aria-label="프로젝터 화면">📺</button></div>`;
   if (!VIEW) h += absPicker(cls, !gs.length);
   if (!VIEW) {
     const opts = METHOD_OPTS[st];
@@ -1860,6 +1860,14 @@ document.addEventListener("click", e => {
     case "resetGames":
       if (confirm(`${cls}반의 경기 결과와 과제수행 체크를 모두 지울까요? 되돌릴 수 없습니다.`)) { put(P(cls, "games"), null, true); put(P(cls, "roles"), null, true); put(P(cls, "closed"), null, true); put(P(cls, "absr"), null, true); put(P(cls, "manual"), null, true); put(P(cls, "live"), null, true); put(P(cls, "task"), null); }
       break;
+    case "resetRound": {   // 지금 라운드만 처음으로: 조·결과·역할·종료 표시를 지운다 (2026-10-07)
+      const st = ui.stage, r = ui.round, nm = `${STAGES[st].name} ${r}라운드`;
+      if (!confirm(`${cls}반 ${nm}를 리셋할까요?
+
+이 라운드의 조 편성과 입력한 결과가 지워집니다. 다른 라운드는 그대로입니다.`)) break;
+      ["groups", "games", "roles", "closed", "absr"].forEach(k => put(P(cls, k, st, "r" + r), null, true));
+      ui.sel = null; ui.focus = null; ui.gOpen = []; toast(`${nm}를 리셋했습니다`); render(); break;
+    }
     case "resetGroups":
       if (confirm(`${cls}반 조 편성을 지울까요?`)) put(P(cls, "groups"), null);
       break;
