@@ -305,6 +305,15 @@
   .sg{text-align:right; font-family:"Barlow Condensed",sans-serif; font-size:28px; color:var(--pri)} .sg small{font-size:15px; margin-left:1px} .sg i{display:block; font-size:12px; color:var(--warn); font-style:normal; font-family:"Noto Sans KR",sans-serif; text-align:right; margin-top:-4px}
   .s2{display:flex; align-items:center; gap:10px; margin-top:4px}
   .stk{display:flex; gap:5px} .stk .tk{min-height:40px; padding:0 10px; margin:0}
+  .gBar{display:flex; align-items:center; gap:10px; margin-bottom:12px; background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:8px; box-shadow:var(--shadow)}
+  .gBar .gchip{flex:none; min-height:56px; border:0; display:flex; align-items:center; gap:6px; padding:0 14px; border-radius:12px; font-size:18px}
+  .gBar .gchip .swap{font-size:16px; opacity:.75}
+  .rStep{flex:1; min-width:0; display:flex; align-items:center; gap:4px}
+  .rStep .arw{flex:none; width:48px; height:56px; border-radius:12px; border:1px solid var(--line2); background:var(--soft); font-size:28px; font-weight:800; color:var(--pri); line-height:1}
+  .rStep .arw:disabled{opacity:.3}
+  .rMid{flex:1; min-width:0; display:flex; flex-direction:column; align-items:center; line-height:1.15}
+  .rMid b{font-size:19px; white-space:nowrap} .rMid small{font-size:13px; font-weight:700; color:var(--sub); white-space:nowrap} .rMid small.live{color:var(--good)}
+  .rMid .dots{display:flex; gap:4px; margin-top:3px} .rMid .dots i{width:7px; height:7px; border-radius:50%; background:var(--line2)} .rMid .dots i.on{background:var(--pri)} .rMid .dots i.live{box-shadow:0 0 0 2px var(--good)}
   details.gPick{margin-bottom:12px}
   details.gPick > summary{list-style:none; cursor:pointer; display:flex; flex-wrap:wrap; row-gap:6px; align-items:center; gap:10px; padding-top:8px; padding-bottom:8px; min-height:60px; padding:0 14px; border-radius:16px; background:var(--panel); border:1px solid var(--line); box-shadow:var(--shadow); font-size:19px}
   details.gPick > summary::-webkit-details-marker{display:none}
@@ -1002,18 +1011,19 @@ function roundSeg(cls, st, act) {
     return `<button class="plain ${ui.round === r ? "on" : ""}" data-act="${act}" data-v="${r}">${mark}${r}라운드<span class="done">${sub}</span></button>`; }).join("")}</div>`;
 }
 /* 경기·라운드 단추 한 줄 — ● 진행 중 · 🔒 종료 · 점 = 조 있음 */
+/* 경기·라운드 한 줄 (2026-10-07): [게임 칩 ⇄] 누르면 게임이 바뀌고, ‹ › 로 라운드 이동 — 펼칠 필요 없음 */
 function gameSeg(cls) {
-  const L = liveOf(cls), st = ui.stage;
-  const roundFor = s => s === ui.stage ? ui.round : (L && L.st === s ? L.r : openRound(cls, s));
-  const tabs = ["cu", "x3"].map(s => `<button class="gt ${s} ${st === s ? "on" : ""}" data-act="gm" data-v="${s}|${roundFor(s)}">${STAGES[s].name}${L && L.st === s ? "<i>●</i>" : ""}</button>`).join("");
-  const rounds = Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => {
-    const has = groupsOf(cls, st, r).length, live = L && L.st === st && L.r === r, cl = isClosed(cls, st, r);
-    const sub = live ? "● 진행 중" : cl ? "종료" : has ? "조 있음" : "";
-    return `<button class="rt ${st} ${ui.round === r ? "on" : ""}" data-act="gm" data-v="${st}|${r}"><b>${r}라운드</b>${sub ? `<small>${sub}</small>` : ""}</button>`;
-  }).join("");
-  const live = L && L.st === st && L.r === ui.round, cl = isClosed(cls, st, ui.round);
-  return `<details class="gPick noprint" data-k="gpick" ${ui.open.gpick ? "open" : ""}><summary><span class="gchip ${st}">${STAGES[st].name}</span><b>${ui.round}라운드</b>${live ? "<small class=live>● 진행 중</small>" : cl ? "<small>🔒 종료</small>" : ""}<span class="sp"></span><span class="chev">▾</span></summary>
-    <div class="gHead"><div class="eq2 gTabs">${tabs}</div><div class="eq3 rTabs">${rounds}</div></div></details>`;
+  const L = liveOf(cls), st = ui.stage, r = ui.round, other = st === "cu" ? "x3" : "cu";
+  const otherR = L && L.st === other ? L.r : openRound(cls, other);
+  const live = L && L.st === st && L.r === r, cl = isClosed(cls, st, r), has = groupsOf(cls, st, r).length;
+  const sub = live ? "<small class=live>● 진행 중</small>" : cl ? "<small>🔒 종료</small>" : has ? "<small>조 있음</small>" : "<small>조 없음</small>";
+  const dots = Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(k => `<i class="${k === r ? "on" : ""} ${L && L.st === st && L.r === k ? "live" : ""}"></i>`).join("");
+  return `<div class="gBar noprint">
+    <button class="gchip ${st}" data-act="gm" data-v="${other}|${otherR}" aria-label="${STAGES[other].name}로 바꾸기">${STAGES[st].name}<span class="swap">⇄</span></button>
+    <div class="rStep"><button class="arw" ${r > 1 ? `data-act="gm" data-v="${st}|${r - 1}"` : "disabled"} aria-label="이전 라운드">‹</button>
+      <div class="rMid"><b>${r}라운드</b>${sub}<span class="dots">${dots}</span></div>
+      <button class="arw" ${r < CFG.rounds ? `data-act="gm" data-v="${st}|${r + 1}"` : "disabled"} aria-label="다음 라운드">›</button></div>
+  </div>`;
 }
 function scGroups() {
   const cls = ui.cls, st = ui.stage, r = ui.round, sm = stuMap(cls), gs = groupsOf(cls, st);
@@ -1583,7 +1593,7 @@ document.addEventListener("click", e => {
     case "gm": {
       const [st, r] = v.split("|"); ui.stage = st; ui.round = +r; ui.sel = null; ui.focus = null; ui.gOpen = [];
       if (b.classList.contains("rt")) ui.open.gpick = false;   // 라운드까지 고르면 접는다
-      if (ui.tab === "groups" && groupsOf(cls, st, +r).length && !isClosed(cls, st, +r)) setLive(cls, st, +r);
+      // 둘러보기만으로는 진행 중 라운드를 바꾸지 않는다 — [▶ 다음 경기]·편성·프로젝터에서만 바뀐다
       render(); break;
     }
     case "wipeGames": case "wipeAll": {
