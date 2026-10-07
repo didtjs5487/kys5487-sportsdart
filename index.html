@@ -337,7 +337,8 @@
   .gchip.cu{background:var(--cu); color:var(--cuInk)} .gchip.x3{background:var(--x3); color:var(--x3Ink)}
   details.gPick small{font-size:15px; font-weight:700; color:var(--sub)} details.gPick small.live{color:var(--good)}
   .chev{font-size:15px; font-weight:700; color:var(--pri); white-space:nowrap}
-  .acts2{display:grid; grid-template-columns:minmax(0,1fr) 76px; gap:8px; margin-bottom:12px}
+  .acts2{display:grid; grid-template-columns:minmax(0,1fr) 92px 76px; gap:8px; margin-bottom:12px}
+  .acts2 .reMake{flex-direction:column; gap:0; padding:0 4px; line-height:1.1} .acts2 .reMake small{font-size:15px; font-weight:800; white-space:nowrap}
   .acts2 .btn{min-height:62px; font-size:21px}
   .glist, .clist{display:flex; flex-direction:column; gap:8px}
   .growW{display:flex; gap:6px}
@@ -1060,7 +1061,7 @@ function scGroups() {
   const info = grpRec(cls, st, r);
   let h = gameSeg(cls);
   if (!VIEW && !gs.length && !liveOf(cls)) h += `<div class="acts noprint"><button class="btn big nextBig wide" data-act="startNext">▶ 경기 시작</button></div>`;
-  if (!VIEW && gs.length) h += `<div class="acts2 noprint"><button class="btn big nextBig" data-act="startNext">▶ 다음 경기</button><button class="btn big soft" data-act="big" aria-label="프로젝터 화면">📺</button></div>`;
+  if (!VIEW && gs.length) h += `<div class="acts2 noprint"><button class="btn big nextBig" data-act="startNext">▶ 다음 경기</button><button class="btn big soft reMake" data-act="make" aria-label="이 라운드 다시 편성">🔀<small>다시 편성</small></button><button class="btn big soft" data-act="big" aria-label="프로젝터 화면">📺</button></div>`;
   if (!VIEW) h += absPicker(cls, !gs.length);
   if (!VIEW) {
     const opts = METHOD_OPTS[st];
