@@ -294,6 +294,12 @@
   .prow.cu1{grid-template-columns:1fr 104px 76px; grid-template-rows:auto; align-items:center}
   .rkBadge{font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-size:24px; font-weight:700; color:var(--pri); text-align:right; line-height:1}
   .rkBadge small{display:block; font-size:16px; opacity:.85} .rkBadge.r1{color:var(--r1)}
+  details.cuScore{margin-top:10px}
+  details.cuScore > summary{cursor:pointer; min-height:48px; display:flex; align-items:center; gap:6px; font-size:17px; font-weight:700; color:var(--sub)}
+  details.cuScore > summary small{font-size:14px; font-weight:600}
+  details.cuScore > summary{list-style:none} details.cuScore > summary::-webkit-details-marker{display:none}
+  details.cuScore > summary::before{content:"▸"; color:var(--pri)} details.cuScore[open] > summary::before{content:"▾"}
+  details.cuScore .prow{margin-top:6px}
   .tapHint{margin:2px 0 8px; font-size:17px; font-weight:700; color:var(--sub)}
   .tapGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
   .tapBtn{position:relative; min-width:0; min-height:66px; border:1px solid var(--line2); border-radius:14px; background:var(--soft); font-size:19px; font-weight:700; display:flex; align-items:center; gap:8px; padding:0 10px; text-align:left; color:var(--ink)}
@@ -531,8 +537,8 @@ const CFG = {
   total: [[16, 20], [14, 18], [12, 16], [10, 14], [8, 12], [5, 10], [0, 8]],
 };
 const STAGES = {
-  cu: { name: "카운트 업", mark: "Ⓐ", better: "high", vLabel: "점수", hint: "태블릿에 나온 최종 점수를 적으면 순위가 자동으로 매겨집니다." },
-  x3: { name: "301 게임", mark: "Ⓑ", better: "low", vLabel: "남은점수", hint: "태블릿의 최종 순위를 누르세요. 남은 점수는 적어도 되고 안 적어도 됩니다." },
+  cu: { name: "카운트 업", mark: "Ⓐ", better: "high", vLabel: "점수", hint: "태블릿 결과 화면의 1위부터 순서대로 이름을 누르세요. 점수는 적어도 되고 안 적어도 됩니다." },
+  x3: { name: "301 게임", mark: "Ⓑ", better: "low", vLabel: "남은점수", hint: "태블릿 결과 화면의 1위부터 순서대로 이름을 누르세요." },
 };
 const TASKS = [["p", "준비·정리"], ["j", "경기 진행"], ["s", "심판"]];
 
@@ -1250,9 +1256,9 @@ function joinBox(cls) {
     <button class="btn pri big" style="width:100%" data-act="join">시작</button></div>`;
 }
 /* 301: 끝난 순서대로 누르는 이름 단추 */
-function tapGrid(cls, key, ids, res, n, ro) {
+function tapGrid(cls, key, ids, res, n, ro, hint = "🏆 1위부터 순서대로 누르세요") {
   const sm = stuMap(cls);
-  return `${ro ? "" : `<p class="tapHint">🏁 끝난 순서대로 누르세요</p>`}<div class="tapGrid">${ids.map(s => { const x = sm[s] || { name: "?" }, r = (res[s] || {}).r;
+  return `${ro ? "" : `<p class="tapHint">${hint}</p>`}<div class="tapGrid">${ids.map(s => { const x = sm[s] || { name: "?" }, r = (res[s] || {}).r;
     return `<button class="tapBtn ${r ? "on" : ""} ${r === 1 ? "r1" : ""}" ${ro ? "disabled" : `data-act="tapRank" data-g="${key}" data-s="${s}"`}><span class="ord">${r || ""}</span><span class="tn">${esc(x.name)}</span>${r ? `<small>+${ptsOf(r, n)}</small>` : ""}</button>`; }).join("")}</div>`;
 }
 function dartState(cls, g, rr, gi) {
@@ -1286,7 +1292,11 @@ function card(cls, st, gk, members, res, title) {
   const n = gk === "mk" ? CFG.maxGroup : Math.max(live.length, 1);
   const done = live.length && live.every(s => res[s] && res[s].r >= 1);
   const simpleCU = gk !== "mk" && st === "cu", tap301 = gk !== "mk" && st === "x3";
-  const rows = tap301 ? tapGrid(cls, key, ids.filter(s => !elsewhere[s] && (!isAbs(cls, s) || res[s])), res, n, RO) : ids.map(s => {
+  const tapIds = ids.filter(s => !elsewhere[s] && (!isAbs(cls, s) || res[s]));
+  // 카운트업: 순위대로 누르기 + 점수는 접힌 칸(선택)
+  const cuScores = simpleCU ? `<details class="cuScore" data-k="cus-${key}" ${ui.open["cus-" + key] ? "open" : ""}><summary>점수도 적기 <small>(선택 · 학년 순위용)</small></summary>${tapIds.map(s => { const x = sm[s] || { name: "?" }, r = res[s] || {};
+      return `<div class="prow cu1"><div class="who">${esc(x.name)}</div><input type="number" inputmode="numeric" placeholder="점수" value="${typeof r.v === "number" ? r.v : ""}" ${RO ? "disabled" : ""} data-g="${key}" data-s="${s}" class="vin"></div>`; }).join("")}</details>` : "";
+  const rows = tap301 ? tapGrid(cls, key, tapIds, res, n, RO) : simpleCU ? tapGrid(cls, key, tapIds, res, n, RO, "🏆 1위부터 순서대로 누르세요") + cuScores : ids.map(s => {
     const x = sm[s] || { no: "?", name: "(명렬 없음)" }, r = res[s] || {};
     if (elsewhere[s]) return `<div class="prow abs"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)} · 이번 라운드는 ${esc(kName(elsewhere[s]))}에서 기록</div></div>`;
     const a = isAbs(cls, s) && !res[s];
@@ -1301,7 +1311,7 @@ function card(cls, st, gk, members, res, title) {
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
   return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
-    ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${RO ? "" : `<div class="foot"><button class="btn sm ghost" data-act="clearCard" data-g="${key}">🗑 지우기</button>${gk !== "mk" && st === "cu" && Object.values(res).some(x => x.m) ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 다시</button>` : ""}</div>`}</div>`;
+    ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${RO ? "" : `<div class="foot"><button class="btn sm ghost" data-act="clearCard" data-g="${key}">🗑 지우기</button>${gk !== "mk" && st === "cu" && tapIds.length > 1 && tapIds.every(s => res[s] && typeof res[s].v === "number") ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 정하기</button>` : ""}</div>`}</div>`;
 }
 /* 역할 기록 — 이 다트(조)·이 라운드에서 누가 입력했고, 누가 경기 진행·심판·준비 정리를 했나.
    classes/{반}/roles/{경기}/r{라운드}/{g번호} = { by, byCls, t, j:{sid:1}, s:{sid:1}, p:{sid:1} } → Ⓒ 과제수행에 자동 반영 */
@@ -1600,7 +1610,7 @@ function saveGroups(cls, st, list, method, r = ui.round) {
 const hasAnyRound = (cls, st, r) => Object.values(roundRes(cls, st, r)).some(x => Object.values(x || {}).some(y => y && y.r >= 1));
 function writeCard(gk, res) {
   // 보충 경기는 다른 조에 끼어 던진 순위를 선생님이 직접 누른다 — 혼자 1위가 되지 않게 자동 순위를 쓰지 않는다
-  if (gk !== "mk") autoRank(res, STAGES[ui.stage].better);
+  if (gk !== "mk" && !Object.values(res).some(x => x && x.m)) autoRank(res, STAGES[ui.stage].better);
   Object.keys(res).forEach(s => { const x = res[s]; if (x.r == null && typeof x.v !== "number" && gk !== "mk") delete res[s]; });
   put(P(ui.cls, "games", ui.stage, "r" + ui.round, gk), Object.keys(res).length ? res : null);
   stampRoles(gk);
@@ -1890,7 +1900,6 @@ document.addEventListener("change", e => {
   const gk = t.dataset.g, s = t.dataset.s, res = curCard(gk), x = res[s] || {};
   const raw = t.value.trim();
   if (raw === "") delete x.v; else { const n = Math.round(+raw); if (!Number.isFinite(n) || n < 0) { toast("0 이상의 숫자를 적어 주세요"); return; } x.v = n; }
-  delete x.m;   // 점수를 고치면 자동 순위로 돌아간다
   res[s] = x;
   const inputs = [...document.querySelectorAll(".vin:not(:disabled)")], idx = inputs.indexOf(t);
   const nextKey = inputs[idx + 1] ? inputs[idx + 1].dataset.g + "|" + inputs[idx + 1].dataset.s : null;
