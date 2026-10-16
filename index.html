@@ -117,7 +117,7 @@
   .sx{display:inline-block; font-size:14px; font-weight:700; color:#C2185B; background:#FCE4EF; border-radius:999px; padding:0 7px; margin-left:4px; vertical-align:2px}
 
   /* 다트 위치 */
-  .boards{display:grid; grid-template-columns:repeat(10,1fr); gap:6px}
+  .boards{display:grid; grid-template-columns:repeat(var(--bc,10),1fr); gap:6px}
   .bd{min-height:58px; border:1px solid var(--line); border-radius:12px; background:var(--soft); font-size:24px; font-weight:700; color:#A3A7C7; line-height:1.1; padding:2px}
   .bd small{display:block; font-family:"Noto Sans KR",sans-serif; font-size:13px; font-weight:600}
   .bd.on{background:var(--pri); border-color:var(--pri); color:#fff}
@@ -125,7 +125,7 @@
   .bd.dead{background:var(--panel); color:#C9C6E4; border-style:dashed; text-decoration:line-through}
   .bd.pw.on{background:var(--good); border-color:var(--good); color:#fff}
   .bd.pw.off{background:var(--panel); color:#A3A7C7; border-style:dashed}
-  @media (max-width:560px){ .boards{grid-template-columns:repeat(5,1fr)!important} }
+  @media (max-width:560px){ .boards{grid-template-columns:repeat(var(--bcp,5),1fr)!important} }
 
   .go{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px}
   .go .btn{min-height:68px; font-size:22px}
@@ -388,7 +388,7 @@
   .segc{flex:1; display:flex; background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:4px; gap:4px; min-width:0}
   .segc button{flex:1; min-width:0; min-height:46px; border:0; border-radius:10px; background:transparent; font-size:16px; font-weight:700; color:var(--sub); line-height:1.15; padding:2px; overflow-wrap:anywhere}
   .segc button.on{background:var(--pri); color:#fff; box-shadow:0 3px 10px rgba(91,81,232,.28)}
-  .boards.mini{grid-template-columns:repeat(5,1fr)!important; gap:6px; margin-left:50px}
+  .boards.mini{grid-template-columns:repeat(var(--bcp,5),1fr)!important; gap:6px; margin-left:50px}
   .boards.mini .bd{min-height:46px; font-size:20px}
   .pane .switch{margin:0}
   .sumline{text-align:center; font-size:18px; color:var(--sub)} .sumline b{color:var(--ink); font-size:20px} .sumline span{font-size:15px}
@@ -412,7 +412,7 @@
   .opts{margin-bottom:10px}
   .opt{min-height:52px; border-radius:12px; border:1px solid var(--line); background:var(--soft); font-size:17px; font-weight:700; color:var(--sub); padding:0 6px}
   .opt.on{background:var(--pri); border-color:var(--pri); color:#fff}
-  .pane .boards{grid-template-columns:repeat(5,1fr)!important}
+  .pane .boards{grid-template-columns:repeat(var(--bcp,5),1fr)!important}
   .pane .bd{min-height:54px}
   .switch{width:100%; min-height:56px; display:flex; align-items:center; justify-content:space-between; border-radius:12px; border:1px solid var(--line); background:var(--soft); padding:0 14px; font-size:17px; font-weight:700; color:var(--ink); margin-bottom:10px}
   .switch i{width:52px; height:30px; border-radius:999px; background:#CFCBE9; position:relative; flex:none}
@@ -1144,6 +1144,7 @@ const sexBadge = x => x.sex === "여" ? ` <span class="sx">여</span>` : "";
    조 순서대로 고른 위치에 하나씩 배정하고, 위치보다 조가 많으면 나머지는 대기. */
 const boardCount = () => Math.min(20, Math.max(1, +((S.settings || {}).count) || CFG.boards));
 const allBoards = () => Array.from({ length: boardCount() }, (_, i) => i + 1);
+const bcStyle = () => { const n = boardCount(), c = Math.ceil(n / 2); return n > 10 ? `style="--bc:${c};--bcp:${c}"` : ""; };
 const isOff = n => !!((S.settings || {}).off || {})["b" + n];
 /* 켜진 다트 — 고장 났거나 오늘 안 쓰는 다트는 꺼 두면 조 배정·화면에서 빠진다 */
 function onBoards() { const on = allBoards().filter(n => !isOff(n)); return on.length ? on : allBoards(); }
@@ -1171,11 +1172,11 @@ function boardPicker(cls) {
       <button class="${mode === "all" && !ui.boardCustom ? "on" : ""}" data-act="boardsSet" data-v="">전체</button>
       ${B.length ? `<button class="${mode === "A" && !ui.boardCustom ? "on" : ""}" data-act="boardsSet" data-v="${A.join(",")}">${rng(A)}</button><button class="${mode === "B" && !ui.boardCustom ? "on" : ""}" data-act="boardsSet" data-v="${B.join(",")}">${rng(B)}</button>` : ""}
       <button class="${custom ? "on" : ""}" data-act="boardCustom">직접</button></div></div>
-    ${custom ? `<div class="boards mini">${allBoards().map(n => isOff(n) ? `<button class="bd dead" disabled>${n}</button>` : `<button class="bd ${mine.includes(n) ? "on" : ""} ${mine.includes(n) && others[n] ? "clash" : ""}" data-act="board" data-v="${n}">${n}${others[n] ? `<small>${others[n].map(esc).join(",")}</small>` : ""}</button>`).join("")}</div>` : ""}`;
+    ${custom ? `<div class="boards mini" ${bcStyle()}>${allBoards().map(n => isOff(n) ? `<button class="bd dead" disabled>${n}</button>` : `<button class="bd ${mine.includes(n) ? "on" : ""} ${mine.includes(n) && others[n] ? "clash" : ""}" data-act="board" data-v="${n}">${n}${others[n] ? `<small>${others[n].map(esc).join(",")}</small>` : ""}</button>`).join("")}</div>` : ""}`;
 }
 /* 고장 난 다트 끄기 · 다트기 수 — 설정 화면에서 */
 function powerPicker() {
-  return `<div class="boards">${allBoards().map(n => `<button class="bd pw ${isOff(n) ? "off" : "on"}" data-act="power" data-v="${n}">${n}<small>${isOff(n) ? "꺼짐" : "켜짐"}</small></button>`).join("")}</div>
+  return `<div class="boards" ${bcStyle()}>${allBoards().map(n => `<button class="bd pw ${isOff(n) ? "off" : "on"}" data-act="power" data-v="${n}">${n}<small>${isOff(n) ? "꺼짐" : "켜짐"}</small></button>`).join("")}</div>
     <div class="row" style="margin-top:10px"><b>다트기 수</b><span class="sp"></span><button class="btn sm" data-act="bcount" data-v="-1" aria-label="한 대 빼기">－</button><b style="font-size:24px;min-width:40px;text-align:center">${allBoards().length}</b><button class="btn sm" data-act="bcount" data-v="1" aria-label="한 대 더하기">＋</button></div>`;
 }
 function hasAny(cls, stage) { const g = (C(cls).games || {})[stage] || {}; return Object.values(g).some(r => Object.values(r || {}).some(x => Object.values(x || {}).some(y => y && y.r >= 1))); }
