@@ -301,6 +301,11 @@
   .goneL{font-size:15px; font-weight:800; color:var(--sub); margin-right:2px}
   .goneChip{min-height:44px; border-radius:999px; border:1px solid var(--line2); background:var(--panel); padding:0 14px; font-size:16px; font-weight:700; color:var(--ink)}
   .goneChip.ask{border-style:dashed; color:var(--bad)} .goneChip.off{display:inline-flex; align-items:center; color:var(--sub); text-decoration:line-through}
+  .alist{display:flex; flex-direction:column; gap:6px}
+  .arow{display:grid; grid-template-columns:minmax(0,1fr) auto auto auto; align-items:center; gap:6px; min-height:52px; border-radius:12px; border:1px solid var(--line); background:var(--panel); padding:0 12px; text-align:left; font-size:16px; font-weight:700; color:var(--ink)}
+  .arow .an{white-space:nowrap; overflow:hidden; text-overflow:ellipsis} .arow .ad, .arow .ag{color:var(--sub); font-size:15px; white-space:nowrap}
+  .arow .ap{justify-self:end; border-radius:999px; padding:4px 10px; background:var(--priSoft); color:var(--pri); font-size:15px; white-space:nowrap}
+  .arow.un{background:var(--badSoft); border-color:#F6B9C1} .arow.un .ap{background:var(--bad); color:#fff}
   .okw{color:var(--warn); font-weight:800}
   .okBox{margin-top:12px; padding:12px; border-radius:14px; background:var(--priSoft); border:1px solid #D3CEFB; text-align:center}
   .okBox p{margin:0 0 8px; font-size:18px; font-weight:800; color:var(--ink)}
@@ -539,6 +544,7 @@
 const CFG = {
   size: 4,                 // 최대 4명씩 조 편성
   rounds: 3,               // 3라운드 실시하여 승점 합산
+  absCap: 2.5,             // 결석 라운드 보정 상한 — 결석으로 중간 이상을 받지 않게 (2026-10-16)
   boards: 10,              // 다트기 기본 대수 — 설정은 S.settings.count / 고장·미설치는 S.settings.off
   maxGroup: 5,             // 다트가 모자랄 때만 5명 조까지
   // 조별 순위 승점 — 1등 4점·꼴찌 1점은 몇 명 조든 같게, 가운데는 고르게 나눠 반올림.
@@ -888,6 +894,7 @@ function startNext(cls) {
   toast(`▶ ${STAGES[target.st].name} ${target.r}라운드 시작 — ${list.length}개 조 (${METHODS[methodFor(target.st)][0]})`);
   openBig(cls);
 }
+const roundDate = (cls, st, r) => { const t = (((C(cls).closed || {})[st]) || {})["r" + r]; if (!t) return ""; const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()}`; };
 const isClosed = (cls, st, r) => !!((((C(cls).closed || {})[st]) || {})["r" + r]);
 function nextStep(st, r) { return r < CFG.rounds ? { st, r: r + 1 } : st === "cu" ? { st: "x3", r: 1 } : null; }
 function setLive(cls, st, r) {
@@ -928,7 +935,7 @@ function record(cls, stage, sid) {
     if (rounds[i]) continue;
     if (!isClosed(cls, stage, i + 1)) { open++; continue; }
     if (absWhy(cls, stage, i + 1, sid) === "un") { rounds[i] = { zero: true, pts: ptsOf(4, 4), r: i + 1 }; zeroed++; }
-    else if (played) { rounds[i] = { fill: true, pts: avg, r: i + 1 }; filled++; }
+    else if (played) { rounds[i] = { fill: true, pts: Math.min(avg, CFG.absCap), r: i + 1 }; filled++; }
     else open++;   // 인정 결석인데 참여한 경기가 하나도 없음 → 선생님이 직접
   }
   const sum = Math.round(rounds.reduce((a, x) => a + (x ? x.pts : 0), 0) * 10) / 10;
@@ -1152,8 +1159,8 @@ function scGroups() {
 function absPicker(cls, open) {
   const list = roster(cls), out = list.filter(st => isAbs(cls, sidOf(st)));
   return `<details class="setup noprint" data-k="abs" ${ui.open.abs ? "open" : ""}><summary>🙋 빠지는 학생 ${out.length ? `<span style="color:var(--bad)">&nbsp;${out.length}명</span>` : "없음"}<span class="sp"></span><span class="sumR">참여 ${list.length - out.length}</span></summary>
-    <div class="card" style="margin-bottom:14px"><p class="hint" style="margin-top:0">한 번 누르면 <b>인정 결석</b>(참여한 경기 평균), 한 번 더 누르면 <b>미인정</b>(꼴찌)</p>
-    <div class="absGrid">${list.map(st => { const s = sidOf(st), a = isAbs(cls, s); return `<button class="absBtn ${a ? "out" : ""} ${a && isUn(cls, s) ? "un" : ""}" data-act="abs" data-v="${s}">${esc(st.no)}. ${esc(st.name)}${a ? `<small>${isUn(cls, s) ? "미인정 · 꼴찌" : "인정 · 평균"}</small>` : ""}</button>`; }).join("")}</div>
+    <div class="card" style="margin-bottom:14px"><p class="hint keep" style="margin-top:0">누르면 <b>결석</b>, 다시 누르면 참여 · 미인정은 학기 말 성적 탭에서</p>
+    <div class="absGrid">${list.map(st => { const s = sidOf(st), a = isAbs(cls, s); return `<button class="absBtn ${a ? "out" : ""}" data-act="abs" data-v="${s}">${esc(st.no)}. ${esc(st.name)}${a ? `<small>결석</small>` : ""}</button>`; }).join("")}</div>
     ${out.length ? `<div class="row" style="margin-top:10px"><button class="btn" data-act="allIn">모두 참여로</button></div>` : ""}</div></details>`;
 }
 /* 여학생은 투구거리를 다르게(핸디캡) — 심판이 투구선을 확인할 수 있게 표시만 한다 */
@@ -1407,7 +1414,7 @@ function areaCell(rec, s, k) {
   if (rec.manual != null) return `${rec.manual}<button class="fx man" data-act="manual" data-v="${s}" data-k="${k}">직접</button>`;
   if (rec.noPlay) return `<button class="fx man" data-act="manual" data-v="${s}" data-k="${k}">점수 입력</button>`;
   if (!rec.played && !rec.zeroed) return "-";
-  const tag = rec.filled ? `<button class="fx" data-act="absfix" data-v="${s}" data-k="${k}" title="인정 결석 라운드는 평균 — 누르면 미인정(꼴찌)">평균</button>`
+  const tag = rec.filled ? `<button class="fx" data-act="absfix" data-v="${s}" data-k="${k}" title="결석 라운드는 내 평균(최대 2.5) — 누르면 미인정(1점)">결석</button>`
     : rec.zeroed ? `<button class="fx z" data-act="absfix" data-v="${s}" data-k="${k}" title="미인정 라운드는 꼴찌 — 누르면 인정(평균)">미인정</button>` : "";
   return `${rec.area}${tag}`;
 }
@@ -1421,14 +1428,21 @@ function scStand() {
   if (ui.sort === "score") rows.sort((x, y) => (y.a.sum + y.b.sum) - (x.a.sum + x.b.sum) || numSort(x.st.no, y.st.no));
   const done = rows.filter(r => r.full).length;
   const cell = (r, s, k) => !r ? `<td class="miss rcol">·</td>`
-    : r.fill ? `<td class="rcol fillc" ${VIEW ? "" : `data-act="absfix" data-v="${s}" data-k="${k}" data-r="${r.r}"`} title="인정 결석 — 참여한 경기 평균 (누르면 미인정·꼴찌)">${r.pts}<small>평균</small></td>`
-    : r.zero ? `<td class="rcol zeroc" ${VIEW ? "" : `data-act="absfix" data-v="${s}" data-k="${k}" data-r="${r.r}"`} title="미인정 결석 — 꼴찌(4위) (누르면 인정·평균)">${r.pts}<small>미인정</small></td>`
+    : r.fill ? `<td class="rcol fillc" ${VIEW ? "" : `data-act="absfix" data-v="${s}" data-k="${k}" data-r="${r.r}"`} title="결석 — 내 평균(최대 2.5) · 누르면 미인정(1점)">${r.pts}<small>결석</small></td>`
+    : r.zero ? `<td class="rcol zeroc" ${VIEW ? "" : `data-act="absfix" data-v="${s}" data-k="${k}" data-r="${r.r}"`} title="미인정 결석 — 1점 · 누르면 결석(평균)">${r.pts}<small>미인정</small></td>`
     : `<td class="rcol" title="${r.rank}위">${r.pts}</td>`;
   let h = `<div class="row noprint" style="margin-bottom:10px"><h2 style="margin:0">${esc(cls)}반</h2><span class="sp"></span>
     <div class="seg" style="margin:0"><button class="plain ${ui.sort === "no" ? "on" : ""}" data-act="sort" data-v="no">번호순</button><button class="plain ${ui.sort === "score" ? "on" : ""}" data-act="sort" data-v="score">승점순</button></div></div>`;
   if (!VIEW) h += `<p class="hint noprint" hidden>칸의 숫자는 그 라운드 <b>승점</b>(4명 조 4·3·2·1, 3명 조 4·3·1, 5명 조 4·3·3·2·1). 노란 칸 = 기록 없음. 6라운드 모두 끝난 학생 ${done}/${rows.length}명.
     Ⓒ <b>심판</b>은 경기 결과를 입력한 학생에게 자동 인정(연두색, 숫자 = 횟수)되고, 준비·정리와 경기 진행은 선생님이 단추를 눌러 인정합니다(누르면 인정 ↔ 취소).</p>
     <div class="row noprint" style="margin-bottom:10px"><button class="btn sm pri" data-act="xlsx">⬇ 엑셀</button><button class="btn sm" data-act="print">🖨 인쇄</button></div>`;
+  if (!VIEW) {   // 결석 확인 — 학기 말에 나이스 출결과 맞춰 미인정만 누른다
+    const items = [];
+    rows.forEach(r => [["cu", r.a], ["x3", r.b]].forEach(([k, rec]) => rec.rounds.forEach(x => { if (x && (x.fill || x.zero)) items.push({ r, k, x }); })));
+    if (items.length) h += `<details class="setup noprint" data-k="absList" ${ui.open.absList ? "open" : ""}><summary>📋 결석 확인 <span style="color:var(--bad)">&nbsp;${items.length}건</span><span class="sp"></span><span class="sumR">미인정 ${items.filter(i => i.x.zero).length}</span></summary>
+      <div class="card"><p class="hint keep" style="margin-top:0">나이스 출결에서 <b>미인정</b>인 줄만 누르세요 (결석 = 내 평균, 최대 2.5 → 미인정 = 1점)</p>
+      <div class="alist">${items.map(({ r, k, x }) => `<button class="arow ${x.zero ? "un" : ""}" data-act="absfix" data-v="${r.s}" data-k="${k}" data-r="${x.r}"><span class="an">${esc(r.st.no)}. ${esc(r.st.name)}</span><span class="ad">${roundDate(cls, k, x.r) || "-"}</span><span class="ag">${STAGES[k].mark} ${x.r}R</span><span class="ap">${x.zero ? "미인정 1" : "결석 " + x.pts}</span></button>`).join("")}</div></div></details>`;
+  }
   if (isPhone()) {
     h += `<div class="slist">${rows.map(r => {
       // 선생님: 영역 점수 / 학생: 합산 승점
@@ -1670,7 +1684,7 @@ document.addEventListener("click", e => {
     case "method": ui.method[ui.stage] = v; render(); break;
     case "sort": ui.sort = v; render(); break;
     case "gsort": ui.gsort = v; render(); break;
-    case "abs": setAbs(cls, v, !isAbs(cls, v) ? true : isUn(cls, v) ? false : "un"); break;
+    case "abs": setAbs(cls, v, !isAbs(cls, v)); break;
     case "allIn": put(P(cls, "absent"), null); break;
     case "seed": {
       const list = (S.rosters[cls] || []).map(st => String(st.no) === v ? { ...st, seed: !st.seed } : st);
@@ -1718,7 +1732,7 @@ document.addEventListener("click", e => {
       const rs = b.dataset.r ? [+b.dataset.r] : rec.rounds.filter(x => x && (x.fill || x.zero)).map(x => x.r);
       const toUn = !rs.every(r => absWhy(cls, k, r, v) === "un");
       rs.forEach(r => put(P(cls, "absr", k, "r" + r, v), toUn ? "un" : "ok", true));
-      toast(toUn ? "미인정 — 그 경기 꼴찌(4위)로 넣었습니다" : "인정 결석 — 참여한 경기 평균으로 채웠습니다"); render(); break;
+      toast(toUn ? "미인정 — 1점으로 바꿨습니다" : "결석 — 내 평균(최대 2.5)으로 채웠습니다"); render(); break;
     }
     case "manual": {
       const k = b.dataset.k, nm = (stuMap(cls)[v] || {}).name || "", cur = (((C(cls).manual || {})[v]) || {})[k];
@@ -2002,9 +2016,9 @@ function studentRow(cls, st) {
   const t = on, c = taskPts(cls, s, rc), tot = a.area + b.area + c;
   const cnt = rc[s] || {}, roleText = TASKS.filter(([k]) => cnt[k]).map(([k, l]) => l + " " + cnt[k] + "회").join(" · ");
   const miss = [];
-  [["카운트업", a], ["301", b]].forEach(([nm, rec]) => {
+  [["카운트업", a, "cu"], ["301", b, "x3"]].forEach(([nm, rec, k]) => {
     if (rec.manual != null) { miss.push(`${nm} 직접 ${rec.manual}점`); return; }
-    rec.rounds.forEach((x, i) => { if (!x) miss.push(`${nm} ${i + 1}R 미응시`); else if (x.fill) miss.push(`${nm} ${i + 1}R 인정 결석(평균 ${x.pts})`); else if (x.zero) miss.push(`${nm} ${i + 1}R 미인정(4위)`); });
+    rec.rounds.forEach((x, i) => { if (!x) miss.push(`${nm} ${i + 1}R 미응시`); else if (x.fill) miss.push(`${nm} ${i + 1}R(${roundDate(cls, k, i + 1)}) 결석 ${x.pts}`); else if (x.zero) miss.push(`${nm} ${i + 1}R(${roundDate(cls, k, i + 1)}) 미인정 1`); });
   });
   return { s, a, b, t, c, tot, roleText, grade: convTotal(tot), note: miss.join(" / ") };
 }
@@ -2037,9 +2051,9 @@ async function downloadXLSX() {
     const rows = [top, sub];
     roster(cls).forEach(st => {
       const r = studentRow(cls, st), row = [+st.no || st.no, st.name];
-      r.a.rounds.forEach(x => row.push(x ? dash(x.v) : "", x ? (x.rank || (x.fill ? "인정·평균" : "미인정 4위")) : "", x ? (x.n || "") : "", x ? x.pts : ""));
+      r.a.rounds.forEach(x => row.push(x ? dash(x.v) : "", x ? (x.rank || (x.fill ? "결석" : "미인정")) : "", x ? (x.n || "") : "", x ? x.pts : ""));
       row.push(r.a.sum, r.a.played ? r.a.area : 0);
-      r.b.rounds.forEach(x => row.push(x ? (x.rank || (x.fill ? "인정·평균" : "미인정 4위")) : "", x ? dash(x.v) : "", x ? (x.n || "") : "", x ? x.pts : ""));
+      r.b.rounds.forEach(x => row.push(x ? (x.rank || (x.fill ? "결석" : "미인정")) : "", x ? dash(x.v) : "", x ? (x.n || "") : "", x ? x.pts : ""));
       row.push(r.b.sum, r.b.played ? r.b.area : 0);
       row.push(...TASKS.map(([k]) => r.t[k] ? 1 : 0), r.c, r.roleText, r.tot, r.grade, r.note);
       rows.push(row);
