@@ -294,6 +294,11 @@
   .prow.cu1{grid-template-columns:1fr 104px 76px; grid-template-rows:auto; align-items:center}
   .rkBadge{font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-size:24px; font-weight:700; color:var(--pri); text-align:right; line-height:1}
   .rkBadge small{display:block; font-size:16px; opacity:.85} .rkBadge.r1{color:var(--r1)}
+  .okw{color:var(--warn); font-weight:800}
+  .okBox{margin-top:12px; padding:12px; border-radius:14px; background:var(--priSoft); border:1px solid #D3CEFB; text-align:center}
+  .okBox p{margin:0 0 8px; font-size:18px; font-weight:800; color:var(--ink)}
+  .okBtn{width:100%; min-height:60px; font-size:20px; background:var(--good); color:#fff; box-shadow:0 4px 14px rgba(46,158,96,.3)}
+  .okDone{margin-top:12px; display:flex; align-items:center; justify-content:center; gap:10px; min-height:52px; border-radius:14px; background:var(--goodSoft); color:var(--good); font-size:19px; font-weight:800}
   details.cuScore{margin-top:10px}
   details.cuScore > summary{cursor:pointer; min-height:48px; display:flex; align-items:center; gap:6px; font-size:17px; font-weight:700; color:var(--sub)}
   details.cuScore > summary small{font-size:14px; font-weight:600}
@@ -847,7 +852,7 @@ function curGame(cls) {
   for (const st of ["cu", "x3"]) for (let r = 1; r <= CFG.rounds; r++) if (!isClosed(cls, st, r)) return { st, r };
   return null;
 }
-const allEntered = (cls, st, r) => { const gs = groupsOf(cls, st, r), rr = roundRes(cls, st, r); return gs.length > 0 && gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi)); };
+const allEntered = (cls, st, r) => { const gs = groupsOf(cls, st, r), rr = roundRes(cls, st, r); return gs.length > 0 && gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi, st, r)); };
 /* [▶ 다음 경기 시작]: 진행 중 경기를 종료하고, 다음 라운드 조를 (기본 방법으로) 짜서, 프로젝터에 띄운다.
    진행 중 경기가 아직 없으면(수업 시작) 첫 경기 조를 짠다. 이미 짜 둔 조가 있으면 그대로 쓴다. */
 function startNext(cls) {
@@ -857,7 +862,7 @@ function startNext(cls) {
   const running = groupsOf(cls, cur.st, cur.r).length > 0 && liveOf(cls);
   if (running) {
     const gs = groupsOf(cls, cur.st, cur.r), rr = roundRes(cls, cur.st, cur.r);
-    const left = gs.map((g, gi) => cardDone(cls, g, rr, "g" + gi) ? null : grpLabel(cls, gi)).filter(Boolean);
+    const left = gs.map((g, gi) => cardDone(cls, g, rr, "g" + gi, cur.st, cur.r) ? null : grpLabel(cls, gi)).filter(Boolean);
     const nx = nextStep(cur.st, cur.r);
     if (!confirm(`${STAGES[cur.st].name} ${cur.r}라운드를 끝내고 ${nx ? `${STAGES[nx.st].name} ${nx.r}라운드를 시작할까요?` : "모든 경기를 마칠까요?"}${left.length ? `\n\n⚠ 아직 입력이 안 끝난 다트: ${left.join(", ")}` : ""}`)) return;
     put(P(cls, "closed", cur.st, "r" + cur.r), Date.now(), true); stampAbs(cls, cur.st, cur.r);
@@ -1076,7 +1081,7 @@ function scRoster() {
 function roundSeg(cls, st, act) {
   const L = liveOf(cls);
   return `<div class="seg">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => {
-    const gs = groupsOf(cls, st, r), res = roundRes(cls, st, r), done = gs.filter((g, gi) => cardDone(cls, g, res, "g" + gi)).length;
+    const gs = groupsOf(cls, st, r), res = roundRes(cls, st, r), done = gs.filter((g, gi) => cardDone(cls, g, res, "g" + gi, st, r)).length;
     const mark = L && L.st === st && L.r === r && gs.length ? "● " : isClosed(cls, st, r) ? "🔒 " : "";
     const sub = act === "round" ? (gs.length ? `${done}/${gs.length}` : "조 없음") : (gs.length ? "✓" : "");
     return `<button class="plain ${ui.round === r ? "on" : ""}" data-act="${act}" data-v="${r}">${mark}${r}라운드<span class="done">${sub}</span></button>`; }).join("")}</div>`;
@@ -1192,7 +1197,7 @@ function hasAny(cls, stage) { const g = (C(cls).games || {})[stage] || {}; retur
 function openRound(cls, st) {
   const L = liveOf(cls);
   if (L && L.st === st) return L.r;                       // 진행 중인 라운드가 있으면 거기서
-  for (let r = 1; r <= CFG.rounds; r++) { const gs = groupsOf(cls, st, r), res = roundRes(cls, st, r); if (!gs.length || gs.some((g, gi) => !cardDone(cls, g, res, "g" + gi))) return r; }
+  for (let r = 1; r <= CFG.rounds; r++) { const gs = groupsOf(cls, st, r), res = roundRes(cls, st, r); if (!gs.length || gs.some((g, gi) => !cardDone(cls, g, res, "g" + gi, st, r))) return r; }
   return CFG.rounds;
 }
 function scEntry() {
@@ -1235,7 +1240,7 @@ function scEntry() {
       const s = dartState(cls, g, rr, gi), res = rr["g" + gi] || {}, R = rolesAt(cls, st, ui.round, "g" + gi);
       const live = g.m.filter(x => !isAbs(cls, x) || res[x]), got = live.filter(x => res[x] && res[x].r >= 1).length;
       const who = R.by && R.by !== "T" ? `📱 ${esc((stuMap(R.byCls || cls)[R.by] || {}).name || "")}` : R.by === "T" ? "👤 선생님" : "대기";
-      return `<button class="crow ${s}" data-act="jumpCard" data-g="g${gi}"><span class="ci">${s === "done" ? "✔" : s === "part" ? "◐" : "○"}</span><span class="gno ${st}">${boardOf(cls, gi)}</span><span class="gnames"><span class="who">${who}</span><small>${got}/${live.length}명</small></span><span class="chev">입력 ▾</span></button>`;
+      return `<button class="crow ${s}" data-act="jumpCard" data-g="g${gi}"><span class="ci">${s === "done" ? "✔" : s === "part" ? "◐" : "○"}</span><span class="gno ${st}">${boardOf(cls, gi)}</span><span class="gnames"><span class="who">${who}</span><small>${s !== "done" && got === live.length && live.length && R.by && R.by !== "T" && !R.ok ? "<b class=okw>확인 대기</b>" : `${got}/${live.length}명`}</small></span><span class="chev">입력 ▾</span></button>`;
     }).join("")}`;
   } else h += `<div class="entryGrid">${cards.map(({ g, gi }) => card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}${g.tag ? " · " + g.tag : ""}`)).join("")}`;
   if (GRP == null) {
@@ -1261,8 +1266,8 @@ function tapGrid(cls, key, ids, res, n, ro, hint = "🏆 1위부터 순서대로
   return `${ro ? "" : `<p class="tapHint">${hint}</p>`}<div class="tapGrid">${ids.map(s => { const x = sm[s] || { name: "?" }, r = (res[s] || {}).r;
     return `<button class="tapBtn ${r ? "on" : ""} ${r === 1 ? "r1" : ""}" ${ro ? "disabled" : `data-act="tapRank" data-g="${key}" data-s="${s}"`}><span class="ord">${r || ""}</span><span class="tn">${esc(x.name)}</span>${r ? `<small>+${ptsOf(r, n)}</small>` : ""}</button>`; }).join("")}</div>`;
 }
-function dartState(cls, g, rr, gi) {
-  if (cardDone(cls, g, rr, "g" + gi)) return "done";
+function dartState(cls, g, rr, gi, st = ui.stage, r = ui.round) {
+  if (cardDone(cls, g, rr, "g" + gi, st, r)) return "done";
   return Object.values((rr || {})["g" + gi] || {}).some(x => x && (x.r >= 1 || typeof x.v === "number")) ? "part" : "none";
 }
 function dartStatus(cls, st, r) {
@@ -1270,7 +1275,9 @@ function dartStatus(cls, st, r) {
   return `<div class="dstat" style="grid-template-columns:repeat(${Math.min(Math.max(gs.length, 1), 6)},1fr)">${gs.map((g, gi) => { const s = dartState(cls, g, rr, gi), w = waves(cls) > 1 ? `<sub>${waveOf(cls, gi)}차</sub>` : "";
     return `<button class="ds ${s}" data-act="jumpCard" data-g="g${gi}"><b>${boardOf(cls, gi)}${w}</b><i>${s === "done" ? "✔" : s === "part" ? "◐" : "○"}</i></button>`; }).join("")}</div>`;
 }
-function cardDone(cls, g, rr, gk) {
+const needOk = (cls, st, r, gk) => { const R = rolesAt(cls, st, r, gk); return !!(R.by && R.by !== "T" && !R.ok); };
+function cardDone(cls, g, rr, gk, st = ui.stage, r = ui.round) {
+  if (needOk(cls, st, r, gk)) return false;
   const res = (rr || {})[gk] || {};
   const elsewhere = s => !res[s] && Object.keys(rr || {}).some(k => k !== gk && rr[k] && rr[k][s] && rr[k][s].r >= 1);
   const live = g.m.filter(s => !elsewhere(s) && (!isAbs(cls, s) || (res[s] && res[s].r)));
@@ -1281,7 +1288,7 @@ function card(cls, st, gk, members, res, title) {
   const hasRef = R0.by && R0.by !== "T";
   const takenByOther = !canTeach() && stuOK && hasRef && R0.dev !== DEV;
   const needRef = !canTeach() && stuOK && !hasRef && !isClosed(cls, st, ui.round);
-  const RO = !canEnter() || (!canTeach() && isClosed(cls, st, ui.round)) || takenByOther || needRef;
+  const RO = !canEnter() || (!canTeach() && isClosed(cls, st, ui.round)) || takenByOther || needRef || (!canTeach() && !!R0.ok);
   const focus = ui.focus === (gk === "mk" ? "mk" : "g" + gk);
   const sm = stuMap(cls), key = gk === "mk" ? "mk" : "g" + gk;
   const ids = [...new Set([...members, ...Object.keys(res)])];
@@ -1290,7 +1297,8 @@ function card(cls, st, gk, members, res, title) {
   const kName = k => k === "mk" ? "보충 경기" : grpLabel(cls, +k.slice(1));
   const live = ids.filter(s => !elsewhere[s] && (!isAbs(cls, s) || res[s]));
   const n = gk === "mk" ? CFG.maxGroup : Math.max(live.length, 1);
-  const done = live.length && live.every(s => res[s] && res[s].r >= 1);
+  const ranked = live.length && live.every(s => res[s] && res[s].r >= 1);
+  const okWait = ranked && R0.by && R0.by !== "T" && !R0.ok, okDone = ranked && !!R0.ok, done = ranked && !okWait;
   const simpleCU = gk !== "mk" && st === "cu", tap301 = gk !== "mk" && st === "x3";
   const tapIds = ids.filter(s => !elsewhere[s] && (!isAbs(cls, s) || res[s]));
   // 카운트업: 순위대로 누르기 + 점수는 접힌 칸(선택)
@@ -1311,6 +1319,8 @@ function card(cls, st, gk, members, res, title) {
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
   return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
+    ${okWait && canEnter() && !takenByOther ? `<div class="okBox"><p>👀 조원 모두 순위를 확인했나요?</p><button class="btn big okBtn" data-act="okCard" data-g="${key}">✔ 모두 확인 · 저장</button></div>` : ""}
+    ${okDone ? `<div class="okDone">✔ 저장 완료${canEnter() && (canTeach() || R0.dev === DEV) && !isClosed(cls, st, ui.round) ? `<button class="btn sm ghost" data-act="unokCard" data-g="${key}">수정</button>` : ""}</div>` : ""}
     ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${RO ? "" : `<div class="foot"><button class="btn sm ghost" data-act="clearCard" data-g="${key}">🗑 지우기</button>${gk !== "mk" && st === "cu" && tapIds.length > 1 && tapIds.every(s => res[s] && typeof res[s].v === "number") ? `<button class="btn ghost" data-act="autoCard" data-g="${key}">점수로 순위 정하기</button>` : ""}</div>`}</div>`;
 }
 /* 역할 기록 — 이 다트(조)·이 라운드에서 누가 입력했고, 누가 경기 진행·심판·준비 정리를 했나.
@@ -1572,7 +1582,7 @@ function showBig() {
     ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기</button></div>` : ""}
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
     <div class="arena" style="grid-template-columns:repeat(${(() => { const k = onBoards().filter(b => slot[b]).length || 1; return k <= 5 ? k : Math.ceil(k / 2); })()},1fr)">${onBoards().filter(b => slot[b]).map(b => { const g = slot[b] || [];
-      const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), gg = groupsOf(c, st, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, st, r0), g[0].gi) : "none"; })() : "none";
+      const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), gg = groupsOf(c, st, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, st, r0), g[0].gi, st, r0) : "none"; })() : "none";
       return `<div class="bd2 g-${st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${multi && g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}</span>` : ""}${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
         ${next[b] ? `<div class="nx">${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
@@ -1613,7 +1623,7 @@ function writeCard(gk, res) {
   if (gk !== "mk" && !Object.values(res).some(x => x && x.m)) autoRank(res, STAGES[ui.stage].better);
   Object.keys(res).forEach(s => { const x = res[s]; if (x.r == null && typeof x.v !== "number" && gk !== "mk") delete res[s]; });
   put(P(ui.cls, "games", ui.stage, "r" + ui.round, gk), Object.keys(res).length ? res : null);
-  stampRoles(gk);
+  stampRoles(gk, R => { delete R.ok; });
 }
 const curCard = gk => JSON.parse(JSON.stringify(roundRes(ui.cls, ui.stage, ui.round)[gk] || {}));
 
@@ -1843,9 +1853,11 @@ document.addEventListener("click", e => {
       res[s] = x; writeCard(gk, res); break;
     }
     case "mkn": { const res = curCard("mk"), x = res[b.dataset.s] || {}; x.n = +v; res[b.dataset.s] = x; writeCard("mk", res); break; }
+    case "okCard": stampRoles(b.dataset.g, R => { R.ok = Date.now(); }); toast("저장했습니다 — 수고했어요!"); break;
+    case "unokCard": stampRoles(b.dataset.g, R => { delete R.ok; }); break;
     case "clearCard": {
       if (!confirm(`이 다트의 ${ui.round}라운드 결과를 모두 지울까요?`)) return;
-      put(P(cls, "games", ui.stage, "r" + ui.round, b.dataset.g), null); stampRoles(b.dataset.g); break;
+      put(P(cls, "games", ui.stage, "r" + ui.round, b.dataset.g), null); stampRoles(b.dataset.g, R => { delete R.ok; }); break;
     }
     case "clrRow": {
       const gk = b.dataset.g, res = curCard(gk), s = b.dataset.s, nm = (stuMap(cls)[s] || {}).name || "";
