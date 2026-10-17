@@ -1186,7 +1186,8 @@ function boardsOf(cls) {
 const boardOf = (cls, gi) => { const b = boardsOf(cls); return b[gi % b.length]; };
 const waveOf = (cls, gi) => Math.floor(gi / boardsOf(cls).length) + 1;
 const waves = (cls, st) => Math.ceil((groupsOf(cls, st || ui.stage).length || 1) / boardsOf(cls).length);
-const DART_CHARS = [["🐯", "호랑이"], ["🦁", "사자"], ["🐻", "곰"], ["🦊", "여우"], ["🐼", "판다"], ["🐰", "토끼"], ["🐸", "개구리"], ["🐧", "펭귄"], ["🦉", "부엉이"], ["🐬", "돌고래"], ["🦅", "독수리"], ["🐨", "코알라"], ["🐙", "문어"], ["🦒", "기린"], ["🐳", "고래"]];
+// 2026-10-17: 한국 전설의 수호신 — 1~4 사신, 5 황룡(가운데), 6~11 상서로운 수호 동물. 그림은 선생님이 만들어 올 예정(chars/1.png~), 그전엔 이모지
+const DART_CHARS = [["🐉", "청룡"], ["🐯", "백호"], ["🔥", "주작"], ["🐢", "현무"], ["🐲", "황룡"], ["🦚", "봉황"], ["🦄", "기린"], ["🦁", "해태"], ["🐦‍⬛", "삼족오"], ["🦊", "구미호"], ["👹", "도깨비"]];
 const chOf = b => DART_CHARS[b - 1] || ["🎯", ""];
 const grpLabel = (cls, gi) => `${chOf(boardOf(cls, gi))[0]} ${boardOf(cls, gi)}번 ${chOf(boardOf(cls, gi))[1]}${waves(cls) > 1 ? ` · ${waveOf(cls, gi)}차` : ""}`;
 function boardPicker(cls) {
