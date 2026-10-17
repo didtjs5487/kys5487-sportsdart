@@ -314,6 +314,12 @@
   #big .bd2 .cn{font-size:clamp(14px,1.9vh,19px); font-weight:800; color:var(--sub); white-space:nowrap}
   .waitBox{text-align:center; padding:40px 0 20px} .waitBox h2{margin:10px 0 0}
   .waitImg{width:150px; height:150px; object-fit:contain} span.waitImg{font-size:100px}
+  .refGuide{margin:4px 0 10px; padding:12px 14px; border-radius:14px; background:var(--priSoft); border:1px solid #D3CEFB; font-size:17px}
+  .refGuide b{font-size:18px; color:var(--pri)}
+  .refGuide ul{margin:6px 0 0; padding-left:22px} .refGuide li{margin:3px 0; font-weight:700}
+  .refGuide.mini{padding:4px 14px; background:var(--soft); border-color:var(--line)}
+  .refGuide.mini > summary{cursor:pointer; min-height:44px; display:flex; align-items:center; font-weight:800; color:var(--pri); list-style:none}
+  .refGuide.mini > summary::-webkit-details-marker{display:none} .refGuide.mini > summary::after{content:"펼치기 ▾"; margin-left:auto; font-size:15px; color:var(--sub)} .refGuide.mini[open] > summary::after{content:"접기 ▴"}
   .okw{color:var(--warn); font-weight:800}
   .okBox{margin-top:12px; padding:12px; border-radius:14px; background:var(--priSoft); border:1px solid #D3CEFB; text-align:center}
   .okBox p{margin:0 0 8px; font-size:18px; font-weight:800; color:var(--ink)}
@@ -1390,7 +1396,7 @@ function card(cls, st, gk, members, res, title) {
       <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refGuide(true) + refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
     ${(() => {   // 순위가 다 안 들어갔으면 저장 단추를 잠근다
       const miss = live.filter(s => !(res[s] && res[s].r >= 1));
       if (ranked || !canEnter() || takenByOther || needRef || !live.some(s => res[s] && res[s].r >= 1)) return "";
@@ -1416,6 +1422,10 @@ function card(cls, st, gk, members, res, title) {
 const ROLE_KEYS = [["j", "경기 진행"], ["s", "심판"], ["p", "준비·정리"]];
 const rolesAt = (cls, st, r, key) => ((((C(cls).roles || {})[st] || {})["r" + r] || {})[key]) || {};
 /* 이번 경기 심판 고르기 — 조원 이름이 먼저, 다른 조 학생은 아래 목록에서 */
+const REF_ROLE = ["태블릿 들고 조원 앞에 앉기", "다음 선수 이름 부르기", "점수 · 남은 점수 불러주기", "투구선 지키는지 보기", "결과 입력 · 저장"];
+const refGuide = full => full
+  ? `<div class="refGuide"><b>🧑‍⚖️ 심판의 역할</b><ul>${REF_ROLE.map(x => `<li>${x}</li>`).join("")}</ul></div>`
+  : `<details class="refGuide mini" data-k="refg" ${ui.open.refg ? "open" : ""}><summary>🧑‍⚖️ 심판의 역할</summary><ul>${REF_ROLE.map(x => `<li>${x}</li>`).join("")}</ul></details>`;
 function refPicker(cls, key, members) {
   const sm = stuMap(cls), mem = members.filter(s => sm[s] && !isAbs(cls, s)), others = roster(cls).filter(st => !mem.includes(sidOf(st)));
   return `<div class="refPick"><b>🧑‍⚖️ 심판은?</b>
