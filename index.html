@@ -1422,7 +1422,7 @@ function card(cls, st, gk, members, res, title) {
 const ROLE_KEYS = [["j", "경기 진행"], ["s", "심판"], ["p", "준비·정리"]];
 const rolesAt = (cls, st, r, key) => ((((C(cls).roles || {})[st] || {})["r" + r] || {})[key]) || {};
 /* 이번 경기 심판 고르기 — 조원 이름이 먼저, 다른 조 학생은 아래 목록에서 */
-const REF_ROLE = ["태블릿 들고 조원 앞에 앉기", "다음 선수 이름 부르기", "점수 · 남은 점수 불러주기", "투구선 지키는지 보기", "결과 입력 · 저장"];
+const REF_ROLE = ["태블릿 들고 P1~P4 순서 부르기", "점수 · 남은 점수 불러주기", "3발 뒤 <i class=nx></i> 누르고 다트 뽑기", "맞은 칸 기억 → 뽑다가 점수가 더 들어가면 [되돌리기] 후 그 선수 점수 다시 입력", "결과 입력 · 저장"];
 const refGuide = full => full
   ? `<div class="refGuide"><b>🧑‍⚖️ 심판의 역할</b><ul>${REF_ROLE.map(x => `<li>${x}</li>`).join("")}</ul></div>`
   : `<details class="refGuide mini" data-k="refg" ${ui.open.refg ? "open" : ""}><summary>🧑‍⚖️ 심판의 역할</summary><ul>${REF_ROLE.map(x => `<li>${x}</li>`).join("")}</ul></details>`;
