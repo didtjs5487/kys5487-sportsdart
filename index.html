@@ -306,8 +306,11 @@
   .arow .an{white-space:nowrap; overflow:hidden; text-overflow:ellipsis} .arow .ad, .arow .ag{color:var(--sub); font-size:15px; white-space:nowrap}
   .arow .ap{justify-self:end; border-radius:999px; padding:4px 10px; background:var(--priSoft); color:var(--pri); font-size:15px; white-space:nowrap}
   .arow.un{background:var(--badSoft); border-color:#F6B9C1} .arow.un .ap{background:var(--bad); color:#fff}
-  .gch{flex:none; font-size:24px; line-height:1}
-  #big .bd2 .ch{font-size:clamp(24px,3.4vh,36px); line-height:1}
+  .gch{flex:none; width:36px; height:36px; object-fit:contain; font-size:26px; line-height:36px; text-align:center}
+  .hdimg{width:44px; height:44px; object-fit:contain; vertical-align:middle; margin:-6px 6px -6px 0}
+  .bpimg{width:30px; height:30px; object-fit:contain; vertical-align:middle; margin-right:4px}
+  #printQR .qcimg{height:22mm; width:22mm; object-fit:contain; vertical-align:middle; margin-right:2mm}
+  #big .bd2 .ch{width:clamp(32px,6vh,56px); height:clamp(32px,6vh,56px); object-fit:contain; font-size:clamp(24px,3.4vh,36px); line-height:1}
   #big .bd2 .cn{font-size:clamp(14px,1.9vh,19px); font-weight:800; color:var(--sub); white-space:nowrap}
   .okw{color:var(--warn); font-weight:800}
   .okBox{margin-top:12px; padding:12px; border-radius:14px; background:var(--priSoft); border:1px solid #D3CEFB; text-align:center}
@@ -1149,13 +1152,13 @@ function scGroups() {
   } else if (!VIEW) h += `<p class="hint noprint">✋ <b>조 바꾸기</b>: 학생을 누르고 → 다른 학생을 누르면 자리 바꾸기, 다른 조의 [여기로 이동]을 누르면 옮기기. 결과를 입력한 뒤에 옮겨도 그 학생의 기록은 남습니다.</p>`;
   const opened = new Set(ui.gOpen || []);
   h += `<div class="glist">${gs.map((g, gi) => (opened.has(gi) || (ui.sel && g.m.includes(ui.sel))) ? `
-    <div class="grp ${st}"><button class="ghd" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span><span class="gch">${chOf(boardOf(cls, gi))[0]}</span>${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="sp"></span><span class="chev">접기 ▴</span></button>
+    <div class="grp ${st}"><button class="ghd" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="sp"></span><span class="chev">접기 ▴</span></button>
     <div class="chips">${g.m.map(s => { const x = sm[s] || { no: "?", name: "(명렬 없음)" }, a = isAbs(cls, s);
       const extra = st === "x3" ? (() => { const r = record(cls, "cu", s); return r.played ? `카운트업 ${r.sum}점` : ""; })() : (x.seed ? "★" : "");
       return `<button class="chip ${ui.sel === s ? "sel" : ""} ${a ? "abs" : ""}" ${VIEW ? "disabled" : `data-act="pick" data-v="${s}"`}><span class="no">${esc(x.no)}</span>${esc(x.name)}${sexBadge(x)}<span class="info">${a ? "결석" : extra}</span></button>`; }).join("")}</div>
     ${!g.m.length ? (VIEW ? "" : `<button class="btn ghost moveHere" data-act="delGrp" data-v="${gi}">빈 조 지우기</button>`) : ""}
     ${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn moveHere" data-act="moveTo" data-v="${gi}">↓ 여기로</button>` : ""}
-    </div>` : `<div class="growW"><button class="grow" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span><span class="gch">${chOf(boardOf(cls, gi))[0]}</span>${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="gnames">${g.m.map(s => esc((sm[s] || {}).name || "?")).join(" · ") || "비어 있음"}</span><span class="chev">▾</span></button>${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn sm moveTo2" data-act="moveTo" data-v="${gi}">여기로</button>` : ""}</div>`).join("")}</div>`;
+    </div>` : `<div class="growW"><button class="grow" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="gnames">${g.m.map(s => esc((sm[s] || {}).name || "?")).join(" · ") || "비어 있음"}</span><span class="chev">▾</span></button>${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn sm moveTo2" data-act="moveTo" data-v="${gi}">여기로</button>` : ""}</div>`).join("")}</div>`;
   return h;
 }
 /* 오늘 참여하지 못하는 학생 — 고르면 조 편성에서 빠진다. 날짜가 바뀌면 자동으로 모두 출석 */
@@ -1189,7 +1192,8 @@ const waves = (cls, st) => Math.ceil((groupsOf(cls, st || ui.stage).length || 1)
 // 2026-10-17: 한국 전설의 수호신 — 1~4 사신, 5 황룡(가운데), 6~11 상서로운 수호 동물. 그림은 선생님이 만들어 올 예정(chars/1.png~), 그전엔 이모지
 const DART_CHARS = [["🐉", "청룡"], ["🐯", "백호"], ["🔥", "주작"], ["🐢", "현무"], ["🐲", "황룡"], ["🦚", "봉황"], ["🦄", "기린"], ["🦁", "해태"], ["🐦‍⬛", "삼족오"], ["🦊", "구미호"], ["👹", "도깨비"]];
 const chOf = b => DART_CHARS[b - 1] || ["🎯", ""];
-const grpLabel = (cls, gi) => `${chOf(boardOf(cls, gi))[0]} ${boardOf(cls, gi)}번 ${chOf(boardOf(cls, gi))[1]}${waves(cls) > 1 ? ` · ${waveOf(cls, gi)}차` : ""}`;
+const charImg = (b, cls) => b >= 1 && b <= DART_CHARS.length ? `<img class="${cls}" src="chars/${b}.png" alt="${chOf(b)[1]}">` : `<span class="${cls}">${chOf(b)[0]}</span>`;
+const grpLabel = (cls, gi) => `${boardOf(cls, gi)}번 ${chOf(boardOf(cls, gi))[1]}${waves(cls) > 1 ? ` · ${waveOf(cls, gi)}차` : ""}`;
 function boardPicker(cls) {
   const mine = boardsOf(cls), on = onBoards(), explicit = !!chosenBoards(cls).length;
   const others = {};   // 다른 반이 오늘 고른 위치
@@ -1244,7 +1248,7 @@ function scEntry() {
     if (!stuOK) h = joinBox(cls) + h;
     else {
       const bs = [...new Set(gs.map((g, gi) => boardOf(cls, gi)))];
-      const pick = `<div class="seg boardPick">${bs.map(b => `<button class="plain ${ui.board === b ? "on" : ""}" data-act="board1" data-v="${b}">${chOf(b)[0]} ${b}</button>`).join("")}</div>`;
+      const pick = `<div class="seg boardPick">${bs.map(b => `<button class="plain ${ui.board === b ? "on" : ""}" data-act="board1" data-v="${b}">${charImg(b, "bpimg")}${b}</button>`).join("")}</div>`;
       h = joinBox(cls) + (PIN_BOARD && bs.includes(PIN_BOARD) ? "" : pick) + h;   // 다트 QR로 왔으면 번호 고르기 생략
       if (!bs.includes(ui.board)) return h + `<p class="wait">👆 내 다트 번호</p>`;
       cards = cards.filter(c => boardOf(cls, c.gi) === ui.board);
@@ -1260,7 +1264,7 @@ function scEntry() {
       const s = dartState(cls, g, rr, gi), res = rr["g" + gi] || {}, R = rolesAt(cls, st, ui.round, "g" + gi);
       const live = g.m.filter(x => (!isAbs(cls, x) || res[x]) && !(res[x] && res[x].out)), got = live.filter(x => res[x] && res[x].r >= 1).length;
       const who = R.by && R.by !== "T" ? `📱 ${esc((stuMap(R.byCls || cls)[R.by] || {}).name || "")}` : R.by === "T" ? "👤 선생님" : "대기";
-      return `<button class="crow ${s}" data-act="jumpCard" data-g="g${gi}"><span class="ci">${s === "done" ? "✔" : s === "part" ? "◐" : "○"}</span><span class="gno ${st}">${boardOf(cls, gi)}</span><span class="gch">${chOf(boardOf(cls, gi))[0]}</span><span class="gnames"><span class="who">${who}</span><small>${s !== "done" && got === live.length && live.length && R.by && R.by !== "T" && !R.ok ? "<b class=okw>확인 대기</b>" : `${got}/${live.length}명`}</small></span><span class="chev">입력 ▾</span></button>`;
+      return `<button class="crow ${s}" data-act="jumpCard" data-g="g${gi}"><span class="ci">${s === "done" ? "✔" : s === "part" ? "◐" : "○"}</span><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}<span class="gnames"><span class="who">${who}</span><small>${s !== "done" && got === live.length && live.length && R.by && R.by !== "T" && !R.ok ? "<b class=okw>확인 대기</b>" : `${got}/${live.length}명`}</small></span><span class="chev">입력 ▾</span></button>`;
     }).join("")}`;
   } else h += `<div class="entryGrid">${cards.map(({ g, gi }) => card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}${g.tag ? " · " + g.tag : ""}`)).join("")}`;
   if (GRP == null) {
@@ -1338,7 +1342,7 @@ function card(cls, st, gk, members, res, title) {
       <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
     ${(() => {   // 순위가 다 안 들어갔으면 저장 단추를 잠근다
       const miss = live.filter(s => !(res[s] && res[s].r >= 1));
       if (ranked || !canEnter() || takenByOther || needRef || !live.some(s => res[s] && res[s].r >= 1)) return "";
@@ -1571,7 +1575,7 @@ async function qrImg(text, size) {
 }
 async function printBoardQR() {
   const base = location.origin + location.pathname, box = $("printQR");
-  const cards = await Promise.all(allBoards().map(async b => `<div class="qc"><b>${chOf(b)[0]} ${b}번 ${chOf(b)[1]}</b><img src="${await qrImg(base + "?in=1&board=" + b, 400)}" alt=""><small>찍으면 ${b}번 다트 결과 입력 · 스포츠다트 리그</small></div>`));
+  const cards = await Promise.all(allBoards().map(async b => `<div class="qc"><b>${charImg(b, "qcimg")}${b}번 ${chOf(b)[1]}</b><img src="${await qrImg(base + "?in=1&board=" + b, 400)}" alt=""><small>찍으면 ${b}번 다트 결과 입력 · 스포츠다트 리그</small></div>`));
   box.innerHTML = `<div class="sheet">${cards.join("")}</div>`;
   document.body.classList.add("printing");
   setTimeout(() => { print(); document.body.classList.remove("printing"); }, 300);
@@ -1626,7 +1630,7 @@ function showBig() {
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
     <div class="arena" style="grid-template-columns:repeat(${(() => { const k = onBoards().filter(b => slot[b]).length || 1; return k <= 5 ? k : Math.ceil(k / 2); })()},1fr)">${onBoards().filter(b => slot[b]).map(b => { const g = slot[b] || [];
       const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), gg = groupsOf(c, st, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, st, r0), g[0].gi, st, r0) : "none"; })() : "none";
-      return `<div class="bd2 g-${st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span><span class="ch">${chOf(b)[0]}</span><span class="cn">${chOf(b)[1]}</span>${multi && g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}</span>` : ""}${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
+      return `<div class="bd2 g-${st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${charImg(b, "ch")}<span class="cn">${chOf(b)[1]}</span>${multi && g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}</span>` : ""}${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
         ${next[b] ? `<div class="nx">${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
