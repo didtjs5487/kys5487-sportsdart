@@ -2100,7 +2100,7 @@ async function downloadXLSX() {
   const sum = [["반", "번호", "이름", "Ⓐ 카운트 업", "Ⓑ 301 게임", "Ⓒ 과제수행", "Ⓐ+Ⓑ+Ⓒ", "최종 점수", "비고"]];
   classNames().forEach(cls => roster(cls).forEach(st => {
     const r = studentRow(cls, st);
-    sum.push([cls, +st.no || st.no, st.name, r.a.played ? r.a.area : 0, r.b.played ? r.b.area : 0, r.c, r.tot, r.grade, r.note]);
+    sum.push([cls, +st.no || st.no, st.name, r.a.area, r.b.area, r.c, r.tot, r.grade, r.note]);
   }));
   const ws0 = X.utils.aoa_to_sheet(sum);
   ws0["!cols"] = [6, 6, 10, 12, 12, 12, 10, 10, 28].map(w => ({ wch: w }));
@@ -2120,9 +2120,9 @@ async function downloadXLSX() {
     roster(cls).forEach(st => {
       const r = studentRow(cls, st), row = [+st.no || st.no, st.name];
       r.a.rounds.forEach(x => row.push(x ? dash(x.v) : "", x ? (x.rank || (x.fill ? "결석" : "미인정")) : "", x ? (x.n || "") : "", x ? x.pts : ""));
-      row.push(r.a.sum, r.a.played ? r.a.area : 0);
+      row.push(r.a.sum, r.a.area);
       r.b.rounds.forEach(x => row.push(x ? (x.rank || (x.fill ? "결석" : "미인정")) : "", x ? dash(x.v) : "", x ? (x.n || "") : "", x ? x.pts : ""));
-      row.push(r.b.sum, r.b.played ? r.b.area : 0);
+      row.push(r.b.sum, r.b.area);
       row.push(...TASKS.map(([k]) => r.t[k] ? 1 : 0), r.c, r.roleText, r.tot, r.grade, r.note);
       rows.push(row);
     });
