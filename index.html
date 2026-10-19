@@ -1083,7 +1083,7 @@ function makeGroups(cls, stage, method) {
   applyBuddies(cls, out);
   return out;
 }
-/* 🤝 함께할 친구 — 아직 반 친구들과 어색한 학생에게 편한 친구를 3명까지 정해 두면, 편성할 때마다 그중 1명이(지난번과 다른 친구 먼저)
+/* 🤝 함께할 친구 — 아직 반 친구들과 어색한 학생에게 편한 친구를 5명까지 정해 두면, 편성할 때마다 그중 1명이(지난번과 다른 친구 먼저)
    같은 다트로 온다. 나머지 자리는 편성 방식 그대로. 조 인원은 바꾸지 않고 자리만 맞바꾼다.
    classes/{반}/buddy/{sid} = { f:{친구sid:1}, off:true(잠시 끔), last:지난번 친구sid } (2026-10-19) */
 const buddiesOf = cls => (C(cls) || {}).buddy || {};
@@ -1108,14 +1108,14 @@ function applyBuddies(cls, out) {
 function buddyBox(cls) {
   const B = buddiesOf(cls), sm = stuMap(cls), nm = s => esc((sm[s] || {}).name || "?");
   const keys = Object.keys(B).filter(a => sm[a]), a = ui.bdA && sm[ui.bdA] ? ui.bdA : null;
-  let h = `<div class="bdBox"><div class="bdTitle">🤝 함께할 친구 ${keys.length ? `<small>${keys.length}명</small>` : ""}</div><p class="hint keep" style="margin-top:0">친구 <b>3명까지</b> 정하면 그중 <b>1명</b>이 같은 다트로</p>`;
+  let h = `<div class="bdBox"><div class="bdTitle">🤝 함께할 친구 ${keys.length ? `<small>${keys.length}명</small>` : ""}</div><p class="hint keep" style="margin-top:0">친구 <b>5명까지</b> 정하면 그중 <b>1명</b>이 같은 다트로</p>`;
   if (!a) {
     h += keys.map(k => { const b = B[k] || {}, fs = Object.keys(b.f || {}).filter(f => sm[f]);
       return `<button class="bdRow ${b.off ? "off" : ""}" data-act="bdEdit" data-v="${k}"><b>${nm(k)}</b><span>↔ ${fs.map(nm).join(" · ") || "친구를 골라 주세요"}</span><small>${b.off ? "꺼짐" : "켜짐"}</small></button>`; }).join("");
     h += `<select class="bdSel"><option value="">＋ 학생 추가${keys.length ? " (여러 명 가능)" : ""}</option>${roster(cls).filter(st => !B[sidOf(st)]).map(st => `<option value="${sidOf(st)}">${esc(st.no)}. ${esc(st.name)}</option>`).join("")}</select>`;
   } else {
     const b = B[a] || {}, fs = b.f || {}, n = Object.keys(fs).length;
-    h += `<div class="row" style="margin-bottom:8px"><b style="font-size:20px">${nm(a)}</b><span class="sp"></span><span class="sumR">친구 ${n}/3</span></div>
+    h += `<div class="row" style="margin-bottom:8px"><b style="font-size:20px">${nm(a)}</b><span class="sp"></span><span class="sumR">친구 ${n}/5</span></div>
       <div class="absGrid">${roster(cls).filter(st => sidOf(st) !== a).map(st => { const s = sidOf(st), on = !!fs[s];
         return `<button class="absBtn ${on ? "bdOn" : ""}" data-act="bdF" data-v="${s}">${esc(st.no)}. ${esc(st.name)}${on ? "<small>친구</small>" : ""}</button>`; }).join("")}</div>
       <div class="row" style="margin-top:10px"><button class="switch ${b.off ? "" : "on"}" data-act="bdOff"><span>${b.off ? "꺼짐 — 완전 랜덤" : "켜짐 — 친구 1명과 같은 다트"}</span><i></i></button></div>
@@ -1823,7 +1823,7 @@ document.addEventListener("click", e => {
     case "bdDone": ui.bdA = null; render(); break;
     case "bdF": {
       const a = ui.bdA, fs = (buddiesOf(cls)[a] || {}).f || {};
-      if (!fs[v] && Object.keys(fs).length >= 3) { toast("친구는 3명까지 정할 수 있어요"); return; }
+      if (!fs[v] && Object.keys(fs).length >= 5) { toast("친구는 5명까지 정할 수 있어요"); return; }
       put(P(cls, "buddy", a, "f", v), fs[v] ? null : 1); break;
     }
     case "bdOff": { const a = ui.bdA; put(P(cls, "buddy", a, "off"), (buddiesOf(cls)[a] || {}).off ? null : true); break; }
