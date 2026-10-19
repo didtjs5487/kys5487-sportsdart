@@ -332,6 +332,7 @@
   details.cuScore > summary::before{content:"▸"; color:var(--pri)} details.cuScore[open] > summary::before{content:"▾"}
   details.cuScore .prow{margin-top:6px}
   .tapHint{margin:2px 0 8px; font-size:17px; font-weight:700; color:var(--sub)}
+  .bdTitle{margin-bottom:6px; font-size:17px; font-weight:800; color:var(--sub); white-space:nowrap} .bdTitle small{margin-left:6px; color:var(--pri)}
   .bdBox{margin:10px 0; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--soft)}
   .bdRow{display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; width:100%; min-height:52px; margin:0 0 8px; padding:8px 12px; border:1px solid var(--line); border-radius:10px; background:var(--panel); font-size:17px; text-align:left; cursor:pointer}
   .bdRow span{flex:1; color:var(--sub)} .bdRow small{font-weight:800; color:var(--pri)} .bdRow.off{opacity:.6} .bdRow.off small{color:var(--sub)}
@@ -1107,7 +1108,7 @@ function applyBuddies(cls, out) {
 function buddyBox(cls) {
   const B = buddiesOf(cls), sm = stuMap(cls), nm = s => esc((sm[s] || {}).name || "?");
   const keys = Object.keys(B).filter(a => sm[a]), a = ui.bdA && sm[ui.bdA] ? ui.bdA : null;
-  let h = `<div class="bdBox"><div class="plbl" style="margin-bottom:6px">🤝 함께할 친구 ${keys.length ? `<small>${keys.length}명</small>` : ""}</div><p class="hint keep" style="margin-top:0">친구와 함께하면 더 편안한 학생이 있다면, 가까운 친구를 <b>3명까지</b> 정해 주세요. 편성할 때마다 그중 <b>1명이 랜덤으로</b> 같은 다트에 들어가요. 프로젝터·학생 화면에는 보이지 않아요.</p>`;
+  let h = `<div class="bdBox"><div class="bdTitle">🤝 함께할 친구 ${keys.length ? `<small>${keys.length}명</small>` : ""}</div><p class="hint keep" style="margin-top:0">친구와 함께하면 더 편안한 학생이 있다면, 가까운 친구를 <b>3명까지</b> 정해 주세요. 편성할 때마다 그중 <b>1명이 랜덤으로</b> 같은 다트에 들어가요. 프로젝터·학생 화면에는 보이지 않아요.</p>`;
   if (!a) {
     h += keys.map(k => { const b = B[k] || {}, fs = Object.keys(b.f || {}).filter(f => sm[f]);
       return `<button class="bdRow ${b.off ? "off" : ""}" data-act="bdEdit" data-v="${k}"><b>${nm(k)}</b><span>🤝 ${fs.map(nm).join(" · ") || "친구 없음"}</span><small>${b.off ? "꺼짐" : "켜짐"}</small></button>`; }).join("");
