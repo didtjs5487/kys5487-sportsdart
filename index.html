@@ -1111,8 +1111,8 @@ function buddyBox(cls) {
   let h = `<div class="bdBox"><div class="bdTitle">🤝 함께할 친구 ${keys.length ? `<small>${keys.length}명</small>` : ""}</div><p class="hint keep" style="margin-top:0">친구 <b>3명까지</b> 정하면 그중 <b>1명</b>이 같은 다트로</p>`;
   if (!a) {
     h += keys.map(k => { const b = B[k] || {}, fs = Object.keys(b.f || {}).filter(f => sm[f]);
-      return `<button class="bdRow ${b.off ? "off" : ""}" data-act="bdEdit" data-v="${k}"><b>${nm(k)}</b><span>🤝 ${fs.map(nm).join(" · ") || "친구 없음"}</span><small>${b.off ? "꺼짐" : "켜짐"}</small></button>`; }).join("");
-    h += `<select class="bdSel"><option value="">＋ 학생 고르기</option>${roster(cls).filter(st => !B[sidOf(st)]).map(st => `<option value="${sidOf(st)}">${esc(st.no)}. ${esc(st.name)}</option>`).join("")}</select>`;
+      return `<button class="bdRow ${b.off ? "off" : ""}" data-act="bdEdit" data-v="${k}"><b>${nm(k)}</b><span>↔ ${fs.map(nm).join(" · ") || "친구를 골라 주세요"}</span><small>${b.off ? "꺼짐" : "켜짐"}</small></button>`; }).join("");
+    h += `<select class="bdSel"><option value="">＋ 학생 추가${keys.length ? " (여러 명 가능)" : ""}</option>${roster(cls).filter(st => !B[sidOf(st)]).map(st => `<option value="${sidOf(st)}">${esc(st.no)}. ${esc(st.name)}</option>`).join("")}</select>`;
   } else {
     const b = B[a] || {}, fs = b.f || {}, n = Object.keys(fs).length;
     h += `<div class="row" style="margin-bottom:8px"><b style="font-size:20px">${nm(a)}</b><span class="sp"></span><span class="sumR">친구 ${n}/3</span></div>
