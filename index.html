@@ -332,6 +332,11 @@
   details.cuScore > summary::before{content:"▸"; color:var(--pri)} details.cuScore[open] > summary::before{content:"▾"}
   details.cuScore .prow{margin-top:6px}
   .tapHint{margin:2px 0 8px; font-size:17px; font-weight:700; color:var(--sub)}
+  .bdBox{margin:10px 0; padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--soft)}
+  .bdRow{display:flex; flex-wrap:wrap; align-items:center; gap:4px 10px; width:100%; min-height:52px; margin:0 0 8px; padding:8px 12px; border:1px solid var(--line); border-radius:10px; background:var(--panel); font-size:17px; text-align:left; cursor:pointer}
+  .bdRow span{flex:1; color:var(--sub)} .bdRow small{font-weight:800; color:var(--pri)} .bdRow.off{opacity:.6} .bdRow.off small{color:var(--sub)}
+  .bdSel{width:100%; min-height:52px; font-size:17px; border-radius:10px; padding:0 10px}
+  .absBtn.bdOn{background:var(--pri); color:#fff; border-color:var(--pri)}
   .turnBox{margin:10px 0 4px; padding:10px 12px; border-radius:12px; background:var(--priSoft); display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; font-size:18px}
   .turnBox .tin2{display:inline-flex; align-items:center; gap:6px; font-weight:800}
   .turnBox .tin{width:84px; height:52px; font-size:24px; font-weight:800; text-align:center}
@@ -1074,7 +1079,48 @@ function makeGroups(cls, stage, method) {
     }
     gs.forEach(g => out.push({ m: g.map(sidOf), tag }));
   });
+  applyBuddies(cls, out);
   return out;
+}
+/* 🤝 짝 — 다트를 꺼리는 학생에게 편한 친구를 3명까지 정해 두면, 편성할 때마다 그중 1명이(지난번과 다른 친구 먼저)
+   같은 다트로 온다. 나머지 자리는 편성 방식 그대로. 조 인원은 바꾸지 않고 자리만 맞바꾼다.
+   classes/{반}/buddy/{sid} = { f:{친구sid:1}, off:true(잠시 끔), last:지난번 친구sid } (2026-10-19) */
+const buddiesOf = cls => (C(cls) || {}).buddy || {};
+function applyBuddies(cls, out) {
+  const B = buddiesOf(cls), lock = new Set();
+  const gOf = s => out.find(g => g.m.includes(s));
+  shuffle(Object.keys(B)).forEach(a => {
+    const b = B[a] || {}; if (b.off || !gOf(a) || lock.has(a)) return;
+    let cand = Object.keys(b.f || {}).filter(f => f !== a && gOf(f) && !lock.has(f));
+    if (!cand.length) return;
+    if (cand.length > 1 && cand.includes(b.last)) cand = cand.filter(f => f !== b.last);
+    const f = shuffle(cand)[0], gA = gOf(a), gF = gOf(f);
+    if (gA !== gF) {
+      const swap = shuffle(gA.m.filter(x => x !== a && !lock.has(x)))[0];
+      if (swap) { gA.m[gA.m.indexOf(swap)] = f; gF.m[gF.m.indexOf(f)] = swap; }
+      else { gF.m.splice(gF.m.indexOf(f), 1); gA.m.push(f); }   // 자리를 바꿀 사람이 없으면 옮기기만
+    }
+    lock.add(a); lock.add(f);
+    if (b.last !== f) put(P(cls, "buddy", a, "last"), f, true);
+  });
+}
+function buddyBox(cls) {
+  const B = buddiesOf(cls), sm = stuMap(cls), nm = s => esc((sm[s] || {}).name || "?");
+  const keys = Object.keys(B).filter(a => sm[a]), a = ui.bdA && sm[ui.bdA] ? ui.bdA : null;
+  let h = `<div class="bdBox"><div class="plbl" style="margin-bottom:6px">🤝 짝 ${keys.length ? `<small>${keys.length}명</small>` : ""}</div><p class="hint keep" style="margin-top:0">다트를 꺼리는 학생에게 편한 친구를 <b>3명까지</b> 정하면, 편성할 때마다 그중 <b>1명이 랜덤으로</b> 같은 다트에 들어가요. 프로젝터·학생 화면에는 보이지 않아요.</p>`;
+  if (!a) {
+    h += keys.map(k => { const b = B[k] || {}, fs = Object.keys(b.f || {}).filter(f => sm[f]);
+      return `<button class="bdRow ${b.off ? "off" : ""}" data-act="bdEdit" data-v="${k}"><b>${nm(k)}</b><span>🤝 ${fs.map(nm).join(" · ") || "친구 없음"}</span><small>${b.off ? "꺼짐" : "켜짐"}</small></button>`; }).join("");
+    h += `<select class="bdSel"><option value="">＋ 짝이 필요한 학생 고르기</option>${roster(cls).filter(st => !B[sidOf(st)]).map(st => `<option value="${sidOf(st)}">${esc(st.no)}. ${esc(st.name)}</option>`).join("")}</select>`;
+  } else {
+    const b = B[a] || {}, fs = b.f || {}, n = Object.keys(fs).length;
+    h += `<div class="row" style="margin-bottom:8px"><b style="font-size:20px">${nm(a)}</b><span class="sp"></span><span class="sumR">친구 ${n}/3</span></div>
+      <div class="absGrid">${roster(cls).filter(st => sidOf(st) !== a).map(st => { const s = sidOf(st), on = !!fs[s];
+        return `<button class="absBtn ${on ? "bdOn" : ""}" data-act="bdF" data-v="${s}">${esc(st.no)}. ${esc(st.name)}${on ? "<small>짝</small>" : ""}</button>`; }).join("")}</div>
+      <div class="row" style="margin-top:10px"><button class="switch ${b.off ? "" : "on"}" data-act="bdOff"><span>${b.off ? "꺼짐 — 완전 랜덤" : "켜짐 — 친구 1명과 같은 다트"}</span><i></i></button></div>
+      <div class="row" style="margin-top:10px"><button class="btn pri" data-act="bdDone">완료</button><span class="sp"></span><button class="btn danger" data-act="bdDel">짝 지우기</button></div>`;
+  }
+  return h + `</div>`;
 }
 const SHORT_M = { seed: "시드", random: "랜덤", no: "번호순", grank: "조 순위", rank: "전체 순위" };
 const METHODS = {
@@ -1192,6 +1238,7 @@ function scGroups() {
     <div class="card pane">
       ${boardPicker(cls)}
       <div class="prow2"><span class="plbl">편성</span><div class="segc">${opts.map(k => `<button class="${ui.method[st] === k ? "on" : ""}" data-act="method" data-v="${k}">${SHORT_M[k]}</button>`).join("")}</div></div>
+      ${buddyBox(cls)}
       <button class="switch ${fitOn() ? "on" : ""}" data-act="fit" data-v="${fitOn() ? 0 : 1}"><span>다트가 모자라면 5명 조</span><i></i></button>
       <div class="sumline">${n0 ? `<b>${n0}명</b> → <b>${sz0.length}개 조</b> <span>(${sz0.join("·")}명)</span>` : "참여 학생 없음"}</div>
       <button class="btn pri big wide" data-act="make">${gs.length ? "다시 편성" : "편성하기"}</button>
@@ -1771,6 +1818,18 @@ document.addEventListener("click", e => {
     case "method": ui.method[ui.stage] = v; render(); break;
     case "sort": ui.sort = v; render(); break;
     case "gst": ui.gst = v; render(); break;
+    case "bdEdit": ui.bdA = v; ui.open.setup = true; render(); break;
+    case "bdDone": ui.bdA = null; render(); break;
+    case "bdF": {
+      const a = ui.bdA, fs = (buddiesOf(cls)[a] || {}).f || {};
+      if (!fs[v] && Object.keys(fs).length >= 3) { toast("친구는 3명까지 정할 수 있어요"); return; }
+      put(P(cls, "buddy", a, "f", v), fs[v] ? null : 1); break;
+    }
+    case "bdOff": { const a = ui.bdA; put(P(cls, "buddy", a, "off"), (buddiesOf(cls)[a] || {}).off ? null : true); break; }
+    case "bdDel": {
+      const a = ui.bdA; if (!confirm(`${(stuMap(cls)[a] || {}).name || ""} 학생의 짝을 지울까요?`)) return;
+      put(P(cls, "buddy", a), null); ui.bdA = null; render(); break;
+    }
     case "abs": setAbs(cls, v, !isAbs(cls, v)); break;
     case "allIn": put(P(cls, "absent"), null); break;
     case "seed": {
@@ -2037,6 +2096,7 @@ document.addEventListener("change", e => {
   if (t.id === "clsSel") { ui.cls = t.value; ui.sel = null; render(); return; }
   if (t.id === "restore") { restore(t.files[0]); return; }
   if (t.classList.contains("refOther") && t.value) { claimRef(t.dataset.g, t.value); return; }
+  if (t.classList.contains("bdSel") && t.value) { ui.bdA = t.value; ui.open.setup = true; render(); return; }
   if (t.classList.contains("roleAdd") && t.value) { const s = t.value; stampRoles(t.dataset.g, R => { (R.x ||= {})[s] = 1; }); return; }
   if (t.classList.contains("tin")) {   // 301 1위 라운드 수
     const res = curCard(t.dataset.g), x = res[t.dataset.s]; if (!x) return;
