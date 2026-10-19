@@ -1108,7 +1108,7 @@ function applyBuddies(cls, out) {
 function buddyBox(cls) {
   const B = buddiesOf(cls), sm = stuMap(cls), nm = s => esc((sm[s] || {}).name || "?");
   const keys = Object.keys(B).filter(a => sm[a]), a = ui.bdA && sm[ui.bdA] ? ui.bdA : null;
-  let h = `<div class="bdBox"><div class="bdTitle">🤝 함께할 친구 ${keys.length ? `<small>${keys.length}명</small>` : ""}</div><p class="hint keep" style="margin-top:0">친구와 함께하면 더 편안한 학생이 있다면, 가까운 친구를 <b>3명까지</b> 정해 주세요. 편성할 때마다 그중 <b>1명이 랜덤으로</b> 같은 다트에 들어가요. 프로젝터·학생 화면에는 보이지 않아요.</p>`;
+  let h = `<div class="bdBox"><div class="bdTitle">🤝 함께할 친구 ${keys.length ? `<small>${keys.length}명</small>` : ""}</div><p class="hint keep" style="margin-top:0">친구 <b>3명까지</b> 정하면 그중 <b>1명</b>이 같은 다트로</p>`;
   if (!a) {
     h += keys.map(k => { const b = B[k] || {}, fs = Object.keys(b.f || {}).filter(f => sm[f]);
       return `<button class="bdRow ${b.off ? "off" : ""}" data-act="bdEdit" data-v="${k}"><b>${nm(k)}</b><span>🤝 ${fs.map(nm).join(" · ") || "친구 없음"}</span><small>${b.off ? "꺼짐" : "켜짐"}</small></button>`; }).join("");
