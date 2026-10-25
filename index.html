@@ -622,7 +622,7 @@ const params = new URLSearchParams(location.search);
 /* 누가 쓰고 있나 — 로그인한 선생님은 모두 고칠 수 있고, 로그인 안 한 사람은 보기만.
    학생은 QR로 들어와 '오늘의 입력 코드'를 넣으면 경기 결과 카드와 역할만 입력할 수 있다. */
 let VIEW = true;
-const TEACHERS = ["teacher112@yeongjong.icehs.kr", "teacher74@yeongjong.icehs.kr"];
+const TEACHERS = ["teacher112@yeongjong.icehs.kr", "teacher74@yeongjong.icehs.kr", "bogang@yeongjong.icehs.kr"];   // bogang = 보강 선생님 공용 계정
 let teacher = null, authKnown = false, fbFailed = false, stuOK = false, secret = {};
 let me = lsGet("darts-me" + TEST);   // 코드를 넣은 휴대폰 {day}
 const DEV = lsGet("darts-dev") || (() => { const d = Math.random().toString(36).slice(2, 10); lsSet("darts-dev", d); return d; })();   // 이 휴대폰 표시
