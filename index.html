@@ -346,6 +346,10 @@
   .clsChips button.main{background:var(--pri); border-color:var(--pri); color:#fff}
   .pairTog{flex:none; min-height:50px; padding:0 12px; border:1.5px dashed var(--pri); border-radius:12px; background:var(--panel); color:var(--pri); font-size:16px; font-weight:800}
   .pairTog.on{background:var(--priSoft); border-style:solid}
+  .pairRows{display:flex; flex-direction:column; gap:6px; margin:0 0 10px}
+  .pairRow{display:flex; align-items:center; gap:10px; min-height:56px; padding:6px 12px; border:1.5px solid var(--line2); border-radius:12px; background:var(--panel); font-size:17px}
+  .pairRow > b{flex:none; font-size:19px; color:var(--pri)} .pairRow > span{flex:1} .pairRow.done{background:var(--goodSoft); border-color:#BFE6CF}
+  .pairRow .btn{flex:none; min-height:46px}
   .clsPick{margin:0 0 12px; padding:12px; border-radius:14px; background:#FFF6E5; border:1.5px solid #F0D9A8}
   .clsPick b{display:block; margin-bottom:8px; font-size:19px}
   .clsPick div{display:flex; flex-wrap:wrap; gap:8px}
@@ -1271,8 +1275,8 @@ function scGroups() {
   const info = grpRec(cls, st, r);
   let h = clsBar() + gameSeg(cls);
   const pairSel = !VIEW && pairOn() ? [ui.cls, ...bigPair()].sort(numSort) : [], isPair = pairSel.length === 2, nxAct = isPair ? "startPair" : "startNext";
-  if (!VIEW && !gs.length && !liveOf(cls)) h += `<div class="acts noprint"><button class="btn big nextBig wide" data-act="${nxAct}">${isPair ? `▶ ${esc(pairSel[0])}반 · ${esc(pairSel[1])}반 함께 시작` : "▶ 경기 시작"}</button></div>`;
-  if (!VIEW && gs.length) h += `<div class="acts2 noprint"><button class="btn big nextBig" data-act="${nxAct}">${isPair ? "▶ 두 반 다음 경기" : "▶ 다음 경기"}</button><button class="btn big soft reMake" data-act="resetRound" aria-label="이 라운드 리셋">↺<small>리셋</small></button><button class="btn big soft" data-act="big" aria-label="프로젝터 화면">📺</button></div>`;
+  if (!VIEW && !gs.length && !liveOf(cls)) h += `<div class="acts noprint"><button class="btn big nextBig wide" data-act="${nxAct}">${isPair ? (pairSel.some(c => liveStat(c).L) ? "▶ 끝난 반 다음 경기" : `▶ ${esc(pairSel[0])}반 · ${esc(pairSel[1])}반 함께 시작`) : "▶ 경기 시작"}</button></div>`;
+  if (!VIEW && gs.length) h += `<div class="acts2 noprint"><button class="btn big nextBig" data-act="${nxAct}">${isPair ? "▶ 끝난 반 다음 경기" : "▶ 다음 경기"}</button><button class="btn big soft reMake" data-act="resetRound" aria-label="이 라운드 리셋">↺<small>리셋</small></button><button class="btn big soft" data-act="big" aria-label="프로젝터 화면">📺</button></div>`;
   if (!VIEW) h += absPicker(cls, !gs.length);
   if (!VIEW) {
     const opts = METHOD_OPTS[st];
@@ -1315,19 +1319,42 @@ function clsBar() {
   if (VIEW) return "";
   const names = classNames(); if (names.length < 2) return "";
   const on = pairOn(), sel = on ? [ui.cls, ...bigPair()] : [ui.cls];
-  return `<div class="clsBar noprint"><div class="clsChips">${names.map(c => `<button class="${sel.includes(c) ? "on" : ""} ${on && c === ui.cls ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(c)}<small>반</small></button>`).join("")}</div><button class="pairTog ${on ? "on" : ""}" data-act="pairTog">${on ? "✔ 두 반 함께" : "두 반 함께"}</button></div>${on ? `<p class="hint noprint" style="margin:-4px 0 8px">${sel.length < 2 ? "함께할 반을 하나 더 눌러 주세요" : `${sel.slice().sort(numSort).join("반 · ")}반 함께 수업 — 다트는 반씩 나눠 써요`}</p>` : ""}`;
+  return `<div class="clsBar noprint"><div class="clsChips">${names.map(c => `<button class="${sel.includes(c) ? "on" : ""} ${on && c === ui.cls ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(c)}<small>반</small></button>`).join("")}</div><button class="pairTog ${on ? "on" : ""}" data-act="pairTog">${on ? "✔ 두 반 함께" : "두 반 함께"}</button></div>${on ? `<p class="hint noprint" style="margin:-4px 0 8px">${sel.length < 2 ? "함께할 반을 하나 더 눌러 주세요" : `${sel.slice().sort(numSort).join("반 · ")}반 함께 수업 — 다트는 반씩 나눠 써요`}</p>` : ""}${on && sel.length === 2 ? pairRows(sel.slice().sort(numSort)) : ""}`;
 }
+/* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
+function pairRows(cs) {
+  const st = cs.map(liveStat); if (!st.some(x => x.L)) return "";
+  return `<div class="pairRows noprint">${st.map(x => `<div class="pairRow ${x.done ? "done" : ""}"><b>${esc(x.c)}반</b><span>${x.L ? `${STAGES[x.L.st].name} ${x.L.r}R · 입력 <b>${x.nd}/${x.total}</b>${x.done ? " ✔" : ""}` : "다음 경기 전"}</span><button class="btn sm ${x.done || !x.L ? "pri" : ""}" data-act="startOne" data-v="${esc(x.c)}">▶ ${x.L ? "다음 경기" : "시작"}</button></div>`).join("")}</div>`;
+}
+/* 한 반의 지금 라운드 입력 현황 */
+function liveStat(c) {
+  const L = liveOf(c); if (!L || isClosed(c, L.st, L.r)) return { c, L: null, total: 0, nd: 0, done: false };
+  const gs = groupsOf(c, L.st, L.r), rr = roundRes(c, L.st, L.r);
+  const nd = gs.filter((g, gi) => cardDone(c, g, rr, "g" + gi, L.st, L.r)).length;
+  return { c, L, total: gs.length, nd, done: gs.length > 0 && nd === gs.length };
+}
+/* 두 반이 함께 수업하면 진행 속도가 다르다 — 시작 전이면 둘 다 시작하고, 진행 중이면 입력이 끝난 반만 다음 경기로 넘어간다.
+   아직 끝나지 않은 반은 그대로 나머지 경기를 이어 간다(반마다 [▶ 다음 경기]로 따로 넘길 수도 있다) */
 function startPair() {
   const [a, b] = [ui.cls, ...bigPair()].sort(numSort);
   if (!b) { toast("함께할 반을 하나 더 골라 주세요"); return; }
-  const ba = boardsOf(a), bb = boardsOf(b);
-  if (ba.some(x => bb.includes(x))) {   // 다트가 겹치면 켜진 다트를 반씩 나눠 쓴다
-    const on = onBoards(), half = Math.ceil(on.length / 2);
-    put(P(a, "boards"), { day: today(), list: on.slice(0, half) }, true);
-    put(P(b, "boards"), { day: today(), list: on.slice(half) }, true);
+  const stat = [a, b].map(liveStat), running = stat.filter(x => x.L);
+  if (!running.length) {
+    const ba = boardsOf(a), bb = boardsOf(b);
+    if (ba.some(x => bb.includes(x))) {   // 다트가 겹치면 켜진 다트를 반씩 나눠 쓴다
+      const on = onBoards(), half = Math.ceil(on.length / 2);
+      put(P(a, "boards"), { day: today(), list: on.slice(0, half) }, true);
+      put(P(b, "boards"), { day: today(), list: on.slice(half) }, true);
+    }
+    ui.bigCls = [a, b]; ui.bigDay = today(); ui.cls = a;
+    startNext(b); startNext(a);
+    return;
   }
-  ui.bigCls = [a, b]; ui.bigDay = today(); ui.cls = a;
-  startNext(b); startNext(a);
+  const go = stat.filter(x => !x.L || x.done), stay = stat.filter(x => x.L && !x.done);
+  if (!go.length) { toast(`${stay.map(x => x.c + "반").join(" · ")}은 아직 입력이 안 끝났어요 — 끝나는 반부터 [다음 경기]를 눌러요`); return; }
+  ui.bigCls = [a, b]; ui.bigDay = today();
+  go.forEach(x => { ui.cls = x.c; startNext(x.c); });
+  if (stay.length) toast(`${stay.map(x => x.c + "반").join(" · ")}은 아직 진행 중이라 그대로 이어 가요`);
 }
 /* 오늘 참여하지 못하는 학생 — 고르면 조 편성에서 빠진다. 날짜가 바뀌면 자동으로 모두 출석 */
 function absPicker(cls, open) {
@@ -1895,6 +1922,7 @@ document.addEventListener("click", e => {
     }
     case "pairTog": { const on = !pairOn(); ui.pairOn = on; ui.bigCls = [ui.cls]; ui.bigDay = today(); render(); break; }
     case "startPair": startPair(); break;
+    case "startOne": ui.cls = v; ui.bigCls = [v, ...bigPair().filter(c => c !== v)].slice(0, 2); ui.bigDay = today(); startNext(v); break;
     case "clrRound": {
       const st = ui.stage, r = ui.round;
       if (!confirm(`${cls}반 ${STAGES[st].name} ${r}라운드에 입력한 결과를 지울까요?\n\n조 편성은 그대로 남습니다.`)) break;
