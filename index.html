@@ -363,6 +363,17 @@
   #big .bd2 .nx .nxn{display:flex; flex-wrap:wrap; gap:0 10px}
   #big .bd2 .nx .nxn i{font-style:normal; white-space:nowrap}
   .refPart{font-size:15px; font-weight:700; color:var(--sub)}
+  .gaugeBox{display:flex; align-items:center; gap:16px; margin:0 0 12px; padding:12px 16px; border-radius:22px; background:linear-gradient(135deg,#F6F4FF 0%,#ECEAFD 100%); border:1px solid #E4E1F5}
+  .gWrap{position:relative; flex:none; width:84px; height:84px}
+  .gauge{width:84px; height:84px; display:block}
+  .gTrack{fill:none; stroke:#DCD7FA; stroke-width:9}
+  .gBar{fill:none; stroke:url(#gGrad); stroke-width:9; stroke-linecap:round; transition:stroke-dashoffset .6s ease}
+  .gaugeBox.full .gBar{stroke:var(--good)} .gaugeBox.full{background:linear-gradient(135deg,#F1FBF5 0%,#E2F5EA 100%); border-color:#BFE6CF}
+  .gNum{position:absolute; inset:0; display:flex; align-items:baseline; justify-content:center; padding-top:22px; font-family:"Barlow","Noto Sans KR",sans-serif; color:var(--ink)}
+  .gNum b{font-size:30px; font-weight:800; line-height:1} .gNum small{font-size:16px; font-weight:700; color:var(--sub)}
+  .gaugeBox.full .gNum b{color:var(--good); font-size:32px}
+  .gTxt{display:flex; flex-direction:column; gap:2px; min-width:0} .gTxt b{font-size:20px; font-weight:800} .gTxt small{font-size:15px; color:var(--sub)}
+  .endLink{margin-left:auto; flex:none; min-height:44px; padding:0 4px; border:0; background:none; color:var(--sub); font-size:15px; font-weight:700; text-decoration:underline; text-underline-offset:3px; cursor:pointer}
   .gMix{display:inline-flex; align-items:baseline; gap:6px; margin-right:14px; font-size:22px; font-weight:800; white-space:nowrap} .gMix b{font-size:26px}
   .pairRows{display:flex; flex-direction:column; gap:6px; margin:0 0 10px}
   .pairRow{display:flex; align-items:center; gap:10px; min-height:56px; padding:6px 12px; border:1.5px solid var(--line2); border-radius:12px; background:var(--panel); font-size:17px}
@@ -1229,7 +1240,7 @@ function render() {
   const names = classNames();
   if (!names.includes(ui.cls)) ui.cls = names[0] || "";
   $("clsSel").disabled = !!(stuOK && !canTeach());
-  $("clsSel").style.display = !canTeach() && params.has("in") ? "none" : "";   // 학생은 반을 고르지 않는다(QR의 다트로 정해짐)
+  $("clsSel").style.display = (!canTeach() && params.has("in")) || (canTeach() && names.length >= 2) ? "none" : "";   // 선생님은 화면 맨 위 반 단추로 고른다   // 학생은 반을 고르지 않는다(QR의 다트로 정해짐)
   $("clsSel").innerHTML = names.length ? names.map(c => `<option ${c === ui.cls ? "selected" : ""}>${esc(c)}</option>`).join("") : `<option>반 없음</option>`;
   VIEW = !canTeach();
   if (VIEW && stuOK && me && me.cls && S.rosters[me.cls]) { ui.cls = me.cls; ui.pinCls = true; }   // 코드로 정해진 반
@@ -1257,7 +1268,7 @@ function render() {
     saveUI(); return;
   }
   const fn = { roster: scRoster, groups: scGroups, entry: scEntry, stand: scStand, grade: scGrade, set: scSet }[ui.tab] || scSet;
-  $("main").innerHTML = (!ui.cls && ui.tab !== "set" && ui.tab !== "grade") ? VIEW ? `<h2>아직 등록된 반이 없어요</h2><p class="hint">선생님이 명렬을 등록하면 여기에 조 편성과 경기 결과가 나옵니다.</p>` : `<h2>먼저 반을 등록하세요</h2><p class="hint"><b>설정</b> 탭의 <b>명렬</b>에서 명렬표를 붙여넣으면 됩니다.</p><button class="btn pri big" data-act="tab" data-v="set">명렬 등록하러 가기</button>` : fn();
+  $("main").innerHTML = (!VIEW && GRP == null && ui.cls ? clsBar() : "") + ((!ui.cls && ui.tab !== "set" && ui.tab !== "grade") ? VIEW ? `<h2>아직 등록된 반이 없어요</h2><p class="hint">선생님이 명렬을 등록하면 여기에 조 편성과 경기 결과가 나옵니다.</p>` : `<h2>먼저 반을 등록하세요</h2><p class="hint"><b>설정</b> 탭의 <b>명렬</b>에서 명렬표를 붙여넣으면 됩니다.</p><button class="btn pri big" data-act="tab" data-v="set">명렬 등록하러 가기</button>` : fn());
   if (ui.tab === "set") drawQR();
   if (teacher && secret.day === today() && classNames().some(c => !(secret.pins || {})[c])) ensurePins();
   if (teacher && serverSeen && JSON.stringify((S.meta || {}).classes || []) !== JSON.stringify(classNames())) put("meta/classes", classNames().length ? classNames() : null, true);
@@ -1316,7 +1327,7 @@ function gameSeg(cls) {
 function scGroups() {
   const cls = ui.cls, st = ui.stage, r = ui.round, sm = stuMap(cls), gs = groupsOf(cls, st);
   const info = grpRec(cls, st, r);
-  let h = clsBar() + (VIEW ? gameSeg(cls) : "");
+  let h = VIEW ? gameSeg(cls) : "";
   const pairSel = !VIEW && pairOn() ? [ui.cls, ...bigPair()].sort(numSort) : [], isPair = pairSel.length === 2, nxAct = isPair ? "startPair" : "startNext";
   if (!VIEW) {   // 수업 중 누를 것은 이 큰 단추 하나: 알아서 다음 경기·라운드를 골라 편성하고 프로젝터에 띄운다
     const cg = curGame(cls), running = !!(gs.length && liveOf(cls)), nx = cg && running ? nextStep(cg.st, cg.r) : null, formed = !!(cg && !running && groupsOf(cls, cg.st, cg.r).length);
@@ -1498,7 +1509,6 @@ function scEntry() {
   const cls = ui.cls, st = ui.stage, gs = groupsOf(cls, st), rr = roundRes(cls, st, ui.round);
   let h = "";
   const pair = (ui.bigCls || []).filter(c => S.rosters[c]);
-  if (!VIEW && GRP == null) h += clsBar();
   if (VIEW && stuOK && !liveOf(cls)) return joinBox(cls) + `<p class="wait">⏳ 경기 시작을 기다리는 중</p>`;
   if (VIEW && stuOK) h += `<div class="lockTag">${STAGES[st].mark} ${STAGES[st].name} · ${ui.round}라운드</div>`;
   else if (!VIEW) h += `<details class="setup noprint" data-k="gpick" ${ui.open.gpick ? "open" : ""}><summary>🎮 경기 · 라운드 바꾸기<span class="sp"></span><span class="sumR">${STAGES[st].name} ${ui.round}R</span></summary><div class="card" style="margin-bottom:14px">${gameSeg(cls)}</div></details>`;
@@ -1507,8 +1517,11 @@ function scEntry() {
   const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi)), closed = isClosed(cls, st, ui.round);
   if (!VIEW && GRP == null) {
     const nDone = gs.filter((g, gi) => cardDone(cls, g, rr, "g" + gi)).length;
-    if (closed) h += `<div class="banner" style="background:var(--soft);border-color:var(--line);color:var(--sub)">🔒 종료됨<button class="btn" data-act="reopenRound">다시 열기</button></div>`;
-    else h += `<div class="banner${allDone ? "" : " todo"}"><span class="bcount">${allDone ? "✔ 모두 입력" : `입력 <b>${nDone}</b>/${gs.length}`}</span><button class="btn sm ghost endBtn" data-act="endRound">경기 종료</button><button class="btn pri big nextBig" data-act="startNext">▶ 다음 경기</button></div>`;
+    // 입력 게이지 — 다트가 다 저장되면 저절로 종료된다 (2026-10-27)
+    const pct = gs.length ? nDone / gs.length : 0, CIR = 2 * Math.PI * 34, full = closed || allDone;
+    h += `<div class="gaugeBox ${full ? "full" : ""}"><div class="gWrap"><svg class="gauge" viewBox="0 0 84 84" aria-hidden="true"><defs><linearGradient id="gGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9890F2"/><stop offset="1" stop-color="#4A41D6"/></linearGradient></defs><circle cx="42" cy="42" r="34" class="gTrack"/><circle cx="42" cy="42" r="34" class="gBar" style="opacity:${pct || full ? 1 : 0}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - (full ? 1 : pct))).toFixed(1)}" transform="rotate(-90 42 42)"/></svg><div class="gNum">${full ? "<b>✔</b>" : `<b>${nDone}</b><small>/${gs.length}</small>`}</div></div>`
+      + `<div class="gTxt"><b>${closed ? "경기 종료" : allDone ? "모두 저장됨" : "다트 입력 중"}</b><small>${closed ? "학생 입력이 잠겼어요" : allDone ? "곧 자동으로 끝나요" : "모두 저장되면 자동으로 끝나요"}</small></div>`
+      + (closed ? `<button class="endLink" data-act="reopenRound">다시 열기</button>` : `<button class="endLink" data-act="endRound">지금 종료</button>`) + `</div>`;
 
   }
 
