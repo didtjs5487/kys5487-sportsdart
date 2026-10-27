@@ -346,6 +346,7 @@
   .clsChips button.main{background:var(--pri); border-color:var(--pri); color:#fff}
   .pairTog{flex:none; min-height:50px; padding:0 12px; border:1.5px dashed var(--pri); border-radius:12px; background:var(--panel); color:var(--pri); font-size:16px; font-weight:800}
   .pairTog.on{background:var(--priSoft); border-style:solid}
+  .gMix{display:inline-flex; align-items:baseline; gap:6px; margin-right:14px; font-size:22px; font-weight:800; white-space:nowrap} .gMix b{font-size:26px}
   .pairRows{display:flex; flex-direction:column; gap:6px; margin:0 0 10px}
   .pairRow{display:flex; align-items:center; gap:10px; min-height:56px; padding:6px 12px; border:1.5px solid var(--line2); border-radius:12px; background:var(--panel); font-size:17px}
   .pairRow > b{flex:none; font-size:19px; color:var(--pri)} .pairRow > span{flex:1} .pairRow.done{background:var(--goodSoft); border-color:#BFE6CF}
@@ -1324,7 +1325,7 @@ function clsBar() {
 /* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
 function pairRows(cs) {
   const st = cs.map(liveStat); if (!st.some(x => x.L)) return "";
-  return `<div class="pairRows noprint">${st.map(x => `<div class="pairRow ${x.done ? "done" : ""}"><b>${esc(x.c)}반</b><span>${x.L ? `${STAGES[x.L.st].name} ${x.L.r}R · 입력 <b>${x.nd}/${x.total}</b>${x.done ? " ✔" : ""}` : "다음 경기 전"}</span><button class="btn sm ${x.done || !x.L ? "pri" : ""}" data-act="startOne" data-v="${esc(x.c)}">▶ ${x.L ? "다음 경기" : "시작"}</button></div>`).join("")}</div>`;
+  return `<div class="pairRows noprint">${st.map(x => `<div class="pairRow ${x.done ? "done" : ""}"><b>${esc(x.c)}반</b><span>${x.L ? `${STAGES[x.L.st].name} ${x.L.r}R · 입력 <b>${x.nd}/${x.total}</b>${x.done ? " ✔" : ""}` : curGame(x.c) ? "다음 경기 전" : "모든 경기 끝 ✔"}</span>${x.L || curGame(x.c) ? `<button class="btn sm ${x.done || !x.L ? "pri" : ""}" data-act="startOne" data-v="${esc(x.c)}">▶ ${x.L ? "다음 경기" : "시작"}</button>` : ""}</div>`).join("")}</div>`;
 }
 /* 한 반의 지금 라운드 입력 현황 */
 function liveStat(c) {
@@ -1339,6 +1340,7 @@ function startPair() {
   const [a, b] = [ui.cls, ...bigPair()].sort(numSort);
   if (!b) { toast("함께할 반을 하나 더 골라 주세요"); return; }
   const stat = [a, b].map(liveStat), running = stat.filter(x => x.L);
+  if (stat.every(x => !x.L && !curGame(x.c))) { toast("두 반 모두 경기가 끝났습니다 — 성적 탭에서 확인하세요"); return; }
   if (!running.length) {
     const ba = boardsOf(a), bb = boardsOf(b);
     if (ba.some(x => bb.includes(x))) {   // 다트가 겹치면 켜진 다트를 반씩 나눠 쓴다
@@ -1347,10 +1349,10 @@ function startPair() {
       put(P(b, "boards"), { day: today(), list: on.slice(half) }, true);
     }
     ui.bigCls = [a, b]; ui.bigDay = today(); ui.cls = a;
-    startNext(b); startNext(a);
+    [b, a].filter(c => curGame(c)).forEach(c => startNext(c));
     return;
   }
-  const go = stat.filter(x => !x.L || x.done), stay = stat.filter(x => x.L && !x.done);
+  const go = stat.filter(x => x.L ? x.done : !!curGame(x.c)), stay = stat.filter(x => x.L && !x.done);
   if (!go.length) { toast(`${stay.map(x => x.c + "반").join(" · ")}은 아직 입력이 안 끝났어요 — 끝나는 반부터 [다음 경기]를 눌러요`); return; }
   ui.bigCls = [a, b]; ui.bigDay = today();
   go.forEach(x => { ui.cls = x.c; startNext(x.c); });
@@ -1810,9 +1812,10 @@ function openBig(cls) {
 const bigPair = () => ui.bigDay === today() ? (ui.bigCls || []).filter(c => c !== ui.cls && S.rosters[c]).slice(0, 1) : [];
 function showBig() {
   const st = ui.stage, show = [ui.cls, ...bigPair()];
-  // 함께 띄운 다른 반은 그 반의 진행 중 라운드를 보여 준다
-  const rOf = c => { if (c === ui.cls) return ui.round; const L = liveOf(c); return L && L.st === st ? L.r : groupsOf(c, st, ui.round).length ? ui.round : 0; };
-  const gOf = c => rOf(c) ? groupsOf(c, st, rOf(c)) : [];
+  // 두 반이 함께 수업하면 진도가 다를 수 있다(7반 카운트업 3R · 8반 301 1R) — 반마다 자기 경기·라운드를 보여 준다
+  const stOf = c => { if (c === ui.cls) return ui.stage; const L = liveOf(c); return L ? L.st : ui.stage; };
+  const rOf = c => { if (c === ui.cls) return ui.round; const L = liveOf(c); return L ? L.r : groupsOf(c, stOf(c), ui.round).length ? ui.round : 0; };
+  const gOf = c => rOf(c) ? groupsOf(c, stOf(c), rOf(c)) : [];
   const maxW = Math.max(1, ...show.map(c => Math.ceil((gOf(c).length || 1) / boardsOf(c).length)));
   if (!(ui.wave >= 1 && ui.wave <= maxW)) ui.wave = 1;
   const wv = ui.wave, slot = {}, next = {};
@@ -1834,12 +1837,12 @@ function showBig() {
       <div class="segc">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}</div>
       <button class="bmEntry" data-act="bigEntry">✏️ 결과 입력</button>
       <div class="bmCls"><b>학급</b>${classNames().map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div></div>` : "";
-  $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle"><span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b>라운드</span>${multi ? `<span class="gCls">${show.slice().sort(numSort).map(esc).join(" · ")}반</span>` : ""}${waveBtns}</div>${qr}${ctl}</div>${menu}
+  $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle">${multi && !show.every(c => stOf(c) === st && rOf(c) === ui.round) ? show.slice().sort(numSort).map(c => `<span class="gMix g-${stOf(c)}"><b>${esc(c)}반</b> ${STAGES[stOf(c)].name} ${rOf(c) || "-"}R</span>`).join("") : `<span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b>라운드</span>${multi ? `<span class="gCls">${show.slice().sort(numSort).map(esc).join(" · ")}반</span>` : ""}`}${waveBtns}</div>${qr}${ctl}</div>${menu}
     ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기</button></div>` : ""}
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
     <div class="arena" style="grid-template-columns:repeat(${(() => { const k = onBoards().filter(b => slot[b]).length || 1; return k <= 5 ? k : Math.ceil(k / 2); })()},1fr)">${onBoards().filter(b => slot[b]).map(b => { const g = slot[b] || [];
-      const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), gg = groupsOf(c, st, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, st, r0), g[0].gi, st, r0) : "none"; })() : "none";
-      return `<div class="bd2 g-${st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${charImg(b, "ch")}<span class="cn">${chOf(b)[1]}</span>${multi && g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}</span>` : ""}${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
+      const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), s0 = stOf(c), gg = groupsOf(c, s0, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, s0, r0), g[0].gi, s0, r0) : "none"; })() : "none";
+      return `<div class="bd2 g-${g.length ? stOf(g[0].c) : st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${charImg(b, "ch")}<span class="cn">${chOf(b)[1]}</span>${multi && g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}</span>` : ""}${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
         ${next[b] ? `<div class="nx">${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
@@ -1897,7 +1900,7 @@ document.addEventListener("click", e => {
   switch (act) {
     case "tab": ui.tab = v; ui.sel = null; ui.focus = null; ui.gOpen = []; if (v === "entry" || v === "groups") ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
     case "stage": ui.stage = v; ui.sel = null; ui.focus = null; ui.round = openRound(cls, v); if (ui.tab === "groups" && groupsOf(cls, v).length) setLive(cls, v, ui.round); render(); break;
-    case "cls": ui.open = {}; ui.cls = v; ui.focus = null; ui.round = openRound(v, ui.stage); render(); break;
+    case "cls": { ui.open = {}; ui.cls = v; ui.focus = null; const L = liveOf(v); if (L) { ui.stage = L.st; ui.round = L.r; } else ui.round = openRound(v, ui.stage); render(); break; }
     case "goEntry": ui.tab = "entry"; ui.focus = null; ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
     case "toX3": ui.tab = "groups"; ui.stage = "x3"; ui.round = 1; render(); scrollTo(0, 0); break;
     case "bigEntry": $("big").classList.remove("show"); ui.tab = "entry"; ui.focus = null; ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
@@ -1918,7 +1921,8 @@ document.addEventListener("click", e => {
         if (sel.includes(v)) { ui.bigCls = [v, ui.cls]; ui.cls = v; }   // 함께하는 다른 반을 보던 반으로
         else { ui.bigCls = [ui.cls, v]; ui.bigDay = today(); }
       } else ui.cls = v;
-      ui.open = {}; ui.focus = null; ui.sel = null; ui.round = openRound(ui.cls, ui.stage); render(); break;
+      { const L = liveOf(ui.cls); if (L) { ui.stage = L.st; ui.round = L.r; } else ui.round = openRound(ui.cls, ui.stage); }
+      ui.open = {}; ui.focus = null; ui.sel = null; render(); break;
     }
     case "pairTog": { const on = !pairOn(); ui.pairOn = on; ui.bigCls = [ui.cls]; ui.bigDay = today(); render(); break; }
     case "startPair": startPair(); break;
