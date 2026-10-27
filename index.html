@@ -1234,7 +1234,7 @@ const METHODS = {
 
 /* ---------- 화면 ---------- */
 // 명렬·출석은 학기 초에 한 번 쓰는 일이라 맨 뒤로 (2026-10-01 선생님 요청)
-const TABS = [["groups", "👥", "조 편성"], ["entry", "✏️", "결과"], ["stand", "📊", "성적"], ["grade", "🏆", "학년"], ["set", "⚙️", "설정"]];
+const TABS = [["groups", "👥", "조 편성"], ["entry", "✏️", "결과"], ["grade", "🏆", "학년"], ["set", "⚙️", "설정"]]   // 성적은 학기 말에만 — 설정 탭 안 상자로 (2026-10-27);
 function render() {
   if (canTeach()) { autoCloseRounds(); syncOpen(); } else if (STU_DEMO) applyOpen();
   const names = classNames();
@@ -1245,6 +1245,7 @@ function render() {
   VIEW = !canTeach();
   if (VIEW && stuOK && me && me.cls && S.rosters[me.cls]) { ui.cls = me.cls; ui.pinCls = true; }   // 코드로 정해진 반
   if (ui.tab === "roster") ui.tab = "set";
+  if (ui.tab === "stand") { ui.tab = "set"; ui.open["s-stand"] = true; }   // 성적 탭은 설정 안으로 옮김
   if (VIEW && ui.tab === "set") ui.tab = "groups";
   if (VIEW && ui.cls) {
     const L = liveOf(ui.cls), key = L ? ui.cls + L.st + L.r + L.day : "";
@@ -1831,6 +1832,7 @@ function scSet() {
   const viewUrl = `${base}?in=1`;
   const gs = groupsOf(cls, ui.stage);
   return `<h2>설정 · 공유</h2>
+    ${cls ? `<details class="setup" data-k="s-stand" ${ui.open["s-stand"] ? "open" : ""}><summary>📊 성적 · 엑셀<span class="sp"></span><span class="sumR">학기 말</span></summary><div class="card">${scStand()}</div></details>` : ""}
     <details class="setup" data-k="s-save" ${ui.open["s-save"] ? "open" : ""}><summary>💾 저장 상태 · 입력 코드</summary><div class="card">
     <p style="margin:0">${$("status").textContent}</p>
     ${serverDenied || !fdb ? `<div class="note">지금은 <b>이 기기에만</b> 저장됩니다. Firebase 콘솔(<b>kys5487-sportsdart</b>)에서 규칙 게시·로그인 설정이 끝나면 자동으로 서버에 올라갑니다.</div>` : `<p class="hint">기록은 서버에 저장되어 휴대폰·태블릿·교실 PC 어디서 열어도 같습니다.</p>`}
