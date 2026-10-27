@@ -1318,17 +1318,17 @@ function scGroups() {
     <span class="sp"></span>${VIEW ? "" : `<button class="btn sm ${mvOn ? "pri" : ""}" data-act="mvTog">${mvOn ? "✔ 바꾸기 끝" : "✋ 조 바꾸기"}</button>${mvOn ? `<button class="btn sm" data-act="addGrp">＋ 조</button>` : ""}`}</div>`;
   if (!VIEW && ui.sel) {
     const x = sm[ui.sel] || { name: "?" };
-    h += `<div class="selBar noprint"><b>✋ ${esc(x.name)}</b><span class="selHint">옮길 조의 <b>[여기로 이동]</b>을 누르세요<br>다른 학생을 누르면 자리 바꾸기</span><span class="sp"></span><button class="btn sm" data-act="newGrpWith">새 조</button><button class="btn sm danger" data-act="selAbs">${isAbs(cls, ui.sel) ? "출석" : "결석"}</button><button class="btn sm ghost" data-act="selCancel">취소</button></div>`;
-  } else if (mvOn) h += `<p class="hint noprint moveHint">✋ 조를 바꾸려면 <b>학생 이름</b>을 누르세요. 그다음 <b>[여기로 이동]</b>(다른 조로 옮기기) 또는 다른 학생 이름(자리 바꾸기)을 누르면 됩니다.</p>`;
+    h += `<div class="selBar noprint"><b>✋ ${esc(x.name)}</b><span class="selHint">바꿀 <b>다른 조 학생 이름</b>을 누르면 자리 교체<br>또는 옮길 조의 <b>[여기로 이동]</b></span><span class="sp"></span><button class="btn sm" data-act="newGrpWith">새 조</button><button class="btn sm danger" data-act="selAbs">${isAbs(cls, ui.sel) ? "출석" : "결석"}</button><button class="btn sm ghost" data-act="selCancel">취소</button></div>`;
+  } else if (mvOn) h += `<p class="hint noprint moveHint">✋ 바꿀 <b>학생 이름</b>을 누르고, <b>다른 조 학생 이름</b>을 누르면 자리가 바뀌어요. (조만 옮기려면 [여기로 이동])</p>`;
   const opened = new Set(ui.gOpen || []);
-  h += `<div class="glist">${gs.map((g, gi) => (opened.has(gi) || (ui.sel && g.m.includes(ui.sel))) ? `
+  h += `<div class="glist">${gs.map((g, gi) => (!mvOn && opened.has(gi)) ? `
     <div class="grp ${st}"><button class="ghd" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="sp"></span><span class="chev">접기 ▴</span></button>
     <div class="chips">${g.m.map(s => { const x = sm[s] || { no: "?", name: "(명렬 없음)" }, a = isAbs(cls, s);
       const extra = st === "x3" ? (() => { const r = record(cls, "cu", s); return r.played ? `카운트업 ${r.sum}점` : ""; })() : (x.seed ? "★" : "");
       return `<button class="chip ${ui.sel === s ? "sel" : ""} ${a ? "abs" : ""}" ${VIEW || !mvOn ? "disabled" : `data-act="pick" data-v="${s}"`}><span class="no">${esc(x.no)}</span>${esc(x.name)}${sexBadge(x)}<span class="info">${a ? "결석" : extra}</span></button>`; }).join("")}</div>
     ${!g.m.length ? (VIEW ? "" : `<button class="btn ghost moveHere" data-act="delGrp" data-v="${gi}">빈 조 지우기</button>`) : ""}
     ${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn moveHere" data-act="moveTo" data-v="${gi}">↓ 여기로 이동</button>` : ""}
-    </div>` : `<div class="growW"><button class="grow" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="gnames">${VIEW || !mvOn ? (g.m.map(s => esc((sm[s] || {}).name || "?")).join(" · ") || "비어 있음") : (g.m.map(s => `<span class="gnc ${ui.sel === s ? "sel" : ""}" data-act="pick" data-v="${s}">${esc((sm[s] || {}).name || "?")}</span>`).join("") || "비어 있음")}</span><span class="chev">▾</span></button>${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn moveTo2" data-act="moveTo" data-v="${gi}">↓ 여기로 이동</button>` : ""}</div>`).join("")}</div>`;
+    </div>` : `<div class="growW"><button class="grow" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="gnames">${VIEW || !mvOn ? (g.m.map(s => esc((sm[s] || {}).name || "?")).join(" · ") || "비어 있음") : (g.m.map(s => `<span class="gnc ${ui.sel === s ? "sel" : ""}" data-act="pick" data-v="${s}">${esc((sm[s] || {}).name || "?")}</span>`).join("") || "비어 있음")}</span><span class="chev">▾</span></button>${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn moveTo2" data-act="moveTo" data-v="${gi}">↓ 여기로 이동</button>` : ""}${mvOn && !g.m.length ? `<button class="btn sm ghost" data-act="delGrp" data-v="${gi}">빈 조 지우기</button>` : ""}</div>`).join("")}</div>`;
   return h;
 }
 /* 반 고르기 단추 + 두 반 함께 수업 (2026-10-27): 화면에서 반을 바로 누른다. 두 반 함께를 켜고 두 반을 고르면 다트를 반씩 나눠 한 번에 시작 */
