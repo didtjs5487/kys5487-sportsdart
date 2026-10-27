@@ -338,6 +338,29 @@
   .bdRow span{flex:1; color:var(--sub)} .bdRow small{font-weight:800; color:var(--pri)} .bdRow.off{opacity:.6} .bdRow.off small{color:var(--sub)}
   .bdSel{width:100%; min-height:52px; font-size:17px; border-radius:10px; padding:0 10px}
   .absBtn.bdOn{background:var(--pri); color:#fff; border-color:var(--pri)}
+  .clsBar{display:flex; gap:8px; align-items:center; margin:0 0 10px}
+  .clsChips{flex:1; display:flex; flex-wrap:wrap; gap:6px}
+  .clsChips button{min-height:50px; min-width:58px; padding:0 12px; border:1.5px solid var(--line2); border-radius:12px; background:var(--panel); font-size:19px; font-weight:800; color:var(--sub)}
+  .clsChips button small{font-size:14px; font-weight:700; margin-left:1px}
+  .clsChips button.on{background:var(--priSoft); border-color:var(--pri); color:var(--pri)}
+  .clsChips button.main{background:var(--pri); border-color:var(--pri); color:#fff}
+  .pairTog{flex:none; min-height:50px; padding:0 12px; border:1.5px dashed var(--pri); border-radius:12px; background:var(--panel); color:var(--pri); font-size:16px; font-weight:800}
+  .pairTog.on{background:var(--priSoft); border-style:solid}
+  .clsPick{margin:0 0 12px; padding:12px; border-radius:14px; background:#FFF6E5; border:1.5px solid #F0D9A8}
+  .clsPick b{display:block; margin-bottom:8px; font-size:19px}
+  .clsPick div{display:flex; flex-wrap:wrap; gap:8px}
+  .clsPick button{min-height:56px; min-width:76px; padding:0 14px; border:2px solid var(--line2); border-radius:14px; background:var(--panel); font-size:22px; font-weight:800; color:var(--sub)}
+  .clsPick button.on{background:var(--pri); border-color:var(--pri); color:#fff}
+  .gnames{display:flex; flex-wrap:wrap; gap:4px 6px}
+  .gnc{display:inline-block; padding:4px 10px; border-radius:99px; background:var(--soft); border:1px solid var(--line2); font-size:17px; font-weight:700}
+  .gnc.sel{background:var(--pri); border-color:var(--pri); color:#fff}
+  .moveTo2{min-height:58px; padding:0 14px; font-size:18px; font-weight:800; white-space:nowrap; animation:mvp 1.2s ease-in-out infinite}
+  @keyframes mvp{50%{box-shadow:0 0 0 5px #D3CEFB}}
+  .selHint{flex:1 1 180px; font-size:15px; line-height:1.4; color:var(--sub)}
+  .moveHint{padding:8px 12px; border-radius:12px; background:var(--priSoft); font-size:16px}
+  .delRow{display:flex; flex-wrap:wrap; gap:8px} .delRow .btn{flex:1 1 150px; min-height:60px} .delRow small{font-weight:600; opacity:.85}
+  .refFirst{margin:6px 0; padding:10px 12px; border-radius:12px; background:#FFF6E5; font-size:17px}
+  .memList{display:flex; flex-wrap:wrap; gap:6px; margin:6px 0} .memList span{padding:6px 12px; border-radius:99px; background:var(--soft); border:1px solid var(--line2); font-size:18px; font-weight:700}
   .turnBox{margin:10px 0 4px; padding:10px 12px; border-radius:12px; background:var(--priSoft); display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; font-size:18px}
   .turnBox .tin2{display:inline-flex; align-items:center; gap:6px; font-weight:800}
   .turnBox .tin{width:84px; height:52px; font-size:24px; font-weight:800; text-align:center}
@@ -753,10 +776,12 @@ function syncOpen() {
 let openKey = "", openSubs = [];
 function applyOpen() {
   if (canTeach()) return;
-  const b = PIN_BOARD || ui.board;
-  const hit = Object.entries(S.open || {}).filter(([c, o]) => o && o.day === today() && Object.values(o.g || {}).some(x => x && x.b === b)).sort((x, y) => numSort(x[0], y[0]));
+  const b = PIN_BOARD || ui.board, now = Date.now();
+  // 이 다트를 쓰는 열린 경기 — 가장 최근에 시작한 반이 먼저. 반이 여럿이면 학생이 고른다(ui.pickCls)
+  const hit = Object.entries(S.open || {}).filter(([c, o]) => o && o.day === today() && (!o.t || o.t > now - 14400000) && Object.values(o.g || {}).some(x => x && x.b === b)).sort((x, y) => (y[1].t || 0) - (x[1].t || 0) || numSort(x[0], y[0]));
+  ui.cands = hit.map(h => h[0]);
   if (!hit.length) { stuOK = false; if (openKey) { openSubs.forEach(u => { try { u(); } catch (e) {} }); openSubs = []; openKey = ""; } return; }
-  const [c, o] = hit[0];
+  const [c, o] = hit.find(h => h[0] === ui.pickCls) || hit[0];
   ui.cls = c; ui.stage = o.st; ui.round = o.r; ui.board = b; ui.pinCls = true;
   me = { day: today(), cls: c }; stuOK = true;
   if (STU_DEMO) return;   // 시연 모드는 휴대폰 안에 자료가 다 있다
@@ -773,6 +798,12 @@ function applyOpen() {
     openSubs.forEach(u => { try { u(); } catch (e) {} }); openSubs = []; openKey = key;
     ["games", "roles"].forEach(k => { const p = P(c, k, o.st, o.rk); openSubs.push(fmod.onValue(fmod.ref(fdb, ROOT + "/" + p), s => { setAt(S, p, s.val()); safeRender(); }, () => {})); });
   }
+}
+/* 같은 다트를 쓰는 열린 경기가 여러 반이면 학생이 우리 반을 바로 누른다 */
+function clsPick() {
+  const c = ui.cands || [];
+  if (!VIEW || !stuOK || c.length < 2) return "";
+  return `<div class="clsPick"><b>우리 반을 눌러 주세요</b><div>${c.map(x => `<button class="${x === ui.cls ? "on" : ""}" data-act="pickCls" data-v="${esc(x)}">${esc(x)}<small>반</small></button>`).join("")}</div></div>`;
 }
 function waitScreen() {
   if (!fdb && !STU_DEMO) return `<p class="wait">서버에 연결하는 중이에요…</p>`;
@@ -964,10 +995,23 @@ function startNext(cls) {
 const roundDate = (cls, st, r) => { const t = (((C(cls).closed || {})[st]) || {})["r" + r]; if (!t) return ""; const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()}`; };
 const isClosed = (cls, st, r) => !!((((C(cls).closed || {})[st]) || {})["r" + r]);
 function nextStep(st, r) { return r < CFG.rounds ? { st, r: r + 1 } : st === "cu" ? { st: "x3", r: 1 } : null; }
+/* 이 반이 경기를 시작할 때, 같은 다트를 쓰는 다른 반의 끝나지 않은 경기가 남아 있으면 종료할지 묻는다 */
+function endOverlapping(cls) {
+  const mine = boardsOf(cls);
+  classNames().filter(c => c !== cls).forEach(c => {
+    const L = liveOf(c); if (!L || isClosed(c, L.st, L.r) || !groupsOf(c, L.st, L.r).length) return;
+    if (!boardsOf(c).some(b => mine.includes(b))) return;
+    if (!confirm(`${c}반 ${STAGES[L.st].name} ${L.r}라운드가 아직 끝나지 않았어요(같은 다트 사용).
+
+그 경기를 종료할까요?`)) return;
+    put(P(c, "closed", L.st, "r" + L.r), Date.now(), true); stampAbs(c, L.st, L.r); put(P(c, "live"), null, true);
+  });
+}
 function setLive(cls, st, r) {
   if (!canTeach() || !cls) return;
   const L = liveOf(cls);
   if (L && L.st === st && L.r === r) return;
+  endOverlapping(cls);
   put(P(cls, "live"), { st, r, day: today(), t: Date.now() });
 }
 const roundRes = (cls, stage, r) => (((C(cls).games || {})[stage] || {})["r" + r]) || {};
@@ -1227,9 +1271,10 @@ function gameSeg(cls) {
 function scGroups() {
   const cls = ui.cls, st = ui.stage, r = ui.round, sm = stuMap(cls), gs = groupsOf(cls, st);
   const info = grpRec(cls, st, r);
-  let h = gameSeg(cls);
-  if (!VIEW && !gs.length && !liveOf(cls)) h += `<div class="acts noprint"><button class="btn big nextBig wide" data-act="startNext">▶ 경기 시작</button></div>`;
-  if (!VIEW && gs.length) h += `<div class="acts2 noprint"><button class="btn big nextBig" data-act="startNext">▶ 다음 경기</button><button class="btn big soft reMake" data-act="resetRound" aria-label="이 라운드 리셋">↺<small>리셋</small></button><button class="btn big soft" data-act="big" aria-label="프로젝터 화면">📺</button></div>`;
+  let h = clsBar() + gameSeg(cls);
+  const pairSel = !VIEW && pairOn() ? [ui.cls, ...bigPair()].sort(numSort) : [], isPair = pairSel.length === 2, nxAct = isPair ? "startPair" : "startNext";
+  if (!VIEW && !gs.length && !liveOf(cls)) h += `<div class="acts noprint"><button class="btn big nextBig wide" data-act="${nxAct}">${isPair ? `▶ ${esc(pairSel[0])}반 · ${esc(pairSel[1])}반 함께 시작` : "▶ 경기 시작"}</button></div>`;
+  if (!VIEW && gs.length) h += `<div class="acts2 noprint"><button class="btn big nextBig" data-act="${nxAct}">${isPair ? "▶ 두 반 다음 경기" : "▶ 다음 경기"}</button><button class="btn big soft reMake" data-act="resetRound" aria-label="이 라운드 리셋">↺<small>리셋</small></button><button class="btn big soft" data-act="big" aria-label="프로젝터 화면">📺</button></div>`;
   if (!VIEW) h += absPicker(cls, !gs.length);
   if (!VIEW) {
     const opts = METHOD_OPTS[st];
@@ -1253,8 +1298,8 @@ function scGroups() {
     <span class="sp"></span>${VIEW ? "" : `<button class="btn sm" data-act="addGrp">＋ 조</button>`}</div>`;
   if (!VIEW && ui.sel) {
     const x = sm[ui.sel] || { name: "?" };
-    h += `<div class="selBar noprint"><b>✋ ${esc(x.name)}</b><span class="sp"></span><button class="btn sm" data-act="newGrpWith">새 조</button><button class="btn sm danger" data-act="selAbs">${isAbs(cls, ui.sel) ? "출석" : "결석"}</button><button class="btn sm ghost" data-act="selCancel">취소</button></div>`;
-  } else if (!VIEW) h += `<p class="hint noprint">✋ <b>조 바꾸기</b>: 학생을 누르고 → 다른 학생을 누르면 자리 바꾸기, 다른 조의 [여기로 이동]을 누르면 옮기기. 결과를 입력한 뒤에 옮겨도 그 학생의 기록은 남습니다.</p>`;
+    h += `<div class="selBar noprint"><b>✋ ${esc(x.name)}</b><span class="selHint">옮길 조의 <b>[여기로 이동]</b>을 누르세요<br>다른 학생을 누르면 자리 바꾸기</span><span class="sp"></span><button class="btn sm" data-act="newGrpWith">새 조</button><button class="btn sm danger" data-act="selAbs">${isAbs(cls, ui.sel) ? "출석" : "결석"}</button><button class="btn sm ghost" data-act="selCancel">취소</button></div>`;
+  } else if (!VIEW) h += `<p class="hint noprint moveHint">✋ 조를 바꾸려면 <b>학생 이름</b>을 누르세요. 그다음 <b>[여기로 이동]</b>(다른 조로 옮기기) 또는 다른 학생 이름(자리 바꾸기)을 누르면 됩니다.</p>`;
   const opened = new Set(ui.gOpen || []);
   h += `<div class="glist">${gs.map((g, gi) => (opened.has(gi) || (ui.sel && g.m.includes(ui.sel))) ? `
     <div class="grp ${st}"><button class="ghd" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="sp"></span><span class="chev">접기 ▴</span></button>
@@ -1262,9 +1307,29 @@ function scGroups() {
       const extra = st === "x3" ? (() => { const r = record(cls, "cu", s); return r.played ? `카운트업 ${r.sum}점` : ""; })() : (x.seed ? "★" : "");
       return `<button class="chip ${ui.sel === s ? "sel" : ""} ${a ? "abs" : ""}" ${VIEW ? "disabled" : `data-act="pick" data-v="${s}"`}><span class="no">${esc(x.no)}</span>${esc(x.name)}${sexBadge(x)}<span class="info">${a ? "결석" : extra}</span></button>`; }).join("")}</div>
     ${!g.m.length ? (VIEW ? "" : `<button class="btn ghost moveHere" data-act="delGrp" data-v="${gi}">빈 조 지우기</button>`) : ""}
-    ${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn moveHere" data-act="moveTo" data-v="${gi}">↓ 여기로</button>` : ""}
-    </div>` : `<div class="growW"><button class="grow" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="gnames">${g.m.map(s => esc((sm[s] || {}).name || "?")).join(" · ") || "비어 있음"}</span><span class="chev">▾</span></button>${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn sm moveTo2" data-act="moveTo" data-v="${gi}">여기로</button>` : ""}</div>`).join("")}</div>`;
+    ${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn moveHere" data-act="moveTo" data-v="${gi}">↓ 여기로 이동</button>` : ""}
+    </div>` : `<div class="growW"><button class="grow" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="gnames">${VIEW ? (g.m.map(s => esc((sm[s] || {}).name || "?")).join(" · ") || "비어 있음") : (g.m.map(s => `<span class="gnc ${ui.sel === s ? "sel" : ""}" data-act="pick" data-v="${s}">${esc((sm[s] || {}).name || "?")}</span>`).join("") || "비어 있음")}</span><span class="chev">▾</span></button>${!VIEW && ui.sel && !g.m.includes(ui.sel) ? `<button class="btn moveTo2" data-act="moveTo" data-v="${gi}">↓ 여기로 이동</button>` : ""}</div>`).join("")}</div>`;
   return h;
+}
+/* 반 고르기 단추 + 두 반 함께 수업 (2026-10-27): 화면에서 반을 바로 누른다. 두 반 함께를 켜고 두 반을 고르면 다트를 반씩 나눠 한 번에 시작 */
+const pairOn = () => ui.pairOn != null ? ui.pairOn : bigPair().length > 0;
+function clsBar() {
+  if (VIEW) return "";
+  const names = classNames(); if (names.length < 2) return "";
+  const on = pairOn(), sel = on ? [ui.cls, ...bigPair()] : [ui.cls];
+  return `<div class="clsBar noprint"><div class="clsChips">${names.map(c => `<button class="${sel.includes(c) ? "on" : ""} ${on && c === ui.cls ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(c)}<small>반</small></button>`).join("")}</div><button class="pairTog ${on ? "on" : ""}" data-act="pairTog">${on ? "✔ 두 반 함께" : "두 반 함께"}</button></div>${on ? `<p class="hint noprint" style="margin:-4px 0 8px">${sel.length < 2 ? "함께할 반을 하나 더 눌러 주세요" : `${sel.slice().sort(numSort).join("반 · ")}반 함께 수업 — 다트는 반씩 나눠 써요`}</p>` : ""}`;
+}
+function startPair() {
+  const [a, b] = [ui.cls, ...bigPair()].sort(numSort);
+  if (!b) { toast("함께할 반을 하나 더 골라 주세요"); return; }
+  const ba = boardsOf(a), bb = boardsOf(b);
+  if (ba.some(x => bb.includes(x))) {   // 다트가 겹치면 켜진 다트를 반씩 나눠 쓴다
+    const on = onBoards(), half = Math.ceil(on.length / 2);
+    put(P(a, "boards"), { day: today(), list: on.slice(0, half) }, true);
+    put(P(b, "boards"), { day: today(), list: on.slice(half) }, true);
+  }
+  ui.bigCls = [a, b]; ui.bigDay = today(); ui.cls = a;
+  startNext(b); startNext(a);
 }
 /* 오늘 참여하지 못하는 학생 — 고르면 조 편성에서 빠진다. 날짜가 바뀌면 자동으로 모두 출석 */
 function absPicker(cls, open) {
@@ -1333,7 +1398,7 @@ function scEntry() {
   const cls = ui.cls, st = ui.stage, gs = groupsOf(cls, st), rr = roundRes(cls, st, ui.round);
   let h = "";
   const pair = (ui.bigCls || []).filter(c => S.rosters[c]);
-  if (!VIEW && GRP == null && pair.length > 1 && pair.includes(cls)) h += `<div class="seg">${pair.map(c => `<button class="plain ${c === cls ? "on" : ""}" data-act="cls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div>`;
+  if (!VIEW && GRP == null) h += clsBar();
   if (VIEW && stuOK && !liveOf(cls)) return joinBox(cls) + `<p class="wait">⏳ 경기 시작을 기다리는 중</p>`;
   if (VIEW && stuOK) h += `<div class="lockTag">${STAGES[st].mark} ${STAGES[st].name} · ${ui.round}라운드</div>`;
   else h += gameSeg(cls);
@@ -1354,7 +1419,7 @@ function scEntry() {
     else {
       const bs = [...new Set(gs.map((g, gi) => boardOf(cls, gi)))];
       const pick = `<div class="seg boardPick">${bs.map(b => `<button class="plain ${ui.board === b ? "on" : ""}" data-act="board1" data-v="${b}">${charImg(b, "bpimg")}${b}</button>`).join("")}</div>`;
-      h = joinBox(cls) + (PIN_BOARD && bs.includes(PIN_BOARD) ? "" : pick) + h;   // 다트 QR로 왔으면 번호 고르기 생략
+      h = clsPick() + joinBox(cls) + (PIN_BOARD && bs.includes(PIN_BOARD) ? "" : pick) + h;   // 다트 QR로 왔으면 번호 고르기 생략
       if (!bs.includes(ui.board)) return h + `<p class="wait">👆 내 다트 번호</p>`;
       cards = cards.filter(c => boardOf(cls, c.gi) === ui.board);
 
@@ -1377,6 +1442,7 @@ function scEntry() {
     if (Object.keys(mk).length) h += card(cls, st, "mk", Object.keys(mk), mk, "보충 경기");
   }
   h += `</div>`;
+  if (!VIEW && GRP == null) h += `<details class="setup noprint" data-k="tdel" ${ui.open.tdel ? "open" : ""}><summary>🧪 테스트 기록 지우기</summary><div class="card"><p class="hint keep" style="margin-top:0">시험 삼아 넣은 결과를 지웁니다. 명렬은 남아요.</p><div class="delRow"><button class="btn danger" data-act="clrRound">지금 라운드 결과만<br><small>${STAGES[st].name} ${ui.round}R</small></button><button class="btn danger" data-act="resetGames">${esc(cls)}반 전체<br><small>모든 경기 · 과제수행</small></button><button class="btn danger" data-act="wipeGames">모든 반 전체<br><small>조 편성 · 결과 · 출결</small></button></div></div></details>`;
   return h;
 }
 /* 이 조 카드 입력이 끝났나 — 결석생, 같은 라운드를 다른 다트에서 이미 기록한(옮긴) 학생은 빼고 본다. 빈 조는 끝난 것으로 */
@@ -1448,7 +1514,8 @@ function card(cls, st, gk, members, res, title) {
       <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refGuide(true) + refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rows}
+  const rowsShown = needRef ? `<p class="refFirst">👆 먼저 위에서 <b>심판</b>(결과를 입력할 사람)을 눌러 주세요. 그러면 점수 칸이 열려요.</p><div class="memList">${live.map(s => `<span>${esc((sm[s] || {}).name || "?")}</span>`).join("")}</div>` : rows;
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refGuide(true) + refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rowsShown}
     ${(() => {   // 순위가 다 안 들어갔으면 저장 단추를 잠근다
       const miss = live.filter(s => !(res[s] && res[s].r >= 1));
       if (ranked || !canEnter() || takenByOther || needRef || !live.some(s => res[s] && res[s].r >= 1)) return "";
@@ -1819,6 +1886,24 @@ document.addEventListener("click", e => {
     case "method": ui.method[ui.stage] = v; render(); break;
     case "sort": ui.sort = v; render(); break;
     case "gst": ui.gst = v; render(); break;
+    case "clsTap": {
+      if (pairOn()) {
+        const sel = [ui.cls, ...bigPair()];
+        if (v === ui.cls) break;
+        if (sel.includes(v)) { ui.bigCls = [v, ui.cls]; ui.cls = v; }   // 함께하는 다른 반을 보던 반으로
+        else { ui.bigCls = [ui.cls, v]; ui.bigDay = today(); }
+      } else ui.cls = v;
+      ui.open = {}; ui.focus = null; ui.sel = null; ui.round = openRound(ui.cls, ui.stage); render(); break;
+    }
+    case "pairTog": { const on = !pairOn(); ui.pairOn = on; if (!on) ui.bigCls = [ui.cls]; render(); break; }
+    case "startPair": startPair(); break;
+    case "clrRound": {
+      const st = ui.stage, r = ui.round;
+      if (!confirm(`${cls}반 ${STAGES[st].name} ${r}라운드에 입력한 결과를 지울까요?\n\n조 편성은 그대로 남습니다.`)) break;
+      ["games", "roles", "closed", "absr"].forEach(k => put(P(cls, k, st, "r" + r), null, true));
+      toast(`${STAGES[st].name} ${r}라운드 결과를 지웠습니다`); render(); break;
+    }
+    case "pickCls": ui.pickCls = v; ui.liveSeen = ""; ui.boardKey = ""; applyOpen(); render(); break;
     case "bdEdit": ui.bdA = v; ui.open.setup = true; render(); break;
     case "bdDone": ui.bdA = null; render(); break;
     case "bdF": {
@@ -1873,7 +1958,7 @@ document.addEventListener("click", e => {
     case "gRound": ui.round = +v; ui.sel = null; if (groupsOf(cls, ui.stage).length) setLive(cls, ui.stage, ui.round); render(); break;
     case "nextRound": ui.round = +v; ui.tab = "groups"; ui.sel = null; render(); scrollTo(0, 0); break;
     case "toGroups": ui.tab = "groups"; render(); scrollTo(0, 0); break;
-    case "startNext": startNext(cls); break;
+    case "startNext": (pairOn() && bigPair().length) ? startPair() : startNext(cls); break;
     case "absfix": {   // 칸(data-r)이면 그 라운드만, 요약 단추면 그 경기의 빠진 라운드 모두
       const k = b.dataset.k, rec = record(cls, k, v);
       const rs = b.dataset.r ? [+b.dataset.r] : rec.rounds.filter(x => x && (x.fill || x.zero)).map(x => x.r);
