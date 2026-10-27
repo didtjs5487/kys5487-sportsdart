@@ -252,7 +252,6 @@
   #big .bd2[data-act]{cursor:pointer}
   #big .bd2 .hd{display:flex; align-items:center; gap:10px; margin-bottom:.6vh}
   #big .bd2 .n{font-family:"Barlow Condensed",sans-serif; font-size:clamp(26px,4.6vh,42px); font-weight:700; color:var(--ink); line-height:1}
-  #big .bd2 .n::after{content:"번"; font-family:"Noto Sans KR",sans-serif; font-size:18px; font-weight:700; color:var(--sub); margin-left:2px}
   #big .bd2 .c{font-size:17px; font-weight:700; color:var(--sub)}
   #big .bd2 .nm{flex:none; font-size:var(--nf, 28px); font-weight:700; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   #big .bd2 .nm .sx{font-size:.5em; vertical-align:.35em; padding:1px 5px; border-radius:6px}
@@ -351,6 +350,10 @@
   .acts3{display:flex; gap:8px; margin:0 0 12px} .acts3 .btn{flex:1; min-height:52px; font-size:17px}
   .okTxt{color:var(--good); font-weight:800}
   .chip[disabled]{opacity:1; color:var(--ink)}
+  #big .swapBar{display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; margin:0 0 10px; padding:10px 16px; border-radius:14px; background:var(--priSoft); font-size:20px; font-weight:700}
+  #big .swapBar .btn{margin-left:auto}
+  #big .bd2 .nx.ref{color:var(--pri); font-weight:800; font-size:clamp(15px, 1.5vw, 22px)}
+  .refPart{font-size:15px; font-weight:700; color:var(--sub)}
   .gMix{display:inline-flex; align-items:baseline; gap:6px; margin-right:14px; font-size:22px; font-weight:800; white-space:nowrap} .gMix b{font-size:26px}
   .pairRows{display:flex; flex-direction:column; gap:6px; margin:0 0 10px}
   .pairRow{display:flex; align-items:center; gap:10px; min-height:56px; padding:6px 12px; border:1.5px solid var(--line2); border-radius:12px; background:var(--panel); font-size:17px}
@@ -772,8 +775,8 @@ function openWant(c) {
   const L = liveOf(c); if (!L || isClosed(c, L.st, L.r)) return null;
   const gs = groupsOf(c, L.st, L.r); if (!gs.length) return null;
   const sm = stuMap(c), g = {};
-  gs.forEach((x, gi) => { g["g" + gi] = { b: boardOf(c, gi), w: waveOf(c, gi), m: x.m.filter(s => sm[s] && !isAbs(c, s)).map(s => ({ s, n: sm[s].name })) }; });
-  return { st: L.st, rk: "r" + L.r, r: L.r, day: L.day, t: L.t || 0, bl: boardsOf(c), g };
+  gs.forEach((x, gi) => { g["g" + gi] = { b: boardOf(c, gi, gs.length), w: waveOf(c, gi, gs.length), m: x.m.filter(s => sm[s] && !isAbs(c, s)).map(s => ({ s, n: sm[s].name })) }; });
+  return { st: L.st, rk: "r" + L.r, r: L.r, day: L.day, t: L.t || 0, bl: boardsOf(c), sw: pairSwap(c) ? 1 : 0, g };
 }
 // 선생님 기기: 열린 경기 정보를 서버와 맞춘다 (다를 때만 쓴다)
 function syncOpen() {
@@ -802,7 +805,7 @@ function applyOpen() {
   const cc = S.classes[c] ||= {};
   cc.live = { st: o.st, r: o.r, day: o.day };
   cc.groups = { [o.st]: { [o.rk]: { list } } };
-  cc.boards = { day: today(), list: o.bl || [] };
+  cc.boards = { day: today(), list: o.bl || [], swap: !!o.sw };   // 심판 교대 여부도 선생님 기기와 같게
   const key = c + "|" + o.st + "|" + o.rk;
   if (key !== openKey && fdb) {
     openSubs.forEach(u => { try { u(); } catch (e) {} }); openSubs = []; openKey = key;
@@ -1118,12 +1121,22 @@ function byGroupRank(cls, list) {
   const place = s => { const rs = rec[s].rounds.filter(x => x && x.rank); return rs.length ? rs.reduce((a, x) => a + x.rank, 0) / rs.length : 9; };
   return shuffle(list).sort((a, b) => place(sidOf(a)) - place(sidOf(b)) || rec[sidOf(b)].sum - rec[sidOf(a)].sum || rec[sidOf(b)].vsum - rec[sidOf(a)].vsum);
 }
+/* 심판 교대용 짝수 조 수 — 한 조 3~5명 안에서 4명에 가장 가까운 쪽 */
+function evenSizes(n, k, len) {
+  const ok = m => m >= 2 && m % 2 === 0 && n / m >= 3 && n / m <= CFG.maxGroup && m <= 2 * len;
+  const m = [k + 1, k - 1].filter(ok).sort((x, y) => Math.abs(n / x - CFG.size) - Math.abs(n / y - CFG.size))[0];
+  if (!m) return null;
+  const base = Math.floor(n / m), extra = n % m;
+  return Array.from({ length: m }, (_, i) => base + (i < extra ? 1 : 0));
+}
 function makeGroups(cls, stage, method) {
   const present = roster(cls).filter(st => !isAbs(cls, sidOf(st)));
   const pools = [["", present]];   // 남녀 구분 없이 편성 — 여학생은 투구거리로 핸디캡
   const out = [];
   pools.forEach(([tag, list]) => {
-    const sz = sizes(list.length, CFG.size, boardsOf(cls).length, fitOn());
+    const len = boardsOf(cls).length;
+    let sz = sizes(list.length, CFG.size, len, fitOn() && !pairSwap(cls));   // 두 반 함께(심판 교대)는 4명 기준으로 짜고 짝수로 맞춘다
+    if (refSwapOn() && sz.length % 2 && (pairSwap(cls) || (sz.length > len && sz.length <= 2 * len))) sz = evenSizes(list.length, sz.length, len) || sz;
     let gs;
     if (method === "seed") {
       gs = sz.map(() => []);
@@ -1211,7 +1224,7 @@ function render() {
   }
   // 다트 QR로 들어왔으면, 오늘 그 다트를 쓰는 반을 저절로 고른다 (두 반이 함께 수업해도)
   if (VIEW && PIN_BOARD && !ui.pinCls) {
-    const hit = classNames().filter(c => { const L = liveOf(c); return L && groupsOf(c, L.st, L.r).some((g, gi) => boardOf(c, gi) === PIN_BOARD); });
+    const hit = classNames().filter(c => { const L = liveOf(c); return L && groupsOf(c, L.st, L.r).some((g, gi, arr) => boardOf(c, gi, arr.length) === PIN_BOARD); });
     if (hit.length === 1) { ui.cls = hit[0]; ui.pinCls = true; const L = liveOf(hit[0]); ui.stage = L.st; ui.round = L.r; }
   }
   let tabs = TABS;
@@ -1312,6 +1325,7 @@ function scGroups() {
       <div class="prow2"><span class="plbl">편성</span><div class="segc">${opts.map(k => `<button class="${ui.method[st] === k ? "on" : ""}" data-act="method" data-v="${k}">${SHORT_M[k]}</button>`).join("")}</div></div>
       ${buddyBox(cls)}
       <button class="switch ${fitOn() ? "on" : ""}" data-act="fit" data-v="${fitOn() ? 0 : 1}"><span>다트가 모자라면 5명 조</span><i></i></button>
+      <button class="switch ${refSwapOn() ? "on" : ""}" data-act="refSwap"><span>조가 다트보다 많으면 심판 교대<br><small>1차 절반 경기·짝 조 심판, 2차는 바꿔서</small></span><i></i></button>
       <div class="sumline">${n0 ? `<b>${n0}명</b> → <b>${sz0.length}개 조</b> <span>(${sz0.join("·")}명)</span>` : "참여 학생 없음"}</div>
       <button class="btn pri big wide" data-act="make">${gs.length ? "다시 편성" : "편성하기"}</button>
       ${gs.length ? `<button class="linkBtn danger" data-act="clrGroups">이 라운드 조 지우기</button>` : r > 1 && groupsOf(cls, st, r - 1).length ? `<button class="linkBtn" data-act="copyPrev">${r - 1}라운드 조 그대로 쓰기</button>` : ""}
@@ -1320,7 +1334,9 @@ function scGroups() {
   if (!gs.length) return h;
   const mvOn = !VIEW && (!!ui.mv || !!ui.sel);
   const wait = gs.length - boardsOf(cls).length;
-  if (wait > 0 && !VIEW) h += `<div class="note">다트 위치(${boardsOf(cls).length}대)보다 조(${gs.length}개)가 많아 <b>${wait}개 조는 2차 경기</b>입니다 — 1차가 끝난 같은 다트에서 이어서 합니다.</div>`;
+  if (wait > 0 && !VIEW) h += swapOn(cls, gs.length)
+    ? `<div class="note">🔁 <b>심판 교대</b> · 1차 ${useN(cls, gs.length)}개 조 경기, 2차는 바꿔요</div>`
+    : `<div class="note">다트 위치(${boardsOf(cls).length}대)보다 조(${gs.length}개)가 많아 <b>${wait}개 조는 2차 경기</b>입니다 — 1차가 끝난 같은 다트에서 이어서 합니다.</div>`;
   h += `<div class="row noprint" style="margin-bottom:8px"><b>${STAGES[st].mark}${r}R · ${gs.length}개 조 · ${gs.reduce((a, g) => a + g.m.length, 0)}명</b>
     <span class="sp"></span>${VIEW ? "" : `<button class="btn sm ${mvOn ? "pri" : ""}" data-act="mvTog">${mvOn ? "✔ 바꾸기 끝" : "✋ 조 바꾸기"}</button>${mvOn ? `<button class="btn sm" data-act="addGrp">＋ 조</button>` : ""}`}</div>`;
   if (!VIEW && ui.sel) {
@@ -1344,7 +1360,7 @@ function clsBar() {
   if (VIEW) return "";
   const names = classNames(); if (names.length < 2) return "";
   const on = pairOn(), sel = on ? [ui.cls, ...bigPair()] : [ui.cls];
-  return `<div class="clsBar noprint"><div class="clsChips">${names.map(c => `<button class="${sel.includes(c) ? "on" : ""} ${on && c === ui.cls ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(c)}<small>반</small></button>`).join("")}</div><button class="pairTog ${on ? "on" : ""}" data-act="pairTog">${on ? "✔ 두 반 함께" : "두 반 함께"}</button></div>${on ? `<p class="hint noprint" style="margin:-4px 0 8px">${sel.length < 2 ? "함께할 반을 하나 더 눌러 주세요" : `${sel.slice().sort(numSort).join("반 · ")}반 함께 수업 — 다트는 반씩 나눠 써요`}</p>` : ""}${on && sel.length === 2 ? pairRows(sel.slice().sort(numSort)) : ""}`;
+  return `<div class="clsBar noprint"><div class="clsChips">${names.map(c => `<button class="${sel.includes(c) ? "on" : ""} ${on && c === ui.cls ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(c)}<small>반</small></button>`).join("")}</div><button class="pairTog ${on ? "on" : ""}" data-act="pairTog">${on ? "✔ 두 반 함께" : "두 반 함께"}</button></div>${on ? `<p class="hint noprint" style="margin:-4px 0 8px">${sel.length < 2 ? "함께할 반을 하나 더 눌러 주세요" : "다트는 반씩 나눠 써요"}</p>` : ""}${on && sel.length === 2 ? pairRows(sel.slice().sort(numSort)) : ""}`;
 }
 /* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
 function pairRows(cs) {
@@ -1366,12 +1382,11 @@ function startPair() {
   const stat = [a, b].map(liveStat), running = stat.filter(x => x.L);
   if (stat.every(x => !x.L && !curGame(x.c))) { toast("두 반 모두 경기가 끝났습니다 — 성적 탭에서 확인하세요"); return; }
   if (!running.length) {
-    const ba = boardsOf(a), bb = boardsOf(b);
-    if (ba.some(x => bb.includes(x))) {   // 다트가 겹치면 켜진 다트를 반씩 나눠 쓴다
-      const on = onBoards(), half = Math.ceil(on.length / 2);
-      put(P(a, "boards"), { day: today(), list: on.slice(0, half) }, true);
-      put(P(b, "boards"), { day: today(), list: on.slice(half) }, true);
-    }
+    let la = boardsOf(a), lb = boardsOf(b);
+    if (la.some(x => lb.includes(x))) { const on = onBoards(), half = Math.ceil(on.length / 2); la = on.slice(0, half); lb = on.slice(half); }   // 다트가 겹치면 반씩
+    // 두 반 함께는 짝수 조로 편성하고 심판 교대 — 1차·2차에 경기 ↔ 심판·진행을 바꾼다
+    put(P(a, "boards"), { day: today(), list: la, swap: true }, true);
+    put(P(b, "boards"), { day: today(), list: lb, swap: true }, true);
     ui.bigCls = [a, b]; ui.bigDay = today(); ui.cls = a;
     const todo = [b, a].filter(c => curGame(c)), needForm = todo.filter(c => { const g = curGame(c); return !groupsOf(c, g.st, g.r).length; });
     (needForm.length ? needForm : todo).forEach(c => startNext(c));   // 조가 없으면 편성만, 다 있으면 시작
@@ -1408,9 +1423,22 @@ function boardsOf(cls) {
   const b = chosenBoards(cls).map(Number).filter(n => on.includes(n));
   return b.length ? [...new Set(b)].sort((x, y) => x - y) : on;
 }
-const boardOf = (cls, gi) => { const b = boardsOf(cls); return b[gi % b.length]; };
-const waveOf = (cls, gi) => Math.floor(gi / boardsOf(cls).length) + 1;
-const waves = (cls, st) => Math.ceil((groupsOf(cls, st || ui.stage).length || 1) / boardsOf(cls).length);
+/* 심판 교대 (2026-10-27): 조가 다트보다 많으면(2배 이하) 다트를 조 수의 절반만 쓴다.
+   1차에는 앞쪽 조가 경기하고 짝 조(같은 다트의 2차 조)가 심판, 2차에는 바꾼다. 설정 settings/refSwap=false 면 예전처럼(1차에 다트 수만큼, 남는 조만 2차) */
+const refSwapOn = () => ((S.settings || {}).refSwap) !== false;
+const nGroups = cls => { if (cls !== ui.cls) { const L = liveOf(cls); if (L) return groupsOf(cls, L.st, L.r).length; } return groupsOf(cls, ui.stage, ui.round).length; };
+const pairSwap = cls => { const b = C(cls).boards; return !!(b && !Array.isArray(b) && b.day === today() && b.swap); };   // 오늘 두 반 함께로 시작한 반
+const swapOn = (cls, n = nGroups(cls)) => { const len = boardsOf(cls).length; return refSwapOn() && n > 1 && n <= 2 * len && (n > len || pairSwap(cls)); };
+const useN = (cls, n = nGroups(cls)) => swapOn(cls, n) ? Math.ceil(n / 2) : boardsOf(cls).length;
+const boardOf = (cls, gi, n) => { const b = boardsOf(cls); return b[gi % useN(cls, n)]; };
+const waveOf = (cls, gi, n) => Math.floor(gi / useN(cls, n)) + 1;
+const waves = (cls, st) => { const n = st ? groupsOf(cls, st).length : nGroups(cls); return Math.ceil((n || 1) / useN(cls, n)); };
+/* 심판 교대일 때 이 조의 짝 조 (같은 다트, 다른 차례) */
+function partnerOf(cls, gi, st = ui.stage, r = ui.round) {
+  const gs = groupsOf(cls, st, r), n = gs.length; if (!swapOn(cls, n)) return null;
+  const h = useN(cls, n), pj = gi < h ? gi + h : gi - h;
+  return gs[pj] ? { gi: pj, m: gs[pj].m } : null;
+}
 // 2026-10-17: 한국 전설의 수호신 — 1~4 사신, 5 황룡(가운데), 6~11 상서로운 수호 동물. 그림은 선생님이 만들어 올 예정(chars/1.png~), 그전엔 이모지
 const DART_CHARS = [["🐉", "청룡"], ["🐯", "백호"], ["🔥", "주작"], ["🐢", "현무"], ["🐲", "황룡"], ["🦚", "봉황"], ["🦄", "기린"], ["🦁", "해태"], ["🐦‍⬛", "삼족오"], ["🦊", "구미호"], ["👹", "도깨비"]];
 const chOf = b => DART_CHARS[b - 1] || ["🎯", ""];
@@ -1520,8 +1548,8 @@ function dartState(cls, g, rr, gi, st = ui.stage, r = ui.round) {
 }
 function dartStatus(cls, st, r) {
   const gs = groupsOf(cls, st, r), rr = roundRes(cls, st, r);
-  return `<div class="dstat" style="grid-template-columns:repeat(${Math.min(Math.max(gs.length, 1), 6)},1fr)">${gs.map((g, gi) => { const s = dartState(cls, g, rr, gi), w = waves(cls) > 1 ? `<sub>${waveOf(cls, gi)}차</sub>` : "";
-    return `<button class="ds ${s}" data-act="jumpCard" data-g="g${gi}"><b>${boardOf(cls, gi)}${w}</b><i>${s === "done" ? "✔" : s === "part" ? "◐" : "○"}</i></button>`; }).join("")}</div>`;
+  return `<div class="dstat" style="grid-template-columns:repeat(${Math.min(Math.max(gs.length, 1), 6)},1fr)">${gs.map((g, gi) => { const s = dartState(cls, g, rr, gi), w = Math.ceil(gs.length / useN(cls, gs.length)) > 1 ? `<sub>${waveOf(cls, gi, gs.length)}차</sub>` : "";
+    return `<button class="ds ${s}" data-act="jumpCard" data-g="g${gi}"><b>${boardOf(cls, gi, gs.length)}${w}</b><i>${s === "done" ? "✔" : s === "part" ? "◐" : "○"}</i></button>`; }).join("")}</div>`;
 }
 const needOk = (cls, st, r, gk) => { const R = rolesAt(cls, st, r, gk); return !!(R.by && R.by !== "T" && !R.ok); };
 function cardDone(cls, g, rr, gk, st = ui.stage, r = ui.round) {
@@ -1600,8 +1628,9 @@ const refGuide = full => full
   ? `<div class="refGuide"><b>🧑‍⚖️ 심판의 역할</b><ul>${REF_ROLE.map(x => `<li>${x}</li>`).join("")}</ul></div>`
   : `<details class="refGuide mini" data-k="refg" ${ui.open.refg ? "open" : ""}><summary>🧑‍⚖️ 심판의 역할</summary><ul>${REF_ROLE.map(x => `<li>${x}</li>`).join("")}</ul></details>`;
 function refPicker(cls, key, members) {
-  const sm = stuMap(cls), mem = members.filter(s => sm[s] && !isAbs(cls, s)), others = roster(cls).filter(st => !mem.includes(sidOf(st)));
-  return `<div class="refPick"><b>🧑‍⚖️ 심판은?</b>
+  const part = key[0] === "g" ? partnerOf(cls, +key.slice(1)) : null;   // 심판 교대: 짝 조 학생이 심판
+  const sm = stuMap(cls), mem = (part ? part.m : members).filter(s => sm[s] && !isAbs(cls, s)), others = roster(cls).filter(st => !mem.includes(sidOf(st)));
+  return `<div class="refPick"><b>🧑‍⚖️ 심판은?${part ? ` <small class="refPart">짝 조(${waveOf(cls, part.gi)}차) 학생 중에서</small>` : ""}</b>
     <div class="refBtns">${mem.map(s => `<button class="btn" data-act="claimRef" data-g="${key}" data-s="${s}">${esc(sm[s].name)}</button>`).join("")}</div>
     ${others.length ? `<select class="refOther" data-g="${key}"><option value="">다른 조 학생</option>${others.map(o => `<option value="${sidOf(o)}">${esc(o.no)}. ${esc(o.name)}</option>`).join("")}</select>` : ""}</div>`;
 }
@@ -1842,19 +1871,23 @@ function showBig() {
   const stOf = c => { if (c === ui.cls) return ui.stage; const L = liveOf(c); return L ? L.st : ui.stage; };
   const rOf = c => { if (c === ui.cls) return ui.round; const L = liveOf(c); return L ? L.r : groupsOf(c, stOf(c), ui.round).length ? ui.round : 0; };
   const gOf = c => rOf(c) ? groupsOf(c, stOf(c), rOf(c)) : [];
-  const maxW = Math.max(1, ...show.map(c => Math.ceil((gOf(c).length || 1) / boardsOf(c).length)));
+  const maxW = Math.max(1, ...show.map(c => Math.ceil((gOf(c).length || 1) / useN(c, gOf(c).length))));
   if (!(ui.wave >= 1 && ui.wave <= maxW)) ui.wave = 1;
   const wv = ui.wave, slot = {}, next = {};
   show.forEach(c => {
     const sm = stuMap(c);
     gOf(c).forEach((g, gi) => {
       const names = g.m.filter(s => !isAbs(c, s)).map(s => { const x = sm[s] || { name: "?" }; return esc(x.name) + sexBadge(x); });
-      const b = boardOf(c, gi), w = waveOf(c, gi);
+      const n = gOf(c).length, sw = swapOn(c, n), b = boardOf(c, gi, n), w = waveOf(c, gi, n);
       if (w === wv) (slot[b] ||= []).push({ c, names, gi });
-      else if (w === wv + 1) (next[b] ||= []).push({ c, names });
+      else if (sw || w === wv + 1) (next[b] ||= []).push({ c, names, ref: sw });   // 심판 교대면 짝 조가 이 다트의 심판
     });
   });
   const multi = show.length > 1, running = groupsOf(ui.cls, st).length && liveOf(ui.cls);
+  // 심판 교대 안내 — 1차가 다 끝나면 [2차 시작] 단추
+  const swapAny = show.some(c => swapOn(c, gOf(c).length));
+  const w1Done = swapAny && show.every(c => gOf(c).every((g, gi) => waveOf(c, gi, gOf(c).length) !== 1 || dartState(c, g, roundRes(c, stOf(c), rOf(c)), gi, stOf(c), rOf(c)) === "done"));
+  const swapBar = swapAny && maxW > 1 ? `<div class="swapBar">🔁 <b>${wv}차</b> 경기 · 🧑‍⚖️ 심판·진행${wv === 1 && w1Done && canTeach() ? `<button class="btn nextBtn" data-act="bigWave" data-v="2">▶ 2차 (역할 바꾸기)</button>` : ""}</div>` : "";
   const qr = false && teacher && show.some(c => pinOf(c)) ? `<div class="joinQR"><div><small>📱 입력 코드</small>${show.map(c => pinOf(c) ? `<div class="pinLine">${multi ? `<span>${esc(c)}반</span>` : ""}<b>${esc(pinOf(c))}</b></div>` : "").join("")}</div></div>` : "";
   const waveBtns = maxW > 1 ? `<span class="waves">${Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("")}</span>` : "";
   const ctl = `<div class="bigCtl">${canTeach() ? `<button class="btn nextBtn" data-act="startNext">▶ ${running ? "다음 경기" : "경기 시작"}</button><button class="iconB ${ui.bigMenu ? "on" : ""}" data-act="bigMenu" aria-label="메뉴">⋯</button>` : ""}<button class="iconB" data-act="closeBig" aria-label="닫기">✕</button></div>`;
@@ -1863,14 +1896,14 @@ function showBig() {
       <div class="segc">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}</div>
       <button class="bmEntry" data-act="bigEntry">✏️ 결과 입력</button>
       <div class="bmCls"><b>학급</b>${classNames().map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div></div>` : "";
-  $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle">${multi && !show.every(c => stOf(c) === st && rOf(c) === ui.round) ? show.slice().sort(numSort).map(c => `<span class="gMix g-${stOf(c)}"><b>${esc(c)}반</b> ${STAGES[stOf(c)].name} ${rOf(c) || "-"}R</span>`).join("") : `<span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b>라운드</span>${multi ? `<span class="gCls">${show.slice().sort(numSort).map(esc).join(" · ")}반</span>` : ""}`}${waveBtns}</div>${qr}${ctl}</div>${menu}
+  $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle">${multi && !show.every(c => stOf(c) === st && rOf(c) === ui.round) ? show.slice().sort(numSort).map(c => `<span class="gMix g-${stOf(c)}"><b>${esc(c)}반</b> ${STAGES[stOf(c)].name} ${rOf(c) || "-"}R</span>`).join("") : `<span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b>라운드</span>${multi ? `<span class="gCls">${show.slice().sort(numSort).map(esc).join(" · ")}반</span>` : ""}`}${waveBtns}</div>${qr}${ctl}</div>${menu}${swapBar}
     ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기</button></div>` : ""}
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
     <div class="arena" style="grid-template-columns:repeat(${(() => { const k = onBoards().filter(b => slot[b]).length || 1; return k <= 5 ? k : Math.ceil(k / 2); })()},1fr)">${onBoards().filter(b => slot[b]).map(b => { const g = slot[b] || [];
       const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), s0 = stOf(c), gg = groupsOf(c, s0, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, s0, r0), g[0].gi, s0, r0) : "none"; })() : "none";
-      return `<div class="bd2 g-${g.length ? stOf(g[0].c) : st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${charImg(b, "ch")}<span class="cn">${chOf(b)[1]}</span>${multi && g.length ? `<span class="c">${g.map(x => esc(x.c) + "반").join(" / ")}</span>` : ""}${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
+      return `<div class="bd2 g-${g.length ? stOf(g[0].c) : st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${charImg(b, "ch")}<span class="cn">${chOf(b)[1]}</span>${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
-        ${next[b] ? `<div class="nx">${wv + 1}차 → ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
+        ${next[b] ? `<div class="nx ${next[b][0].ref ? "ref" : ""}">${next[b][0].ref ? "🧑‍⚖️ 심판·진행" : `${wv + 1}차 →`} ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
   fitBig();
 }
@@ -1940,6 +1973,7 @@ document.addEventListener("click", e => {
     case "method": ui.method[ui.stage] = v; render(); break;
     case "sort": ui.sort = v; render(); break;
     case "gst": ui.gst = v; render(); break;
+    case "refSwap": put("settings/refSwap", refSwapOn() ? false : null); break;
     case "mvTog": ui.mv = !(ui.mv || ui.sel); ui.sel = null; render(); break;
     case "clsTap": {
       if (pairOn()) {
