@@ -359,6 +359,7 @@
   .acts3{display:flex; justify-content:center; gap:8px; margin:0 0 12px} .acts3 .btn{flex:0 1 170px; min-height:50px; font-size:16px; border-radius:999px}
   .okTxt{color:var(--good); font-weight:800}
   .chip[disabled]{opacity:1; color:var(--ink)}
+  #big .bd2 .wvTag{align-self:center; margin:0 4px; padding:2px 8px; border-radius:99px; background:var(--priSoft); color:var(--pri); font-size:15px; font-weight:800}
   #big .swapBar{display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; margin:0 0 10px; padding:10px 16px; border-radius:14px; background:var(--priSoft); font-size:20px; font-weight:700}
   #big .swapBar .btn{margin-left:auto}
   #big .bd2 .nx.ref{color:var(--pri); font-weight:800; font-size:clamp(15px, 1.5vw, 22px)}
@@ -1904,7 +1905,7 @@ async function drawQR() {
 /* 화면 띄우기 — 지난번 함께 띄운 반(같은 시간 수업)이 있으면 같이 띄운다 */
 function openBig(cls) {
   const prev = ui.bigDay === today() ? (ui.bigCls || []).filter(c => c !== cls && S.rosters[c]).slice(0, 1) : [];
-  ui.bigCls = [cls, ...prev]; ui.bigDay = today(); ui.wave = 1; saveUI();
+  ui.bigCls = [cls, ...prev]; ui.bigDay = today(); ui.wave = 1; ui.waveManual = false; saveUI();
   setLive(cls, ui.stage, ui.round);
   showBig();
 }
@@ -1919,14 +1920,23 @@ function showBig() {
   const gOf = c => rOf(c) ? groupsOf(c, stOf(c), rOf(c)) : [];
   const maxW = Math.max(1, ...show.map(c => Math.ceil((gOf(c).length || 1) / useN(c, gOf(c).length))));
   if (!(ui.wave >= 1 && ui.wave <= maxW)) ui.wave = 1;
-  const wv = ui.wave, slot = {}, next = {};
+  // 다트마다 차례를 따로 넘긴다(2026-10-27): 그 다트의 1차 조가 저장되면 바로 2차 조를 보여 준다 — 다른 다트를 기다리지 않음.
+  // [1차][2차] 단추를 누르면 그 차례로 고정해서 보고, [자동]으로 돌아간다
+  const wv = ui.wave, slot = {}, next = {}, actW = {}, byB = {};
   show.forEach(c => {
-    const sm = stuMap(c);
+    const sm = stuMap(c), n = gOf(c).length, sw = swapOn(c, n), rr = roundRes(c, stOf(c), rOf(c));
     gOf(c).forEach((g, gi) => {
       const names = g.m.filter(s => !isAbs(c, s)).map(s => { const x = sm[s] || { name: "?" }; return esc(x.name) + sexBadge(x); });
-      const n = gOf(c).length, sw = swapOn(c, n), b = boardOf(c, gi, n), w = waveOf(c, gi, n);
-      if (w === wv) (slot[b] ||= []).push({ c, names, gi });
-      else if (sw || w === wv + 1) (next[b] ||= []).push({ c, names, ref: sw });   // 심판 교대면 짝 조가 이 다트의 심판
+      (byB[boardOf(c, gi, n)] ||= []).push({ c, gi, names, sw, w: waveOf(c, gi, n), done: dartState(c, g, rr, gi, stOf(c), rOf(c)) === "done" });
+    });
+  });
+  Object.entries(byB).forEach(([b, arr]) => {
+    const open = arr.filter(x => !x.done).map(x => x.w);
+    const a = ui.waveManual ? wv : open.length ? Math.min(...open) : Math.max(...arr.map(x => x.w));
+    actW[b] = a;
+    arr.forEach(x => {
+      if (x.w === a) (slot[b] ||= []).push({ c: x.c, names: x.names, gi: x.gi });
+      else if (x.sw || x.w === a + 1) (next[b] ||= []).push({ c: x.c, names: x.names, ref: x.sw });   // 심판 교대면 짝 조가 이 다트의 심판
     });
   });
   const multi = show.length > 1, running = groupsOf(ui.cls, st).length && liveOf(ui.cls);
@@ -1937,9 +1947,9 @@ function showBig() {
   // 심판 교대 안내 — 1차가 다 끝나면 [2차 시작] 단추
   const swapAny = show.some(c => swapOn(c, gOf(c).length));
   const w1Done = swapAny && show.every(c => gOf(c).every((g, gi) => waveOf(c, gi, gOf(c).length) !== 1 || dartState(c, g, roundRes(c, stOf(c), rOf(c)), gi, stOf(c), rOf(c)) === "done"));
-  const swapBar = swapAny && maxW > 1 ? `<div class="swapBar">🔁 <b>${wv}차</b> 경기 · 🧑‍⚖️ 대표 1명 심판, 나머지 참관${wv === 1 && w1Done && canTeach() ? `<button class="btn nextBtn" data-act="bigWave" data-v="2">▶ 2차 (역할 바꾸기)</button>` : ""}</div>` : "";
+  const swapBar = swapAny && maxW > 1 ? `<div class="swapBar">🔁 ${ui.waveManual ? `<b>${wv}차</b> 보는 중` : "다트마다 1차가 저장되면 바로 2차"} · 🧑‍⚖️ 대표 1명 심판, 나머지 참관</div>` : "";
   const qr = false && teacher && show.some(c => pinOf(c)) ? `<div class="joinQR"><div><small>📱 입력 코드</small>${show.map(c => pinOf(c) ? `<div class="pinLine">${multi ? `<span>${esc(c)}반</span>` : ""}<b>${esc(pinOf(c))}</b></div>` : "").join("")}</div></div>` : "";
-  const waveBtns = maxW > 1 ? `<span class="waves">${Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("")}</span>` : "";
+  const waveBtns = maxW > 1 ? `<span class="waves"><button class="${ui.waveManual ? "" : "on"}" data-act="bigWaveAuto">자동</button>${Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${ui.waveManual && wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("")}</span>` : "";
   const ctl = `<div class="bigCtl">${canTeach() ? `<button class="btn nextBtn" data-act="startNext">▶ ${running ? "다음 경기" : "경기 시작"}</button><button class="iconB ${ui.bigMenu ? "on" : ""}" data-act="bigMenu" aria-label="메뉴">⋯</button>` : ""}<button class="iconB" data-act="closeBig" aria-label="닫기">✕</button></div>`;
   const menu = ui.bigMenu && canTeach() ? `<div class="bigMenu">
       <div class="segc">${Object.entries(STAGES).map(([k, s]) => `<button class="${st === k ? "on" : ""}" data-act="bigStage" data-v="${k}">${k === "cu" ? "카운트업" : "301"}</button>`).join("")}</div>
@@ -1951,7 +1961,7 @@ function showBig() {
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
     <div class="arena" style="grid-template-columns:repeat(${(() => { const k = onBoards().filter(b => slot[b]).length || 1; return k <= 5 ? k : Math.ceil(k / 2); })()},1fr)">${onBoards().filter(b => slot[b]).map(b => { const g = slot[b] || [];
       const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), s0 = stOf(c), gg = groupsOf(c, s0, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, s0, r0), g[0].gi, s0, r0) : "none"; })() : "none";
-      return `<div class="bd2 g-${g.length ? stOf(g[0].c) : st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${charImg(b, "ch")}<span class="cn">${chOf(b)[1]}</span>${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
+      return `<div class="bd2 g-${g.length ? stOf(g[0].c) : st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${maxW > 1 ? `<span class="wvTag">${actW[b]}차</span>` : ""}${charImg(b, "ch")}<span class="cn">${chOf(b)[1]}</span>${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
         ${next[b] ? `<div class="nx ${next[b][0].ref ? "ref" : ""}"><span class="nxl">${next[b][0].ref ? "🧑‍⚖️ 심판·참관" : `${wv + 1}차`}</span><span class="nxn">${next[b].flatMap(x => x.names).map(n => `<i>${n}</i>`).join("")}</span></div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
@@ -2201,7 +2211,8 @@ document.addEventListener("click", e => {
       ui.bigDay = today(); saveUI(); render(); showBig(); break;
     }
     case "bigMenu": ui.bigMenu = !ui.bigMenu; showBig(); break;
-    case "bigWave": ui.wave = +v; showBig(); break;
+    case "bigWave": ui.wave = +v; ui.waveManual = true; showBig(); break;
+    case "bigWaveAuto": ui.waveManual = false; showBig(); break;
     case "bigStage": ui.stage = v; ui.round = openRound(cls, v); render(); showBig(); break;
     case "board": {
       const s = new Set(boardsOf(cls)), n = +v;
