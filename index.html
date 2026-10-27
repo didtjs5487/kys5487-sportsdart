@@ -1827,38 +1827,24 @@ function rulesTable() {
 
 /* ⚙ 설정 */
 function scSet() {
-  const base = location.origin + location.pathname;
+  // 설정 상자 4개 (2026-10-27): 성적·엑셀 / 명렬 / 다트 / 자료 관리. 입력 코드·학생용 링크는 다트 QR로 바뀌어 뺐다
   const cls = ui.cls;
-  const viewUrl = `${base}?in=1`;
-  const gs = groupsOf(cls, ui.stage);
-  return `<h2>설정 · 공유</h2>
+  return `<h2>설정</h2>
     ${cls ? `<details class="setup" data-k="s-stand" ${ui.open["s-stand"] ? "open" : ""}><summary>📊 성적 · 엑셀<span class="sp"></span><span class="sumR">학기 말</span></summary><div class="card">${scStand()}</div></details>` : ""}
-    <details class="setup" data-k="s-save" ${ui.open["s-save"] ? "open" : ""}><summary>💾 저장 상태 · 입력 코드</summary><div class="card">
-    <p style="margin:0">${$("status").textContent}</p>
-    ${serverDenied || !fdb ? `<div class="note">지금은 <b>이 기기에만</b> 저장됩니다. Firebase 콘솔(<b>kys5487-sportsdart</b>)에서 규칙 게시·로그인 설정이 끝나면 자동으로 서버에 올라갑니다.</div>` : `<p class="hint">기록은 서버에 저장되어 휴대폰·태블릿·교실 PC 어디서 열어도 같습니다.</p>`}
-    ${pinOf(cls) ? `<p style="font-size:20px">📱 ${esc(cls)}반 오늘의 입력 코드: <b style="font-size:28px;letter-spacing:4px">${esc(pinOf(cls))}</b> <button class="btn ghost" data-act="renewPin">🔄 새 코드</button></p>
-      <p class="hint">반마다 코드가 다르고 날마다 바뀝니다. 이 코드로는 <b>${esc(cls)}반 결과만</b> 입력할 수 있어요. [새 코드]를 누르면 이 반의 지금 코드는 바로 못 씁니다.</p>
-      <details class="setup"><summary>오늘 모든 반 코드 보기</summary><div class="card">${classNames().map(c => `<span class="tag" style="font-size:17px;margin:3px">${esc(c)}반 <b>${esc(pinOf(c) || "-")}</b></span>`).join("")}</div></details>` : ""}
-    </div></details>
     <details class="setup" data-k="s-roster" ${(ui.open["s-roster"] ?? !classNames().length) ? "open" : ""}><summary>📋 명렬 · 시드</summary><div class="card">${scRoster()}</div></details>
-    ${cls ? `<details class="setup" data-k="s-link" ${ui.open["s-link"] ? "open" : ""}><summary>📱 학생용 링크 · QR</summary><div class="card">
-    <p class="hint">프로젝터 화면에도 이 QR과 입력 코드가 나옵니다. 코드를 넣은 학생은 <b>경기 결과와 역할</b>만 입력할 수 있고, 평가 점수는 볼 수 없습니다.</p>
-    <div class="row"><input type="text" readonly value="${esc(viewUrl)}" style="flex:1;min-width:240px" id="viewUrl"><button class="btn" data-act="copy" data-v="viewUrl">복사</button></div>
-    <div class="qr" id="qr" style="margin-top:10px"></div>
-    <h3>🖨 다트기에 붙일 QR</h3>
-    <p class="hint">다트마다 전용 QR을 인쇄해 다트기 옆에 붙여 두면, 학생이 찍었을 때 <b>그 다트의 입력 카드가 바로</b> 열립니다(다트 번호 고르기 없음). 한 번만 인쇄하면 계속 씁니다.</p>
-    <button class="btn pri" data-act="printQR">🖨 다트 1~${allBoards().length}번 QR 인쇄</button>
-
-    </div></details>` : ""}
-    <details class="setup" data-k="s-power" ${ui.open["s-power"] ? "open" : ""}><summary>🔌 다트기 켜기·끄기</summary><div class="card"><p class="hint" style="margin-top:0">고장 났거나 쓰지 않는 다트를 끄면 조 배정과 프로젝터에서 빠집니다.</p>${powerPicker()}</div></details>
-    <details class="setup" data-k="s-wipe" ${ui.open["s-wipe"] ? "open" : ""}><summary>🗂 학기 자료 정리 (개인정보)</summary><div class="card">
-    <p class="hint" style="margin-top:0">평가가 끝나면 ① 엑셀을 내려받아 학교 규정대로 보관하고 ② 서버 기록을 지우세요. 내려받은 엑셀·백업 파일에도 학생 정보가 있으니 교사 PC에만 두세요.</p>
-    <div class="row"><button class="btn pri" data-act="xlsx">① ⬇ 엑셀 내려받기 (모든 반)</button></div>
-    <div class="row" style="margin-top:10px"><button class="btn danger" data-act="wipeGames">② 경기 기록만 지우기 (명렬 남김)</button><button class="btn danger" data-act="wipeAll">② 명렬까지 모두 지우기</button></div>
-    <p class="hint">지우면 되돌릴 수 없습니다. 같은 명렬로 다음 단원을 할 때는 '경기 기록만 지우기', 학기를 마칠 때는 '모두 지우기'.</p></div></details>
-    <details class="setup" data-k="s-backup" ${ui.open["s-backup"] ? "open" : ""}><summary>📦 백업 · 초기화</summary><div class="card">
-    <div class="row"><button class="btn" data-act="backup">⬇ 전체 백업(JSON)</button><label class="btn" style="display:inline-flex;align-items:center">⬆ 백업 불러오기<input type="file" accept=".json" id="restore" hidden></label></div>
-    ${cls ? `<h3>${esc(cls)}반 초기화</h3><div class="row"><button class="btn danger" data-act="resetGames">경기 결과·과제수행 지우기</button><button class="btn danger" data-act="resetGroups">조 편성 지우기</button></div>` : ""}
+    <details class="setup" data-k="s-dart" ${ui.open["s-dart"] ? "open" : ""}><summary>🎯 다트<span class="sp"></span><span class="sumR">켜기·끄기 · QR 인쇄</span></summary><div class="card">
+      <p class="hint" style="margin-top:0">고장 났거나 쓰지 않는 다트를 끄면 조 편성과 프로젝터에서 빠져요.</p>${powerPicker()}
+      <h3>🖨 다트에 붙일 QR</h3>
+      <p class="hint">학생이 찍으면 그 다트의 입력 카드가 바로 열려요. 한 번만 인쇄하면 계속 써요.</p>
+      <button class="btn pri" data-act="printQR">🖨 다트 1~${allBoards().length}번 QR 인쇄</button>
+    </div></details>
+    <details class="setup" data-k="s-data" ${ui.open["s-data"] ? "open" : ""}><summary>🗂 자료 관리<span class="sp"></span><span class="sumR">엑셀 · 백업 · 지우기</span></summary><div class="card">
+      <p class="hint" style="margin-top:0">${serverDenied || !fdb ? "⚠ 지금은 <b>이 기기에만</b> 저장돼요." : "기록은 서버에 저장되어 어느 기기에서 열어도 같아요."} 내려받은 엑셀·백업 파일에는 학생 정보가 있으니 교사 PC에만 두세요.</p>
+      <div class="row"><button class="btn pri" data-act="xlsx">⬇ 엑셀 (모든 반)</button><button class="btn" data-act="backup">⬇ 전체 백업</button><label class="btn" style="display:inline-flex;align-items:center">⬆ 백업 불러오기<input type="file" accept=".json" id="restore" hidden></label></div>
+      ${cls ? `<h3>${esc(cls)}반 지우기</h3><div class="row"><button class="btn danger" data-act="resetGames">경기 결과·과제수행</button><button class="btn danger" data-act="resetGroups">조 편성</button></div>` : ""}
+      <h3>모든 반 지우기 <small style="font-weight:600;color:var(--sub)">학기 끝</small></h3>
+      <div class="row"><button class="btn danger" data-act="wipeGames">경기 기록만 (명렬 남김)</button><button class="btn danger" data-act="wipeAll">명렬까지 모두</button></div>
+      <p class="hint">지우면 되돌릴 수 없어요. 엑셀을 먼저 내려받으세요.</p>
     </div></details>`;
 }
 let qrLib = null;
