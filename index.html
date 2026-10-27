@@ -1762,13 +1762,16 @@ function scStand() {
       <div class="card"><p class="hint keep" style="margin-top:0">나이스 출결에서 <b>미인정</b>인 줄만 누르세요 (결석 = 내 평균, 최대 2.5 → 미인정 = 1점)</p>
       <div class="alist">${items.map(({ r, k, x }) => `<button class="arow ${x.zero ? "un" : ""}" data-act="absfix" data-v="${r.s}" data-k="${k}" data-r="${x.r}"><span class="an">${esc(r.st.no)}. ${esc(r.st.name)}</span><span class="ad">${roundDate(cls, k, x.r) || "-"}</span><span class="ag">${STAGES[k].mark} ${x.r}R</span><span class="ap">${x.zero ? "미인정 1" : "결석 " + x.pts}</span></button>`).join("")}</div></div></details>`;
   }
-  if (isPhone() || (!VIEW && !ui.standFull)) {
-    if (!VIEW) {   // 간단 보기 (2026-10-27): 한 줄에 Ⓐ Ⓑ Ⓒ 와 최종 점수
+  if (!VIEW && !ui.standFull) {
+    {   // 간단 보기 (2026-10-27): 한 줄에 Ⓐ Ⓑ Ⓒ 와 최종 점수
       h += `<div class="slim">${rows.map(r => `<div class="slr"><span class="sno">${esc(r.st.no)}</span><span class="snm">${esc(r.st.name)}</span><span class="sabc"><i>Ⓐ</i>${areaCell(r.a, r.s, "cu")}<i>Ⓑ</i>${areaCell(r.b, r.s, "x3")}<i>Ⓒ</i><span>${r.c}</span></span><b class="sg">${r.grade}${r.full ? "" : "<small>…</small>"}</b></div>`).join("")}</div>`;
-      if (!isPhone()) h += `<button class="linkBtn" data-act="standFull" style="margin-top:10px">📋 라운드별 표 보기</button>`;
+      h += `<button class="linkBtn" data-act="standFull" style="margin-top:10px">📋 자세히 보기 (라운드별 · 준비·진행 체크)</button>`;
       h += `<details class="setup" style="margin-top:14px"><summary>📏 채점 기준</summary>${rulesTable()}</details>`;
       return h;
     }
+  }
+  if (isPhone()) {
+    if (!VIEW) h += `<button class="linkBtn noprint" data-act="standFull" style="margin-bottom:8px">↩ 간단히 보기</button>`;
     h += `<div class="slist">${rows.map(r => {
       // 선생님: 영역 점수 / 학생: 합산 승점
       const ab = VIEW ? `<span class="sa">Ⓐ <b>${r.a.realSum}</b></span><span class="sb">Ⓑ <b>${r.b.realSum}</b></span>`
