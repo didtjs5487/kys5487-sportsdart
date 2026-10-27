@@ -992,13 +992,18 @@ function startNext(cls) {
     target = nx;
   }
   ui.stage = target.st; ui.round = target.r; ui.sel = null; ui.focus = null;
-  let list = groupsOf(cls, target.st, target.r);
+  let list = groupsOf(cls, target.st, target.r), fresh = false;
   if (!list.length) {
     list = makeGroups(cls, target.st, methodFor(target.st));
     if (!list.length) { toast("참여하는 학생이 없습니다 — 오늘 빠지는 학생을 확인하세요"); render(); return; }
-    saveGroups(cls, target.st, list, methodFor(target.st), target.r);
+    saveGroups(cls, target.st, list, methodFor(target.st), target.r); fresh = true;
   }
   if (isClosed(cls, target.st, target.r)) put(P(cls, "closed", target.st, "r" + target.r), null, true);
+  if (fresh) {   // 새로 짠 조는 바로 프로젝터로 넘기지 않는다 — 인원을 확인·변경한 뒤 [▶ 경기 시작]
+    $("big").classList.remove("show"); ui.tab = "groups"; ui.cls = cls; ui.mv = false;
+    toast(`${STAGES[target.st].name} ${target.r}라운드 — ${list.length}개 조를 편성했어요. 인원을 바꾼 뒤 [▶ 경기 시작]을 누르세요`);
+    render(); return;
+  }
   toast(`▶ ${STAGES[target.st].name} ${target.r}라운드 시작 — ${list.length}개 조 (${METHODS[methodFor(target.st)][0]})`);
   openBig(cls);
 }
@@ -1282,14 +1287,16 @@ function scGroups() {
   let h = clsBar() + (VIEW ? gameSeg(cls) : "");
   const pairSel = !VIEW && pairOn() ? [ui.cls, ...bigPair()].sort(numSort) : [], isPair = pairSel.length === 2, nxAct = isPair ? "startPair" : "startNext";
   if (!VIEW) {   // 수업 중 누를 것은 이 큰 단추 하나: 알아서 다음 경기·라운드를 골라 편성하고 프로젝터에 띄운다
-    const cg = curGame(cls), running = !!(gs.length && liveOf(cls)), nx = cg && running ? nextStep(cg.st, cg.r) : null;
+    const cg = curGame(cls), running = !!(gs.length && liveOf(cls)), nx = cg && running ? nextStep(cg.st, cg.r) : null, formed = !!(cg && !running && groupsOf(cls, cg.st, cg.r).length);
     let b1, b2;
     if (isPair) {
-      b1 = pairSel.some(c => liveStat(c).L) ? "▶ 끝난 반 다음 경기" : `▶ ${esc(pairSel[0])}반 · ${esc(pairSel[1])}반 함께 시작`;
+      const needForm = pairSel.some(c => { const g = curGame(c); return g && !liveStat(c).L && !groupsOf(c, g.st, g.r).length; });
+      b1 = pairSel.some(c => liveStat(c).L) ? "▶ 끝난 반 다음 경기" : needForm ? "▶ 두 반 조 편성" : "▶ 두 반 경기 시작";
       b2 = pairSel.map(c => { const g = curGame(c); return g ? `${esc(c)}반 ${STAGES[g.st].name} ${g.r}R` : `${esc(c)}반 끝`; }).join(" · ");
     } else if (!cg) { b1 = "✔ 모든 경기가 끝났어요"; b2 = "눌러서 성적 보기"; }
-    else if (running) { b1 = "▶ 다음 경기"; b2 = nx ? `${STAGES[nx.st].name} ${nx.r}라운드로 넘어가요` : "마지막 경기를 마쳐요"; }
-    else { b1 = "▶ 경기 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · ${METHODS[methodFor(cg.st)][0]}`; }
+    else if (running) { b1 = "▶ 다음 경기"; b2 = nx ? `${STAGES[nx.st].name} ${nx.r}라운드 조를 짜요` : "마지막 경기를 마쳐요"; }
+    else if (formed) { b1 = "▶ 경기 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · 인원을 확인했으면 눌러요`; }
+    else { b1 = "▶ 조 편성"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · ${METHODS[methodFor(cg.st)][0]}`; }
     h += `<div class="acts noprint"><button class="btn big nextBig wide startBtn" data-act="${nxAct}"><span class="sb1">${b1}</span><span class="sb2">${b2}</span></button></div>`;
     if (gs.length) h += `<div class="acts3 noprint"><button class="btn soft" data-act="big">📺 프로젝터</button><button class="btn soft" data-act="resetRound">↺ 이 라운드 리셋</button></div>`;
   }
@@ -1366,7 +1373,8 @@ function startPair() {
       put(P(b, "boards"), { day: today(), list: on.slice(half) }, true);
     }
     ui.bigCls = [a, b]; ui.bigDay = today(); ui.cls = a;
-    [b, a].filter(c => curGame(c)).forEach(c => startNext(c));
+    const todo = [b, a].filter(c => curGame(c)), needForm = todo.filter(c => { const g = curGame(c); return !groupsOf(c, g.st, g.r).length; });
+    (needForm.length ? needForm : todo).forEach(c => startNext(c));   // 조가 없으면 편성만, 다 있으면 시작
     return;
   }
   const go = stat.filter(x => x.L ? x.done : !!curGame(x.c)), stay = stat.filter(x => x.L && !x.done);
@@ -1985,8 +1993,8 @@ document.addEventListener("click", e => {
       const list = makeGroups(cls, st, ui.method[st]);
       if (!list.length) { toast("출석한 학생이 없습니다"); return; }
       if (isClosed(cls, st, r)) put(P(cls, "closed", st, "r" + r), null, true);
-      ui.sel = null; saveGroups(cls, st, list, ui.method[st]); toast(`${nm} — ${list.length}개 조로 편성했습니다`);
-      openBig(cls); // 편성하면 바로 프로젝터 화면으로 (이 라운드가 진행 중 라운드가 된다)
+      ui.sel = null; saveGroups(cls, st, list, ui.method[st]); toast(`${nm} — ${list.length}개 조로 편성했습니다. 인원을 바꾼 뒤 [▶ 경기 시작]`);
+      render();
       break;
     }
     case "clrGroups": {
