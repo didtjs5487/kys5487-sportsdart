@@ -1119,8 +1119,8 @@ function roleCounts(cls) {
   Object.values(R).forEach(st => Object.values(st || {}).forEach(rd => Object.values(rd || {}).forEach(x => {
     ["p", "j", "s"].forEach(k => Object.keys((x || {})[k] || {}).forEach(s => { (out[s] ||= { p: 0, j: 0, s: 0 })[k]++; }));
     // 결과를 입력한 학생 = 그 다트의 심판 (예전 역할 표에서 이미 심판으로 체크했으면 두 번 세지 않는다)
-    // 심판이 준비·정리와 경기 진행까지 맡는다(2026-10-27) — 결과를 입력한 심판에게 세 역할 모두 인정 (예전 역할 표에 이미 체크했으면 두 번 세지 않음)
-    if (x && x.by && x.by !== "T" && (x.byCls || cls) === cls) { const o = (out[x.by] ||= { p: 0, j: 0, s: 0 }); ["p", "j", "s"].forEach(k => { if (!((x[k] || {})[x.by])) o[k]++; }); }
+    // 조마다 대표 1명이 심판, 나머지는 참관(2026-10-27) — 결과를 입력한 대표 심판에게 '심판'만 인정. 준비·정리·경기 진행은 선생님이 성적 화면에서 인정
+    if (x && x.by && x.by !== "T" && (x.byCls || cls) === cls && !((x.s || {})[x.by])) (out[x.by] ||= { p: 0, j: 0, s: 0 }).s++;
   })));
   return out;
 }
@@ -1431,7 +1431,7 @@ function startPair() {
   if (!running.length) {
     let la = boardsOf(a), lb = boardsOf(b);
     if (la.some(x => lb.includes(x))) { const on = onBoards(), half = Math.ceil(on.length / 2); la = on.slice(0, half); lb = on.slice(half); }   // 다트가 겹치면 반씩
-    // 두 반 함께는 짝수 조로 편성하고 심판 교대 — 1차·2차에 경기 ↔ 심판·진행을 바꾼다
+    // 두 반 함께는 짝수 조로 편성하고 심판 교대 — 1차·2차에 경기 ↔ 심판(대표 1명)·참관을 바꾼다
     put(P(a, "boards"), { day: today(), list: la, swap: true }, true);
     put(P(b, "boards"), { day: today(), list: lb, swap: true }, true);
     ui.bigCls = [a, b]; ui.bigDay = today(); ui.cls = a;
@@ -1679,7 +1679,7 @@ const refGuide = full => full
 function refPicker(cls, key, members) {
   const part = key[0] === "g" ? partnerOf(cls, +key.slice(1)) : null;   // 심판 교대: 짝 조 학생이 심판
   const sm = stuMap(cls), mem = (part ? part.m : members).filter(s => sm[s] && !isAbs(cls, s)), others = roster(cls).filter(st => !mem.includes(sidOf(st)));
-  return `<div class="refPick"><b>🧑‍⚖️ 이번 경기 심판은? <span style="font-weight:600;color:var(--sub);font-size:16px">내 이름을 눌러요</span>${part ? ` <small class="refPart">짝 조(${waveOf(cls, part.gi)}차) 학생 중에서</small>` : ""}</b>
+  return `<div class="refPick"><b>🧑‍⚖️ 대표 심판 1명 <span style="font-weight:600;color:var(--sub);font-size:16px">내 이름을 눌러요 · 나머지는 참관</span>${part ? ` <small class="refPart">짝 조(${waveOf(cls, part.gi)}차) 학생 중에서</small>` : ""}</b>
     <div class="refBtns">${mem.map(s => `<button class="btn" data-act="claimRef" data-g="${key}" data-s="${s}">${esc(sm[s].name)}</button>`).join("")}</div>
     ${others.length ? `<select class="refOther" data-g="${key}"><option value="">다른 조 학생</option>${others.map(o => `<option value="${sidOf(o)}">${esc(o.no)}. ${esc(o.name)}</option>`).join("")}</select>` : ""}</div>`;
 }
@@ -1934,7 +1934,7 @@ function showBig() {
   // 심판 교대 안내 — 1차가 다 끝나면 [2차 시작] 단추
   const swapAny = show.some(c => swapOn(c, gOf(c).length));
   const w1Done = swapAny && show.every(c => gOf(c).every((g, gi) => waveOf(c, gi, gOf(c).length) !== 1 || dartState(c, g, roundRes(c, stOf(c), rOf(c)), gi, stOf(c), rOf(c)) === "done"));
-  const swapBar = swapAny && maxW > 1 ? `<div class="swapBar">🔁 <b>${wv}차</b> 경기 · 🧑‍⚖️ 심판·진행${wv === 1 && w1Done && canTeach() ? `<button class="btn nextBtn" data-act="bigWave" data-v="2">▶ 2차 (역할 바꾸기)</button>` : ""}</div>` : "";
+  const swapBar = swapAny && maxW > 1 ? `<div class="swapBar">🔁 <b>${wv}차</b> 경기 · 🧑‍⚖️ 대표 1명 심판, 나머지 참관${wv === 1 && w1Done && canTeach() ? `<button class="btn nextBtn" data-act="bigWave" data-v="2">▶ 2차 (역할 바꾸기)</button>` : ""}</div>` : "";
   const qr = false && teacher && show.some(c => pinOf(c)) ? `<div class="joinQR"><div><small>📱 입력 코드</small>${show.map(c => pinOf(c) ? `<div class="pinLine">${multi ? `<span>${esc(c)}반</span>` : ""}<b>${esc(pinOf(c))}</b></div>` : "").join("")}</div></div>` : "";
   const waveBtns = maxW > 1 ? `<span class="waves">${Array.from({ length: maxW }, (_, i) => i + 1).map(w => `<button class="${wv === w ? "on" : ""}" data-act="bigWave" data-v="${w}">${w}차</button>`).join("")}</span>` : "";
   const ctl = `<div class="bigCtl">${canTeach() ? `<button class="btn nextBtn" data-act="startNext">▶ ${running ? "다음 경기" : "경기 시작"}</button><button class="iconB ${ui.bigMenu ? "on" : ""}" data-act="bigMenu" aria-label="메뉴">⋯</button>` : ""}<button class="iconB" data-act="closeBig" aria-label="닫기">✕</button></div>`;
@@ -1950,7 +1950,7 @@ function showBig() {
       const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), s0 = stOf(c), gg = groupsOf(c, s0, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, s0, r0), g[0].gi, s0, r0) : "none"; })() : "none";
       return `<div class="bd2 g-${g.length ? stOf(g[0].c) : st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${charImg(b, "ch")}<span class="cn">${chOf(b)[1]}</span>${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
-        ${next[b] ? `<div class="nx ${next[b][0].ref ? "ref" : ""}"><span class="nxl">${next[b][0].ref ? "🧑‍⚖️ 심판·진행" : `${wv + 1}차`}</span><span class="nxn">${next[b].flatMap(x => x.names).map(n => `<i>${n}</i>`).join("")}</span></div>` : ""}</div>`; }).join("")}</div>`;
+        ${next[b] ? `<div class="nx ${next[b][0].ref ? "ref" : ""}"><span class="nxl">${next[b][0].ref ? "🧑‍⚖️ 심판·참관" : `${wv + 1}차`}</span><span class="nxn">${next[b].flatMap(x => x.names).map(n => `<i>${n}</i>`).join("")}</span></div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
   fitBig();
 }
