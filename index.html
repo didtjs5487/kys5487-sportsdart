@@ -995,16 +995,14 @@ function startNext(cls) {
 const roundDate = (cls, st, r) => { const t = (((C(cls).closed || {})[st]) || {})["r" + r]; if (!t) return ""; const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()}`; };
 const isClosed = (cls, st, r) => !!((((C(cls).closed || {})[st]) || {})["r" + r]);
 function nextStep(st, r) { return r < CFG.rounds ? { st, r: r + 1 } : st === "cu" ? { st: "x3", r: 1 } : null; }
-/* 이 반이 경기를 시작할 때, 같은 다트를 쓰는 다른 반의 끝나지 않은 경기가 남아 있으면 종료할지 묻는다 */
+/* 이 반이 경기를 시작하면, 같은 다트를 쓰는 다른 반의 끝나지 않은 경기는 저절로 종료한다(결과는 그대로 남는다) */
 function endOverlapping(cls) {
   const mine = boardsOf(cls);
   classNames().filter(c => c !== cls).forEach(c => {
     const L = liveOf(c); if (!L || isClosed(c, L.st, L.r) || !groupsOf(c, L.st, L.r).length) return;
     if (!boardsOf(c).some(b => mine.includes(b))) return;
-    if (!confirm(`${c}반 ${STAGES[L.st].name} ${L.r}라운드가 아직 끝나지 않았어요(같은 다트 사용).
-
-그 경기를 종료할까요?`)) return;
     put(P(c, "closed", L.st, "r" + L.r), Date.now(), true); stampAbs(c, L.st, L.r); put(P(c, "live"), null, true);
+    toast(`${c}반 ${STAGES[L.st].name} ${L.r}라운드는 자동으로 종료했어요`);
   });
 }
 function setLive(cls, st, r) {
@@ -1312,7 +1310,7 @@ function scGroups() {
   return h;
 }
 /* 반 고르기 단추 + 두 반 함께 수업 (2026-10-27): 화면에서 반을 바로 누른다. 두 반 함께를 켜고 두 반을 고르면 다트를 반씩 나눠 한 번에 시작 */
-const pairOn = () => ui.pairOn != null ? ui.pairOn : bigPair().length > 0;
+const pairOn = () => ui.pairOn === true;   // 이 화면에서 두 반 함께를 켰을 때만 (새로 열면 꺼짐)
 function clsBar() {
   if (VIEW) return "";
   const names = classNames(); if (names.length < 2) return "";
@@ -1895,7 +1893,7 @@ document.addEventListener("click", e => {
       } else ui.cls = v;
       ui.open = {}; ui.focus = null; ui.sel = null; ui.round = openRound(ui.cls, ui.stage); render(); break;
     }
-    case "pairTog": { const on = !pairOn(); ui.pairOn = on; if (!on) ui.bigCls = [ui.cls]; render(); break; }
+    case "pairTog": { const on = !pairOn(); ui.pairOn = on; ui.bigCls = [ui.cls]; ui.bigDay = today(); render(); break; }
     case "startPair": startPair(); break;
     case "clrRound": {
       const st = ui.stage, r = ui.round;
