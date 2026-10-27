@@ -174,8 +174,9 @@
   .rtitle{font-size:17px; font-weight:700; margin-bottom:8px} .rtitle small{font-size:14px; font-weight:600; color:var(--sub); margin-left:6px}
   .refPick{background:var(--priSoft); border:1px solid #D3CEFB; border-radius:14px; padding:12px; margin:4px 0 10px}
   .refPick b{display:block; font-size:19px} .refPick small{display:block; font-size:14px; color:var(--sub); margin:2px 0 8px}
-  .refBtns{display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:8px}
-  .refBtns .btn{min-height:56px; font-size:19px; background:var(--panel)}
+  .refBtns{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:8px}
+  .refBtns .btn{min-height:68px; font-size:23px; font-weight:800; background:var(--panel); border:2px solid #D3CEFB; border-radius:16px}
+  .refBtns .btn:active{background:var(--pri); color:#fff}
   .refPick select{width:100%; margin-top:8px; min-height:48px; font-size:16px; background:var(--panel)}
   .refBox{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:12px; background:var(--soft); border-radius:12px; padding:10px 12px; font-size:18px}
   .refBox.on{background:var(--goodSoft); color:#1E6B42}
@@ -339,12 +340,14 @@
   .absBtn.bdOn{background:var(--pri); color:#fff; border-color:var(--pri)}
   .clsBar{display:flex; gap:8px; align-items:center; margin:0 0 10px}
   .clsChips{flex:1; display:flex; flex-wrap:wrap; gap:6px}
-  .clsChips button{min-height:50px; min-width:58px; padding:0 12px; border:1.5px solid var(--line2); border-radius:12px; background:var(--panel); font-size:19px; font-weight:800; color:var(--sub)}
+  .clsChips button{min-height:48px; min-width:58px; padding:0 14px; border:1.5px solid var(--line2); border-radius:999px; background:var(--panel); font-size:19px; font-weight:800; color:var(--sub)}
   .clsChips button small{font-size:14px; font-weight:700; margin-left:1px}
   .clsChips button.on{background:var(--priSoft); border-color:var(--pri); color:var(--pri)}
   .clsChips button.main{background:var(--pri); border-color:var(--pri); color:#fff}
-  .pairTog{flex:none; min-height:50px; padding:0 12px; border:1.5px dashed var(--pri); border-radius:12px; background:var(--panel); color:var(--pri); font-size:16px; font-weight:800}
-  .pairTog.on{background:var(--priSoft); border-style:solid}
+  .pairTog{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:48px; padding:0 16px 0 6px; border:0; border-radius:999px; background:linear-gradient(135deg,#F1EFFE,#E4E0FC); color:var(--pri); font-size:16px; font-weight:800; box-shadow:inset 0 0 0 1.5px #D3CEFB; cursor:pointer; transition:transform .1s}
+  .pairTog .pIco{display:grid; place-items:center; width:36px; height:36px; border-radius:50%; background:#fff; color:var(--pri); font-size:20px; box-shadow:0 1px 4px rgba(91,81,232,.2)}
+  .pairTog.on{background:linear-gradient(135deg,#7A71EE,#4A41D6); color:#fff; box-shadow:0 6px 14px rgba(91,81,232,.3)}
+  .pairTog:active{transform:scale(.96)}
   .startWrap{display:flex; justify-content:center; margin:6px 0 14px}
   .startBtn{display:flex; align-items:center; gap:14px; max-width:100%; min-width:260px; padding:12px 30px 12px 12px; border:0; border-radius:999px; background:linear-gradient(135deg,#7A71EE 0%,#5B51E8 55%,#4A41D6 100%); color:#fff; text-align:left; cursor:pointer;
     box-shadow:0 12px 26px rgba(91,81,232,.32), inset 0 -3px 0 rgba(0,0,0,.14); transition:transform .1s, box-shadow .15s}
@@ -363,6 +366,17 @@
   #big .bd2 .nx .nxn{display:flex; flex-wrap:wrap; gap:0 10px}
   #big .bd2 .nx .nxn i{font-style:normal; white-space:nowrap}
   .refPart{font-size:15px; font-weight:700; color:var(--sub)}
+  #big .miniG{display:inline-flex; align-items:center; gap:6px; margin-left:auto; margin-right:10px; font-family:"Barlow",sans-serif}
+  #big .miniG svg{width:40px; height:40px}
+  #big .miniG .mT{fill:none; stroke:#DCD7FA; stroke-width:5} #big .miniG .mB{fill:none; stroke:var(--pri); stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset .6s}
+  #big .miniG.full .mB{stroke:var(--good)}
+  #big .miniG b{font-size:22px; font-weight:800; color:var(--ink)} #big .miniG small{font-size:14px; color:var(--sub)}
+  .slim{display:flex; flex-direction:column; gap:6px}
+  .slr{display:flex; align-items:center; gap:10px; min-height:52px; padding:6px 12px; border:1px solid var(--line); border-radius:12px; background:var(--panel); font-size:17px}
+  .slr .sno{flex:none; width:26px; color:var(--pri); font-family:"Barlow Condensed",sans-serif; font-weight:700}
+  .slr .snm{flex:1; min-width:0; font-weight:700}
+  .slr .sabc{display:flex; align-items:center; gap:4px 6px; color:var(--sub); font-size:16px} .slr .sabc i{font-style:normal; font-size:14px; margin-left:6px}
+  .slr .sg{flex:none; min-width:44px; text-align:right; font-family:"Barlow",sans-serif; font-size:24px; color:var(--pri)} .slr .sg small{font-size:14px; color:var(--sub)}
   .gaugeBox{display:flex; align-items:center; gap:16px; margin:0 0 12px; padding:12px 16px; border-radius:22px; background:linear-gradient(135deg,#F6F4FF 0%,#ECEAFD 100%); border:1px solid #E4E1F5}
   .gWrap{position:relative; flex:none; width:84px; height:84px}
   .gauge{width:84px; height:84px; display:block}
@@ -1105,7 +1119,8 @@ function roleCounts(cls) {
   Object.values(R).forEach(st => Object.values(st || {}).forEach(rd => Object.values(rd || {}).forEach(x => {
     ["p", "j", "s"].forEach(k => Object.keys((x || {})[k] || {}).forEach(s => { (out[s] ||= { p: 0, j: 0, s: 0 })[k]++; }));
     // 결과를 입력한 학생 = 그 다트의 심판 (예전 역할 표에서 이미 심판으로 체크했으면 두 번 세지 않는다)
-    if (x && x.by && x.by !== "T" && (x.byCls || cls) === cls && !((x.s || {})[x.by])) (out[x.by] ||= { p: 0, j: 0, s: 0 }).s++;
+    // 심판이 준비·정리와 경기 진행까지 맡는다(2026-10-27) — 결과를 입력한 심판에게 세 역할 모두 인정 (예전 역할 표에 이미 체크했으면 두 번 세지 않음)
+    if (x && x.by && x.by !== "T" && (x.byCls || cls) === cls) { const o = (out[x.by] ||= { p: 0, j: 0, s: 0 }); ["p", "j", "s"].forEach(k => { if (!((x[k] || {})[x.by])) o[k]++; }); }
   })));
   return out;
 }
@@ -1392,7 +1407,7 @@ function clsBar() {
   if (VIEW) return "";
   const names = classNames(); if (names.length < 2) return "";
   const on = pairOn(), sel = on ? [ui.cls, ...bigPair()] : [ui.cls];
-  return `<div class="clsBar noprint"><div class="clsChips">${names.map(c => `<button class="${sel.includes(c) ? "on" : ""} ${on && c === ui.cls ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(c)}<small>반</small></button>`).join("")}</div><button class="pairTog ${on ? "on" : ""}" data-act="pairTog">${on ? "✔ 두 반 함께" : "두 반 함께"}</button></div>${on ? `<p class="hint noprint" style="margin:-4px 0 8px">${sel.length < 2 ? "함께할 반을 하나 더 눌러 주세요" : "다트는 반씩 나눠 써요"}</p>` : ""}${on && sel.length === 2 ? pairRows(sel.slice().sort(numSort)) : ""}`;
+  return `<div class="clsBar noprint"><div class="clsChips">${names.map(c => `<button class="${sel.includes(c) ? "on" : ""} ${on && c === ui.cls ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(c)}<small>반</small></button>`).join("")}</div><button class="pairTog ${on ? "on" : ""}" data-act="pairTog" aria-pressed="${on}"><span class="pIco">${on ? "✓" : "＋"}</span>두 반 함께</button></div>${on ? `<p class="hint noprint" style="margin:-4px 0 8px">${sel.length < 2 ? "함께할 반을 하나 더 눌러 주세요" : "다트는 반씩 나눠 써요"}</p>` : ""}${on && sel.length === 2 ? pairRows(sel.slice().sort(numSort)) : ""}`;
 }
 /* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
 function pairRows(cs) {
@@ -1630,7 +1645,7 @@ function card(cls, st, gk, members, res, title) {
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
   const rowsShown = needRef ? `<p class="refFirst">👆 먼저 위에서 <b>심판</b>(결과를 입력할 사람)을 눌러 주세요. 그러면 점수 칸이 열려요.</p><div class="memList">${live.map(s => `<span>${esc((sm[s] || {}).name || "?")}</span>`).join("")}</div>` : rows;
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refGuide(true) + refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rowsShown}
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rowsShown}
     ${(() => {   // 순위가 다 안 들어갔으면 저장 단추를 잠근다
       const miss = live.filter(s => !(res[s] && res[s].r >= 1));
       if (ranked || !canEnter() || takenByOther || needRef || !live.some(s => res[s] && res[s].r >= 1)) return "";
@@ -1664,7 +1679,7 @@ const refGuide = full => full
 function refPicker(cls, key, members) {
   const part = key[0] === "g" ? partnerOf(cls, +key.slice(1)) : null;   // 심판 교대: 짝 조 학생이 심판
   const sm = stuMap(cls), mem = (part ? part.m : members).filter(s => sm[s] && !isAbs(cls, s)), others = roster(cls).filter(st => !mem.includes(sidOf(st)));
-  return `<div class="refPick"><b>🧑‍⚖️ 심판은?${part ? ` <small class="refPart">짝 조(${waveOf(cls, part.gi)}차) 학생 중에서</small>` : ""}</b>
+  return `<div class="refPick"><b>🧑‍⚖️ 이번 경기 심판은? <span style="font-weight:600;color:var(--sub);font-size:16px">내 이름을 눌러요</span>${part ? ` <small class="refPart">짝 조(${waveOf(cls, part.gi)}차) 학생 중에서</small>` : ""}</b>
     <div class="refBtns">${mem.map(s => `<button class="btn" data-act="claimRef" data-g="${key}" data-s="${s}">${esc(sm[s].name)}</button>`).join("")}</div>
     ${others.length ? `<select class="refOther" data-g="${key}"><option value="">다른 조 학생</option>${others.map(o => `<option value="${sidOf(o)}">${esc(o.no)}. ${esc(o.name)}</option>`).join("")}</select>` : ""}</div>`;
 }
@@ -1736,7 +1751,7 @@ function scStand() {
     : r.zero ? `<td class="rcol zeroc" ${VIEW ? "" : `data-act="absfix" data-v="${s}" data-k="${k}" data-r="${r.r}"`} title="미인정 결석 — 1점 · 누르면 결석(평균)">${r.pts}<small>미인정</small></td>`
     : `<td class="rcol" title="${r.rank}위">${r.pts}</td>`;
   let h = `<div class="row noprint" style="margin-bottom:10px"><h2 style="margin:0">${esc(cls)}반</h2><span class="sp"></span>
-    <div class="seg" style="margin:0"><button class="plain ${ui.sort === "no" ? "on" : ""}" data-act="sort" data-v="no">번호순</button><button class="plain ${ui.sort === "score" ? "on" : ""}" data-act="sort" data-v="score">승점순</button></div></div>`;
+    ${VIEW ? `<div class="seg" style="margin:0"><button class="plain ${ui.sort === "no" ? "on" : ""}" data-act="sort" data-v="no">번호순</button><button class="plain ${ui.sort === "score" ? "on" : ""}" data-act="sort" data-v="score">승점순</button></div>` : ""}</div>`;
   if (!VIEW) h += `<p class="hint noprint" hidden>칸의 숫자는 그 라운드 <b>승점</b>(4명 조 4·3·2·1, 3명 조 4·3·1, 5명 조 4·3·3·2·1). 노란 칸 = 기록 없음. 6라운드 모두 끝난 학생 ${done}/${rows.length}명.
     Ⓒ <b>심판</b>은 경기 결과를 입력한 학생에게 자동 인정(연두색, 숫자 = 횟수)되고, 준비·정리와 경기 진행은 선생님이 단추를 눌러 인정합니다(누르면 인정 ↔ 취소).</p>
     <div class="row noprint" style="margin-bottom:10px"><button class="btn sm pri" data-act="xlsx">⬇ 엑셀</button><button class="btn sm" data-act="print">🖨 인쇄</button></div>`;
@@ -1747,7 +1762,13 @@ function scStand() {
       <div class="card"><p class="hint keep" style="margin-top:0">나이스 출결에서 <b>미인정</b>인 줄만 누르세요 (결석 = 내 평균, 최대 2.5 → 미인정 = 1점)</p>
       <div class="alist">${items.map(({ r, k, x }) => `<button class="arow ${x.zero ? "un" : ""}" data-act="absfix" data-v="${r.s}" data-k="${k}" data-r="${x.r}"><span class="an">${esc(r.st.no)}. ${esc(r.st.name)}</span><span class="ad">${roundDate(cls, k, x.r) || "-"}</span><span class="ag">${STAGES[k].mark} ${x.r}R</span><span class="ap">${x.zero ? "미인정 1" : "결석 " + x.pts}</span></button>`).join("")}</div></div></details>`;
   }
-  if (isPhone()) {
+  if (isPhone() || (!VIEW && !ui.standFull)) {
+    if (!VIEW) {   // 간단 보기 (2026-10-27): 한 줄에 Ⓐ Ⓑ Ⓒ 와 최종 점수
+      h += `<div class="slim">${rows.map(r => `<div class="slr"><span class="sno">${esc(r.st.no)}</span><span class="snm">${esc(r.st.name)}</span><span class="sabc"><i>Ⓐ</i>${areaCell(r.a, r.s, "cu")}<i>Ⓑ</i>${areaCell(r.b, r.s, "x3")}<i>Ⓒ</i><span>${r.c}</span></span><b class="sg">${r.grade}${r.full ? "" : "<small>…</small>"}</b></div>`).join("")}</div>`;
+      if (!isPhone()) h += `<button class="linkBtn" data-act="standFull" style="margin-top:10px">📋 라운드별 표 보기</button>`;
+      h += `<details class="setup" style="margin-top:14px"><summary>📏 채점 기준</summary>${rulesTable()}</details>`;
+      return h;
+    }
     h += `<div class="slist">${rows.map(r => {
       // 선생님: 영역 점수 / 학생: 합산 승점
       const ab = VIEW ? `<span class="sa">Ⓐ <b>${r.a.realSum}</b></span><span class="sb">Ⓑ <b>${r.b.realSum}</b></span>`
@@ -1760,6 +1781,7 @@ function scStand() {
     if (!VIEW) h += `<details class="setup" style="margin-top:14px"><summary>📏 채점 기준</summary>${rulesTable()}</details>`;
     return h;
   }
+  if (!VIEW) h += `<button class="linkBtn noprint" data-act="standFull" style="margin-bottom:8px">↩ 간단히 보기</button>`;
   h += `<div class="tblWrap"><table><thead><tr><th rowspan="2">번호</th><th rowspan="2">이름</th>
     <th class="cu" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓐ<span class="stx"> 카운트 업</span></th><th class="x3" colspan="${CFG.rounds + 1 + (VIEW ? 0 : 1)}">Ⓑ<span class="stx"> 301 게임</span></th>
     ${VIEW ? "" : `<th rowspan="2">Ⓒ</th><th rowspan="2" class="rcol">합</th><th rowspan="2">점수</th>`}</tr><tr>
@@ -1905,6 +1927,10 @@ function showBig() {
     });
   });
   const multi = show.length > 1, running = groupsOf(ui.cls, st).length && liveOf(ui.cls);
+  // 입력 게이지 — 함께 띄운 반 전체의 다트 입력 현황, 숫자 하나만
+  const gTot = show.reduce((a, c) => a + gOf(c).length, 0), gDone = show.reduce((a, c) => a + gOf(c).filter((g, gi) => dartState(c, g, roundRes(c, stOf(c), rOf(c)), gi, stOf(c), rOf(c)) === "done").length, 0);
+  const CI = 2 * Math.PI * 16, gFull = gTot && gDone === gTot;
+  const miniG = gTot && canTeach() ? `<span class="miniG ${gFull ? "full" : ""}" title="입력 ${gDone}/${gTot}"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" class="mT"/><circle cx="20" cy="20" r="16" class="mB" style="opacity:${gDone ? 1 : 0}" stroke-dasharray="${CI.toFixed(1)}" stroke-dashoffset="${(CI * (1 - gDone / gTot)).toFixed(1)}" transform="rotate(-90 20 20)"/></svg><b>${gDone}<small>/${gTot}</small></b></span>` : "";
   // 심판 교대 안내 — 1차가 다 끝나면 [2차 시작] 단추
   const swapAny = show.some(c => swapOn(c, gOf(c).length));
   const w1Done = swapAny && show.every(c => gOf(c).every((g, gi) => waveOf(c, gi, gOf(c).length) !== 1 || dartState(c, g, roundRes(c, stOf(c), rOf(c)), gi, stOf(c), rOf(c)) === "done"));
@@ -1917,7 +1943,7 @@ function showBig() {
       <div class="segc">${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(r => `<button class="${ui.round === r ? "on" : ""}" data-act="bigRound" data-v="${r}">${r}R</button>`).join("")}</div>
       <button class="bmEntry" data-act="bigEntry">✏️ 결과 입력</button>
       <div class="bmCls"><b>학급</b>${classNames().map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div></div>` : "";
-  $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle">${multi && !show.every(c => stOf(c) === st && rOf(c) === ui.round) ? show.slice().sort(numSort).map(c => `<span class="gMix g-${stOf(c)}"><b>${esc(c)}반</b> ${STAGES[stOf(c)].name} ${rOf(c) || "-"}R</span>`).join("") : `<span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b>라운드</span>${multi ? `<span class="gCls">${show.slice().sort(numSort).map(esc).join(" · ")}반</span>` : ""}`}${waveBtns}</div>${qr}${ctl}</div>${menu}${swapBar}
+  $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle">${multi && !show.every(c => stOf(c) === st && rOf(c) === ui.round) ? show.slice().sort(numSort).map(c => `<span class="gMix g-${stOf(c)}"><b>${esc(c)}반</b> ${STAGES[stOf(c)].name} ${rOf(c) || "-"}R</span>`).join("") : `<span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b>라운드</span>${multi ? `<span class="gCls">${show.slice().sort(numSort).map(esc).join(" · ")}반</span>` : ""}`}${waveBtns}</div>${qr}${miniG}${ctl}</div>${menu}${swapBar}
     ${canTeach() && groupsOf(ui.cls, st, ui.round).length && isClosed(ui.cls, st, ui.round) && allEntered(ui.cls, st, ui.round) ? `<div class="doneBar">✔ ${ui.round}라운드 입력 완료 · 자동 종료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기 조 편성</button></div>` : ""}
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
     <div class="arena" style="grid-template-columns:repeat(${(() => { const k = onBoards().filter(b => slot[b]).length || 1; return k <= 5 ? k : Math.ceil(k / 2); })()},1fr)">${onBoards().filter(b => slot[b]).map(b => { const g = slot[b] || [];
@@ -1994,6 +2020,7 @@ document.addEventListener("click", e => {
     case "method": ui.method[ui.stage] = v; render(); break;
     case "sort": ui.sort = v; render(); break;
     case "gst": ui.gst = v; render(); break;
+    case "standFull": ui.standFull = !ui.standFull; render(); break;
     case "refSwap": put("settings/refSwap", refSwapOn() ? false : null); break;
     case "mvTog": ui.mv = !(ui.mv || ui.sel); ui.sel = null; render(); break;
     case "clsTap": {
