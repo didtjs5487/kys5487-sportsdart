@@ -353,6 +353,9 @@
   #big .swapBar{display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; margin:0 0 10px; padding:10px 16px; border-radius:14px; background:var(--priSoft); font-size:20px; font-weight:700}
   #big .swapBar .btn{margin-left:auto}
   #big .bd2 .nx.ref{color:var(--pri); font-weight:800; font-size:clamp(15px, 1.5vw, 22px)}
+  #big .bd2 .nx .nxl{display:block; margin-bottom:2px}
+  #big .bd2 .nx .nxn{display:flex; flex-wrap:wrap; gap:0 10px}
+  #big .bd2 .nx .nxn i{font-style:normal; white-space:nowrap}
   .refPart{font-size:15px; font-weight:700; color:var(--sub)}
   .gMix{display:inline-flex; align-items:baseline; gap:6px; margin-right:14px; font-size:22px; font-weight:800; white-space:nowrap} .gMix b{font-size:26px}
   .pairRows{display:flex; flex-direction:column; gap:6px; margin:0 0 10px}
@@ -1903,7 +1906,7 @@ function showBig() {
       const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), s0 = stOf(c), gg = groupsOf(c, s0, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, s0, r0), g[0].gi, s0, r0) : "none"; })() : "none";
       return `<div class="bd2 g-${g.length ? stOf(g[0].c) : st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${charImg(b, "ch")}<span class="cn">${chOf(b)[1]}</span>${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
-        ${next[b] ? `<div class="nx ${next[b][0].ref ? "ref" : ""}">${next[b][0].ref ? "🧑‍⚖️ 심판·진행" : `${wv + 1}차 →`} ${next[b].flatMap(x => x.names).join(" · ")}</div>` : ""}</div>`; }).join("")}</div>`;
+        ${next[b] ? `<div class="nx ${next[b][0].ref ? "ref" : ""}"><span class="nxl">${next[b][0].ref ? "🧑‍⚖️ 심판·진행" : `${wv + 1}차`}</span><span class="nxn">${next[b].flatMap(x => x.names).map(n => `<i>${n}</i>`).join("")}</span></div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
   fitBig();
 }
