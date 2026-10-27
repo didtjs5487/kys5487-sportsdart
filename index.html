@@ -1032,6 +1032,16 @@ function endOverlapping(cls) {
     toast(`${c}반 ${STAGES[L.st].name} ${L.r}라운드는 자동으로 종료했어요`);
   });
 }
+/* 심판들이 모든 다트를 저장하면 그 라운드는 저절로 종료 (선생님 기기가 처리, 2026-10-27).
+   학생 입력은 잠기고, 선생님은 종료된 라운드도 고칠 수 있다. 다음 라운드는 [▶ 다음 경기]로 조를 짠다 */
+function autoCloseRounds() {
+  if (!canTeach() || STU_DEMO) return;
+  classNames().forEach(c => {
+    const L = liveOf(c); if (!L || isClosed(c, L.st, L.r) || !allEntered(c, L.st, L.r)) return;
+    put(P(c, "closed", L.st, "r" + L.r), Date.now(), true); stampAbs(c, L.st, L.r); put(P(c, "live"), null, true);
+    toast(`✔ ${c}반 ${STAGES[L.st].name} ${L.r}라운드 — 모든 다트가 저장되어 자동으로 종료했어요`);
+  });
+}
 function setLive(cls, st, r) {
   if (!canTeach() || !cls) return;
   const L = liveOf(cls);
@@ -1215,7 +1225,7 @@ const METHODS = {
 // 명렬·출석은 학기 초에 한 번 쓰는 일이라 맨 뒤로 (2026-10-01 선생님 요청)
 const TABS = [["groups", "👥", "조 편성"], ["entry", "✏️", "결과"], ["stand", "📊", "성적"], ["grade", "🏆", "학년"], ["set", "⚙️", "설정"]];
 function render() {
-  if (canTeach()) syncOpen(); else if (STU_DEMO) applyOpen();
+  if (canTeach()) { autoCloseRounds(); syncOpen(); } else if (STU_DEMO) applyOpen();
   const names = classNames();
   if (!names.includes(ui.cls)) ui.cls = names[0] || "";
   $("clsSel").disabled = !!(stuOK && !canTeach());
@@ -1907,7 +1917,7 @@ function showBig() {
       <button class="bmEntry" data-act="bigEntry">✏️ 결과 입력</button>
       <div class="bmCls"><b>학급</b>${classNames().map(c => `<button class="${show.includes(c) ? "on" : ""}" data-act="bigCls" data-v="${esc(c)}">${esc(c)}반</button>`).join("")}</div></div>` : "";
   $("big").innerHTML = `<div class="bigTop g-${st}"><div class="gTitle">${multi && !show.every(c => stOf(c) === st && rOf(c) === ui.round) ? show.slice().sort(numSort).map(c => `<span class="gMix g-${stOf(c)}"><b>${esc(c)}반</b> ${STAGES[stOf(c)].name} ${rOf(c) || "-"}R</span>`).join("") : `<span class="gName">${STAGES[st].name}</span><span class="gRound"><b>${ui.round}</b>라운드</span>${multi ? `<span class="gCls">${show.slice().sort(numSort).map(esc).join(" · ")}반</span>` : ""}`}${waveBtns}</div>${qr}${ctl}</div>${menu}${swapBar}
-    ${canTeach() && liveOf(ui.cls) && allEntered(ui.cls, st, ui.round) && !isClosed(ui.cls, st, ui.round) ? `<div class="doneBar">✔ 모든 다트 입력 완료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기</button></div>` : ""}
+    ${canTeach() && groupsOf(ui.cls, st, ui.round).length && isClosed(ui.cls, st, ui.round) && allEntered(ui.cls, st, ui.round) ? `<div class="doneBar">✔ ${ui.round}라운드 입력 완료 · 자동 종료<button class="btn nextBtn" data-act="startNext">▶ 다음 경기 조 편성</button></div>` : ""}
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
     <div class="arena" style="grid-template-columns:repeat(${(() => { const k = onBoards().filter(b => slot[b]).length || 1; return k <= 5 ? k : Math.ceil(k / 2); })()},1fr)">${onBoards().filter(b => slot[b]).map(b => { const g = slot[b] || [];
       const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), s0 = stOf(c), gg = groupsOf(c, s0, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, s0, r0), g[0].gi, s0, r0) : "none"; })() : "none";
