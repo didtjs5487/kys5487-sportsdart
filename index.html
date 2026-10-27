@@ -345,9 +345,15 @@
   .clsChips button.main{background:var(--pri); border-color:var(--pri); color:#fff}
   .pairTog{flex:none; min-height:50px; padding:0 12px; border:1.5px dashed var(--pri); border-radius:12px; background:var(--panel); color:var(--pri); font-size:16px; font-weight:800}
   .pairTog.on{background:var(--priSoft); border-style:solid}
-  .startBtn{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:78px}
-  .startBtn .sb1{font-size:24px; font-weight:800} .startBtn .sb2{font-size:16px; font-weight:600; opacity:.92}
-  .acts3{display:flex; gap:8px; margin:0 0 12px} .acts3 .btn{flex:1; min-height:52px; font-size:17px}
+  .startWrap{display:flex; justify-content:center; margin:6px 0 14px}
+  .startBtn{display:flex; align-items:center; gap:14px; max-width:100%; min-width:260px; padding:12px 30px 12px 12px; border:0; border-radius:999px; background:linear-gradient(135deg,#7A71EE 0%,#5B51E8 55%,#4A41D6 100%); color:#fff; text-align:left; cursor:pointer;
+    box-shadow:0 12px 26px rgba(91,81,232,.32), inset 0 -3px 0 rgba(0,0,0,.14); transition:transform .1s, box-shadow .15s}
+  .startBtn:hover{box-shadow:0 14px 30px rgba(91,81,232,.42), inset 0 -3px 0 rgba(0,0,0,.14)} .startBtn:active{transform:scale(.97)}
+  .startBtn .ico{flex:none; width:56px; height:56px; border-radius:50%; background:#fff; color:var(--pri); display:grid; place-items:center; font-size:24px; font-weight:800; box-shadow:0 2px 6px rgba(0,0,0,.12)}
+  .startBtn .txt{display:flex; flex-direction:column; gap:2px; min-width:0}
+  .startBtn .sb1{font-family:"Barlow","Noto Sans KR",sans-serif; font-size:26px; font-weight:800; letter-spacing:-.3px; line-height:1.15}
+  .startBtn .sb2{font-size:15px; font-weight:600; opacity:.9; line-height:1.3}
+  .acts3{display:flex; justify-content:center; gap:8px; margin:0 0 12px} .acts3 .btn{flex:0 1 170px; min-height:50px; font-size:16px; border-radius:999px}
   .okTxt{color:var(--good); font-weight:800}
   .chip[disabled]{opacity:1; color:var(--ink)}
   #big .swapBar{display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; margin:0 0 10px; padding:10px 16px; border-radius:14px; background:var(--priSoft); font-size:20px; font-weight:700}
@@ -1313,7 +1319,7 @@ function scGroups() {
     else if (running) { b1 = "▶ 다음 경기"; b2 = nx ? `${STAGES[nx.st].name} ${nx.r}라운드 조를 짜요` : "마지막 경기를 마쳐요"; }
     else if (formed) { b1 = "▶ 경기 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · 인원을 확인했으면 눌러요`; }
     else { b1 = "▶ 조 편성"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · ${METHODS[methodFor(cg.st)][0]}`; }
-    h += `<div class="acts noprint"><button class="btn big nextBig wide startBtn" data-act="${nxAct}"><span class="sb1">${b1}</span><span class="sb2">${b2}</span></button></div>`;
+    h += `<div class="startWrap noprint"><button class="startBtn" data-act="${nxAct}"><span class="ico">${b1.startsWith("✔") ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${b1.replace(/^[▶✔] /, "")}</span><span class="sb2">${b2}</span></span></button></div>`;
     if (gs.length) h += `<div class="acts3 noprint"><button class="btn soft" data-act="big">📺 프로젝터</button><button class="btn soft" data-act="resetRound">↺ 이 라운드 리셋</button></div>`;
   }
   if (!VIEW) {
