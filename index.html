@@ -694,6 +694,20 @@
   #big .bd2.swap .nm{animation:rise .5s var(--ease) both}
   #big .bd2.swap .nm:nth-of-type(1){animation-delay:0ms} #big .bd2.swap .nm:nth-of-type(2){animation-delay:60ms} #big .bd2.swap .nm:nth-of-type(3){animation-delay:120ms} #big .bd2.swap .nm:nth-of-type(4){animation-delay:180ms} #big .bd2.swap .nm:nth-of-type(5){animation-delay:240ms} #big .bd2.swap .nm:nth-of-type(6){animation-delay:300ms}
   #big .bd2{transition:background .4s var(--ease), border-color .4s var(--ease)}
+  /* ── 수호신 캐릭터 움직임 ── */
+  img.live{transform-origin:50% 92%; will-change:transform}
+  @keyframes mv-float{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-7px) rotate(2deg)}}
+  @keyframes mv-hop{0%,60%,100%{transform:translateY(0) scale(1,1)}70%{transform:translateY(0) scale(1.06,.92)}80%{transform:translateY(-9px) scale(.96,1.05)}90%{transform:translateY(0) scale(1.04,.96)}}
+  @keyframes mv-flap{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-5px) rotate(-5deg)}75%{transform:translateY(-3px) rotate(5deg)}}
+  @keyframes mv-sway{0%,100%{transform:rotate(-3deg) translateX(-1px)}50%{transform:rotate(3deg) translateX(1px)}}
+  @keyframes boing{0%{transform:none}30%{transform:translateY(-22px) rotate(-12deg) scale(1.08)}60%{transform:translateY(0) rotate(360deg) scale(.94,1.06)}80%{transform:scale(1.06,.94)}100%{transform:none}}
+  @keyframes cheer{0%,100%{transform:none}20%{transform:translateY(-18px) rotate(-8deg)}40%{transform:translateY(0) scale(1.08,.92)}60%{transform:translateY(-12px) rotate(8deg)}80%{transform:translateY(0)}}
+  .hdimg.live, .waitImg.live, .bpimg.live{animation:var(--mv) var(--dur, 3s) ease-in-out infinite}
+  .gch.live, #big .ch.live{animation:var(--mv) var(--dur, 4.2s) ease-in-out infinite}
+  img.mv-float{--mv:mv-float; --dur:3.2s} img.mv-hop{--mv:mv-hop; --dur:2.6s} img.mv-flap{--mv:mv-flap; --dur:2.2s} img.mv-sway{--mv:mv-sway; --dur:4.4s}
+  .gch.live.mv-hop, #big .ch.live.mv-hop{--dur:4s}
+  img.live.boing{animation:boing .8s var(--ease) !important}
+  .ecard.cheer .hdimg.live{animation:cheer .9s var(--ease) 2 !important}
   .cf{position:fixed; top:-16px; width:10px; height:14px; border-radius:2px; z-index:9999; pointer-events:none; animation:fall 1.6s cubic-bezier(.2,.6,.4,1) forwards}
   @media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
 </style>
@@ -1605,7 +1619,8 @@ function partnerOf(cls, gi, st = ui.stage, r = ui.round) {
 // 2026-10-17: 한국 전설의 수호신 — 1~4 사신, 5 황룡(가운데), 6~11 상서로운 수호 동물. 그림은 선생님이 만들어 올 예정(chars/1.png~), 그전엔 이모지
 const DART_CHARS = [["🐉", "청룡"], ["🐯", "백호"], ["🔥", "주작"], ["🐢", "현무"], ["🐲", "황룡"], ["🦚", "봉황"], ["🦄", "기린"], ["🦁", "해태"], ["🐦‍⬛", "삼족오"], ["🦊", "구미호"], ["👹", "도깨비"]];
 const chOf = b => DART_CHARS[b - 1] || ["🎯", ""];
-const charImg = (b, cls) => b >= 1 && b <= DART_CHARS.length ? `<img class="${cls}" src="chars/${b}.png" alt="${chOf(b)[1]}">` : `<span class="${cls}">${chOf(b)[0]}</span>`;
+const CH_MOVE = { 1: "float", 2: "hop", 3: "flap", 4: "sway", 5: "float", 6: "flap", 7: "hop", 8: "hop", 9: "flap", 10: "hop", 11: "hop" };
+const charImg = (b, cls) => b >= 1 && b <= DART_CHARS.length ? `<img class="${cls} live mv-${CH_MOVE[b]}" style="animation-delay:-${(b * .37).toFixed(2)}s" src="chars/${b}.png" alt="${chOf(b)[1]}" draggable="false">` : `<span class="${cls}">${chOf(b)[0]}</span>`;
 const grpLabel = (cls, gi) => `${boardOf(cls, gi)}번 ${chOf(boardOf(cls, gi))[1]}${waves(cls) > 1 ? ` · ${waveOf(cls, gi)}차` : ""}`;
 function boardPicker(cls) {
   const mine = boardsOf(cls), on = onBoards(), explicit = !!chosenBoards(cls).length;
@@ -1762,7 +1777,8 @@ function card(cls, st, gk, members, res, title) {
   }).join("");
   const rowsShown = needRef ? `<p class="refFirst">👆 먼저 위에서 <b>심판</b>(결과를 입력할 사람)을 눌러 주세요. 그러면 점수 칸이 열려요.</p><div class="memList">${live.map(s => `<span>${esc((sm[s] || {}).name || "?")}</span>`).join("")}</div>` : rows;
   const opened = !needRef && hasRef && once("open" + cls + st + ui.round + key);
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""} ${opened ? "opened" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rowsShown}
+  const cheer = okDone && once("cheer" + cls + st + ui.round + key);
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""} ${opened ? "opened" : ""} ${cheer ? "cheer" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rowsShown}
     ${(() => {   // 순위가 다 안 들어갔으면 저장 단추를 잠근다
       const miss = live.filter(s => !(res[s] && res[s].r >= 1));
       if (ranked || !canEnter() || takenByOther || needRef || !live.some(s => res[s] && res[s].r >= 1)) return "";
@@ -2131,6 +2147,8 @@ function writeCard(gk, res) {
 const curCard = gk => JSON.parse(JSON.stringify(roundRes(ui.cls, ui.stage, ui.round)[gk] || {}));
 
 document.addEventListener("click", e => {
+  const ci = e.target.closest && e.target.closest("img.live");
+  if (ci && !ci.closest("[data-act]")) { ci.classList.remove("boing"); void ci.offsetWidth; ci.classList.add("boing"); return; }
   const b = e.target.closest("[data-act]"); if (!b) return;
   const act = b.dataset.act, v = b.dataset.v, cls = ui.cls;
   switch (act) {
