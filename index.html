@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#E9E7F8">
+<meta name="theme-color" content="#F2F4F6">
 <title>스포츠다트 리그</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -14,9 +14,9 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
-  /* 타바타 앱과 같은 디자인 언어 — 연보라 바탕 · 흰 카드 · 남색 글자 · 보라 강조 · Barlow 숫자.
+  /* (예전) 타바타 디자인 언어. 2026-10-29 '깔끔한 앱' 테마로 바뀜 — 맨 아래 테마 층이 덮어쓴다. 글씨는 크게(노안).
      다만 노안을 고려해 글씨는 크게(본문 18px, 보조 15px 이상), 보조 글자색은 타바타보다 진하게. */
   :root{
     --bg:#E9E7F8; --panel:#FFFFFF; --soft:#F3F1FD; --line:#E4E1F5; --line2:#D6D1F0;
@@ -31,18 +31,18 @@
   }
   *{box-sizing:border-box}
   html,body{margin:0}
-  body{background:var(--bg); color:var(--ink); font-family:"Barlow","Noto Sans KR",system-ui,sans-serif; font-size:18px; line-height:1.5;
+  body{background:var(--bg); color:var(--ink); font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",system-ui,sans-serif; font-size:18px; line-height:1.5;
     -webkit-font-smoothing:antialiased; -webkit-text-size-adjust:100%; padding-bottom:40px}
   button,input,select,textarea{font:inherit; color:inherit}
   button{cursor:pointer}
   .wrap{max-width:1100px; margin:0 auto; padding:0 16px}
-  .num, .prow input, .ranks .pts, td.grade, td.sum, .bd, #big .bd2 .n, #big .joinQR b, .codeIn{font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-variant-numeric:tabular-nums}
+  .num, .prow input, .ranks .pts, td.grade, td.sum, .bd, #big .bd2 .n, #big .joinQR b, .codeIn{font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",sans-serif; font-variant-numeric:tabular-nums}
 
   /* 머리글 — 타바타처럼 바탕 위에 제목, 오른쪽에 알약 모양 상태 */
   header{background:var(--bg); position:sticky; top:0; z-index:20}
   header .wrap{display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding-top:calc(14px + env(safe-area-inset-top)); padding-bottom:8px;
     padding-left:max(16px, env(safe-area-inset-left)); padding-right:max(16px, env(safe-area-inset-right))}
-  header h1{margin:0; font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-size:28px; font-weight:700; letter-spacing:.5px; white-space:nowrap}
+  header h1{margin:0; font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",sans-serif; font-size:28px; font-weight:700; letter-spacing:.5px; white-space:nowrap}
   header select{background:var(--panel); color:var(--pri); border:1px solid var(--line); border-radius:999px; font-size:20px; font-weight:800; padding:6px 14px; min-height:48px}
   #status{margin-left:auto; font-size:15px; font-weight:600; background:var(--panel); border:1px solid var(--line); color:var(--sub); border-radius:999px; padding:8px 14px; white-space:nowrap}
   #who{min-height:46px; border:0; border-radius:999px; background:var(--pri); color:#fff; font-size:16px; font-weight:700; padding:0 18px; white-space:nowrap}
@@ -54,8 +54,8 @@
   nav button.on{background:var(--pri); color:#fff; border-color:var(--pri)}
   main{background:var(--panel); border:1px solid var(--line); border-radius:0 16px 16px 16px; padding:20px 18px 26px; min-height:60vh; box-shadow:var(--shadow)}
 
-  h2{font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-size:26px; font-weight:700; letter-spacing:.3px; margin:4px 0 12px}
-  h3{font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-size:22px; font-weight:700; letter-spacing:.3px; margin:18px 0 10px}
+  h2{font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",sans-serif; font-size:26px; font-weight:700; letter-spacing:.3px; margin:4px 0 12px}
+  h3{font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",sans-serif; font-size:22px; font-weight:700; letter-spacing:.3px; margin:18px 0 10px}
   .hint{color:var(--sub); font-size:16px; margin:6px 0 12px; line-height:1.6}
   .row{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
   .sp{flex:1}
@@ -88,7 +88,7 @@
   .seg button.on.cu{background:var(--cu); border-color:var(--cu); color:var(--cuInk)}
   .seg button.on.x3{background:var(--x3); border-color:var(--x3); color:var(--x3Ink)}
   .seg button.on.plain{background:var(--pri); border-color:var(--pri); color:#fff}
-  .seg button .done{font-family:"Barlow Condensed",sans-serif; font-size:17px; font-weight:600; margin-left:6px; opacity:.85}
+  .seg button .done{font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:17px; font-weight:600; margin-left:6px; opacity:.85}
 
   /* 명렬 */
   .stuGrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:10px}
@@ -109,7 +109,7 @@
   .chips{display:flex; flex-direction:column; gap:6px}
   .chip{display:flex; align-items:center; gap:8px; min-height:52px; border:1px solid var(--line); border-radius:12px; background:var(--soft);
     padding:0 12px; font-size:19px; font-weight:700; text-align:left; width:100%}
-  .chip .no{color:var(--pri); font-family:"Barlow Condensed",sans-serif; font-weight:700; min-width:28px}
+  .chip .no{color:var(--pri); font-family:"Pretendard Variable",Pretendard,sans-serif; font-weight:700; min-width:28px}
   .chip .info{margin-left:auto; font-size:15px; font-weight:600; color:var(--sub)}
   .chip.sel{border-color:var(--pri); background:var(--priSoft); box-shadow:0 0 0 3px #D3CEFB}
   .chip.abs{color:#A3A7C7; border-style:dashed; background:var(--panel)}
@@ -156,7 +156,7 @@
   .prow{display:grid; grid-template-columns:1fr 108px; grid-template-rows:auto auto; gap:6px 8px; padding:10px 0; border-top:1px solid var(--line)}
   .prow:first-of-type{border-top:0}
   .prow .who{font-size:19px; font-weight:700; align-self:center}
-  .prow .who small{font-family:"Barlow Condensed",sans-serif; font-weight:700; color:var(--pri); font-size:17px; margin-right:6px}
+  .prow .who small{font-family:"Pretendard Variable",Pretendard,sans-serif; font-weight:700; color:var(--pri); font-size:17px; margin-right:6px}
   .prow input{width:108px; text-align:center; font-size:26px; font-weight:700; padding:4px}
   .prow input::placeholder{font-family:"Noto Sans KR",sans-serif; font-size:16px; font-weight:500; color:#A3A7C7}
   .ranks{grid-column:1 / -1; display:flex; gap:6px; align-items:center}
@@ -222,14 +222,14 @@
   #big .gName{display:flex; align-items:center; gap:10px; font-size:clamp(30px,2.8vw,42px); font-weight:800; white-space:nowrap}
   #big .gName::before{content:""; width:16px; height:16px; border-radius:50%; background:var(--gc)}
   #big .bigTop.g-cu{--gc:#FF9F1C} #big .bigTop.g-x3{--gc:#2EC4B6}
-  #big .gRound{font-size:clamp(26px,2.4vw,36px); font-weight:700; color:var(--sub)} #big .gRound b{font-family:"Barlow Condensed",sans-serif; color:var(--ink); margin-right:2px}
+  #big .gRound{font-size:clamp(26px,2.4vw,36px); font-weight:700; color:var(--sub)} #big .gRound b{font-family:"Pretendard Variable",Pretendard,sans-serif; color:var(--ink); margin-right:2px}
   #big .waves{display:flex; gap:6px}
   #big .waves button{min-height:44px; padding:0 16px; border-radius:999px; border:1px solid var(--line2); background:#fff; color:var(--sub); font-size:17px; font-weight:700}
   #big .waves button.on{background:var(--ink); border-color:var(--ink); color:#fff}
   #big .joinQR{margin-left:auto; display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:6px 14px 6px 6px}
   #big .joinQR img{width:76px; height:76px}
   #big .joinQR small{display:block; font-size:14px; font-weight:700; color:var(--sub)}
-  #big .joinQR b{font-family:"Barlow Condensed",sans-serif; font-size:34px; letter-spacing:4px; color:var(--pri); line-height:1}
+  #big .joinQR b{font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:34px; letter-spacing:4px; color:var(--pri); line-height:1}
   #big .joinQR .pinLine{display:flex; align-items:baseline; gap:6px} #big .joinQR .pinLine span{font-size:15px; font-weight:700; color:var(--sub)}
   #big .bigCtl{display:flex; align-items:center; gap:8px; margin-left:auto}
   #big .joinQR + .bigCtl{margin-left:0}
@@ -252,7 +252,7 @@
   #big .bd2.g-cu{--gc:#FF9F1C} #big .bd2.g-x3{--gc:#2EC4B6}
   #big .bd2[data-act]{cursor:pointer}
   #big .bd2 .hd{display:flex; align-items:center; gap:10px; margin-bottom:.6vh}
-  #big .bd2 .n{font-family:"Barlow Condensed",sans-serif; font-size:clamp(26px,4.6vh,42px); font-weight:700; color:var(--ink); line-height:1}
+  #big .bd2 .n{font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:clamp(26px,4.6vh,42px); font-weight:700; color:var(--ink); line-height:1}
   #big .bd2 .c{font-size:17px; font-weight:700; color:var(--sub)}
   #big .bd2 .nm{flex:none; font-size:var(--nf, 28px); font-weight:700; line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   #big .bd2 .nm .sx{font-size:.5em; vertical-align:.35em; padding:1px 5px; border-radius:6px}
@@ -292,7 +292,7 @@
   .rules td,.rules th{white-space:normal}
   .boardPick button{min-width:64px; font-size:22px}
   .prow.cu1{grid-template-columns:1fr 104px 76px; grid-template-rows:auto; align-items:center}
-  .rkBadge{font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-size:24px; font-weight:700; color:var(--pri); text-align:right; line-height:1}
+  .rkBadge{font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",sans-serif; font-size:24px; font-weight:700; color:var(--pri); text-align:right; line-height:1}
   .rkBadge small{display:block; font-size:16px; opacity:.85} .rkBadge.r1{color:var(--r1)}
   .okBox.wait{background:var(--soft); border-color:var(--line)} .okBox.wait p{font-size:17px; font-weight:700; color:var(--sub)} .okBox.wait b{color:var(--bad)}
   .okBtn:disabled{background:#C9C6E4; box-shadow:none; opacity:1}
@@ -354,7 +354,7 @@
   .startBtn:hover{box-shadow:0 14px 30px rgba(91,81,232,.42), inset 0 -3px 0 rgba(0,0,0,.14)} .startBtn:active{transform:scale(.97)}
   .startBtn .ico{flex:none; width:56px; height:56px; border-radius:50%; background:#fff; color:var(--pri); display:grid; place-items:center; font-size:24px; font-weight:800; box-shadow:0 2px 6px rgba(0,0,0,.12)}
   .startBtn .txt{display:flex; flex-direction:column; gap:2px; min-width:0}
-  .startBtn .sb1{font-family:"Barlow","Noto Sans KR",sans-serif; font-size:26px; font-weight:800; letter-spacing:-.3px; line-height:1.15}
+  .startBtn .sb1{font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",sans-serif; font-size:26px; font-weight:800; letter-spacing:-.3px; line-height:1.15}
   .startBtn .sb2{font-size:15px; font-weight:600; opacity:.9; line-height:1.3}
   .acts3{display:flex; justify-content:center; gap:8px; margin:0 0 12px} .acts3 .btn{flex:0 1 170px; min-height:50px; font-size:16px; border-radius:999px}
   .okTxt{color:var(--good); font-weight:800}
@@ -367,24 +367,24 @@
   #big .bd2 .nx .nxn{display:flex; flex-wrap:wrap; gap:0 10px}
   #big .bd2 .nx .nxn i{font-style:normal; white-space:nowrap}
   .refPart{font-size:15px; font-weight:700; color:var(--sub)}
-  #big .miniG{display:inline-flex; align-items:center; gap:6px; margin-left:auto; margin-right:10px; font-family:"Barlow",sans-serif}
+  #big .miniG{display:inline-flex; align-items:center; gap:6px; margin-left:auto; margin-right:10px; font-family:"Pretendard Variable",Pretendard,sans-serif}
   #big .miniG svg{width:40px; height:40px}
   #big .miniG .mT{fill:none; stroke:#DCD7FA; stroke-width:5} #big .miniG .mB{fill:none; stroke:var(--pri); stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset .6s}
   #big .miniG.full .mB{stroke:var(--good)}
   #big .miniG b{font-size:22px; font-weight:800; color:var(--ink)} #big .miniG small{font-size:14px; color:var(--sub)}
   .slim{display:flex; flex-direction:column; gap:6px}
   .slr{display:flex; align-items:center; gap:10px; min-height:52px; padding:6px 12px; border:1px solid var(--line); border-radius:12px; background:var(--panel); font-size:17px}
-  .slr .sno{flex:none; width:26px; color:var(--pri); font-family:"Barlow Condensed",sans-serif; font-weight:700}
+  .slr .sno{flex:none; width:26px; color:var(--pri); font-family:"Pretendard Variable",Pretendard,sans-serif; font-weight:700}
   .slr .snm{flex:1; min-width:0; font-weight:700}
   .slr .sabc{display:flex; align-items:center; gap:4px 6px; color:var(--sub); font-size:16px} .slr .sabc i{font-style:normal; font-size:14px; margin-left:6px}
-  .slr .sg{flex:none; min-width:44px; text-align:right; font-family:"Barlow",sans-serif; font-size:24px; color:var(--pri)} .slr .sg small{font-size:14px; color:var(--sub)}
+  .slr .sg{flex:none; min-width:44px; text-align:right; font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:24px; color:var(--pri)} .slr .sg small{font-size:14px; color:var(--sub)}
   .gaugeBox{display:flex; align-items:center; gap:16px; margin:0 0 12px; padding:12px 16px; border-radius:22px; background:linear-gradient(135deg,#F6F4FF 0%,#ECEAFD 100%); border:1px solid #E4E1F5}
   .gWrap{position:relative; flex:none; width:84px; height:84px}
   .gauge{width:84px; height:84px; display:block}
   .gTrack{fill:none; stroke:#DCD7FA; stroke-width:9}
   .gBar{fill:none; stroke:url(#gGrad); stroke-width:9; stroke-linecap:round; transition:stroke-dashoffset .6s ease}
   .gaugeBox.full .gBar{stroke:var(--good)} .gaugeBox.full{background:linear-gradient(135deg,#F1FBF5 0%,#E2F5EA 100%); border-color:#BFE6CF}
-  .gNum{position:absolute; inset:0; display:flex; align-items:baseline; justify-content:center; padding-top:22px; font-family:"Barlow","Noto Sans KR",sans-serif; color:var(--ink)}
+  .gNum{position:absolute; inset:0; display:flex; align-items:baseline; justify-content:center; padding-top:22px; font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",sans-serif; color:var(--ink)}
   .gNum b{font-size:30px; font-weight:800; line-height:1} .gNum small{font-size:16px; font-weight:700; color:var(--sub)}
   .gaugeBox.full .gNum b{color:var(--good); font-size:32px}
   .gTxt{display:flex; flex-direction:column; gap:2px; min-width:0} .gTxt b{font-size:20px; font-weight:800} .gTxt small{font-size:15px; color:var(--sub)}
@@ -414,9 +414,9 @@
   .turnBox .tin{width:84px; height:52px; font-size:24px; font-weight:800; text-align:center}
   .tapGrid{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px}
   .tapBtn{position:relative; min-width:0; min-height:66px; border:1px solid var(--line2); border-radius:14px; background:var(--soft); font-size:19px; font-weight:700; display:flex; align-items:center; gap:8px; padding:0 10px; text-align:left; color:var(--ink)}
-  .tapBtn .ord{width:40px; height:40px; border-radius:50%; background:var(--panel); border:2px dashed var(--line2); display:flex; align-items:center; justify-content:center; font-family:"Barlow Condensed",sans-serif; font-size:24px; flex:none}
+  .tapBtn .ord{width:40px; height:40px; border-radius:50%; background:var(--panel); border:2px dashed var(--line2); display:flex; align-items:center; justify-content:center; font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:24px; flex:none}
   .tapBtn .tn{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-  .tapBtn small{position:absolute; top:3px; right:8px; color:var(--pri); font-size:15px; font-family:"Barlow Condensed",sans-serif}
+  .tapBtn small{position:absolute; top:3px; right:8px; color:var(--pri); font-size:15px; font-family:"Pretendard Variable",Pretendard,sans-serif}
   .tapBtn.on{background:var(--priSoft); border-color:var(--pri)}
   .tapBtn.on .ord{background:var(--pri); color:#fff; border:0}
   .tapBtn.r1 .ord{background:var(--r1)}
@@ -430,10 +430,10 @@
   .absBtn.out.un{background:#7A2232; border-color:#7A2232; color:#fff; text-decoration:none} .absBtn.out.un small{color:#FFD3DA}
   .gseg button, .seg button, .tapBtn, .ranks button, .ds, .chip, .absBtn, .bd{transition:transform .08s, background .15s}
   .gseg button:active, .seg button:active, .tapBtn:active, .ds:active, .chip:active{transform:scale(.96)}
-  .bcount{font-size:20px} .bcount b{font-family:"Barlow Condensed",sans-serif; font-size:26px}
+  .bcount{font-size:20px} .bcount b{font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:26px}
   .dstat{display:grid; grid-template-columns:repeat(auto-fill,minmax(58px,1fr)); gap:6px; margin:-4px 0 14px}
   .ds{min-height:58px; border-radius:14px; border:2px dashed var(--line2); background:var(--panel); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.05; color:var(--sub); padding:2px}
-  .ds b{font-family:"Barlow Condensed",sans-serif; font-size:24px} .ds sub{font-size:11px; font-weight:700; margin-left:1px}
+  .ds b{font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:24px} .ds sub{font-size:11px; font-weight:700; margin-left:1px}
   .ds i{font-style:normal; font-size:15px; font-weight:800}
   .ds.part{border-style:solid; border-color:var(--pri); color:var(--pri); background:var(--priSoft)}
   .ds.done{border-style:solid; border-color:var(--good); background:var(--good); color:#fff}
@@ -445,13 +445,13 @@
   .slist{display:flex; flex-direction:column; gap:6px}
   .srow{background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:6px 10px 8px}
   .s1{display:flex; align-items:center; gap:8px}
-  .sno{min-width:24px; font-family:"Barlow Condensed",sans-serif; font-weight:700; color:var(--pri); font-size:18px}
+  .sno{min-width:24px; font-family:"Pretendard Variable",Pretendard,sans-serif; font-weight:700; color:var(--pri); font-size:18px}
   .snm{flex:1; min-width:0; font-size:18px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .sa, .sb{font-size:15px; font-weight:700; color:var(--sub); white-space:nowrap}
-  .sa b, .sb b{font-family:"Barlow Condensed",sans-serif; font-size:21px; color:var(--ink)}
+  .sa b, .sb b{font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:21px; color:var(--ink)}
   .sa em, .sb em{font-style:normal; font-size:14px; margin-left:3px; color:var(--pri)}
   .sa b{color:var(--cuInk)} .sb b{color:var(--x3Ink)}
-  .sg{text-align:right; font-family:"Barlow Condensed",sans-serif; font-size:28px; color:var(--pri)} .sg small{font-size:15px; margin-left:1px} .sg i{display:block; font-size:12px; color:var(--warn); font-style:normal; font-family:"Noto Sans KR",sans-serif; text-align:right; margin-top:-4px}
+  .sg{text-align:right; font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:28px; color:var(--pri)} .sg small{font-size:15px; margin-left:1px} .sg i{display:block; font-size:12px; color:var(--warn); font-style:normal; font-family:"Noto Sans KR",sans-serif; text-align:right; margin-top:-4px}
   .s2{display:flex; align-items:center; gap:10px; margin-top:4px}
   .stk{display:flex; gap:5px} .stk .tk{min-height:40px; padding:0 10px; margin:0}
   .gBar{display:flex; align-items:center; gap:10px; margin-bottom:12px; background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:8px; box-shadow:var(--shadow)}
@@ -462,7 +462,7 @@
   .gTog button.on.cu{background:var(--cu); color:var(--cuInk)} .gTog button.on.x3{background:var(--x3); color:var(--x3Ink)}
   .rPills{flex:1; min-width:0; display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
   .rPills button{min-width:0; min-height:56px; border-radius:12px; border:1px solid var(--line); background:var(--soft); color:var(--sub); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1; padding:2px}
-  .rPills button b{font-family:"Barlow Condensed",sans-serif; font-size:22px} .rPills button small{font-size:12px; font-weight:700; white-space:nowrap; min-height:14px}
+  .rPills button b{font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:22px} .rPills button small{font-size:12px; font-weight:700; white-space:nowrap; min-height:14px}
   .rPills button.on.cu{background:var(--cuSoft); border:2px solid var(--cu); color:var(--cuInk)} .rPills button.on.x3{background:var(--x3Soft); border:2px solid var(--x3); color:var(--x3Ink)}
   .rStep{flex:1; min-width:0; display:flex; align-items:center; gap:4px}
   .rStep .arw{flex:none; width:48px; height:56px; border-radius:12px; border:1px solid var(--line2); background:var(--soft); font-size:28px; font-weight:800; color:var(--pri); line-height:1}
@@ -488,13 +488,13 @@
   .glist, .clist{display:flex; flex-direction:column; gap:8px}
   .growW{display:flex; gap:6px}
   .grow, .crow{flex:1; min-width:0; display:flex; align-items:center; gap:10px; min-height:58px; border-radius:14px; border:1px solid var(--line); background:var(--panel); padding:0 12px; text-align:left; color:var(--ink); box-shadow:0 2px 8px rgba(91,81,232,.06)}
-  .gno{flex:none; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:"Barlow Condensed",sans-serif; font-size:24px; font-weight:700}
+  .gno{flex:none; width:40px; height:40px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:24px; font-weight:700}
   .gno.cu{background:var(--cu); color:var(--cuInk)} .gno.x3{background:var(--x3); color:var(--x3Ink)}
   .gnames{flex:1; min-width:0; font-size:17px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .grow small, .ghd small{font-size:14px; font-weight:700; color:var(--sub)}
   .moveTo2{flex:none; background:var(--pri); color:#fff; box-shadow:none}
   .ghd{width:100%; display:flex; align-items:center; gap:10px; border:0; background:transparent; padding:0 0 8px}
-  .crow .gnames .who{font-size:17px} .crow .gnames small{margin-left:8px; font-size:15px; color:var(--sub); font-family:"Barlow Condensed",sans-serif; font-size:18px}
+  .crow .gnames .who{font-size:17px} .crow .gnames small{margin-left:8px; font-size:15px; color:var(--sub); font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:18px}
   .crow .ci{flex:none; width:28px; font-size:20px; font-weight:800; color:#B9B5DA; text-align:center}
   .crow.part .ci{color:var(--pri)} .crow.done .ci{color:var(--good)}
   .crow.done{background:var(--goodSoft); border-color:#BFE6CF}
@@ -536,7 +536,7 @@
   .switch i::after{content:""; position:absolute; top:3px; left:3px; width:24px; height:24px; border-radius:50%; background:#fff; transition:left .15s}
   .switch.on i{background:var(--good)} .switch.on i::after{left:25px}
   .gseg{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-bottom:12px}
-  .gseg button{position:relative; min-height:54px; border:1px solid var(--line); background:var(--soft); border-radius:12px; font-family:"Barlow Condensed","Noto Sans KR",sans-serif; font-size:21px; font-weight:700; color:var(--sub); padding:0}
+  .gseg button{position:relative; min-height:54px; border:1px solid var(--line); background:var(--soft); border-radius:12px; font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",sans-serif; font-size:21px; font-weight:700; color:var(--sub); padding:0}
   .gseg button .gm{font-size:15px; margin-right:1px}
   .gseg button i{position:absolute; top:2px; right:4px; font-style:normal; font-size:11px}
   .gseg button.has::after{content:""; position:absolute; bottom:6px; left:50%; width:6px; height:6px; margin-left:-3px; border-radius:50%; background:currentColor; opacity:.5}
@@ -596,7 +596,7 @@
   #printQR{display:none}
   #printQR .sheet{display:grid; grid-template-columns:1fr 1fr; gap:10mm}
   #printQR .qc{border:2px dashed #999; border-radius:6mm; padding:6mm; text-align:center; break-inside:avoid; color:#2B3160}
-  #printQR .qc b{display:block; font-size:30pt; font-family:"Barlow Condensed","Noto Sans KR",sans-serif}
+  #printQR .qc b{display:block; font-size:30pt; font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",sans-serif}
   #printQR .qc img{width:48mm; height:48mm; margin:3mm auto; display:block}
   #printQR .qc small{font-size:12pt}
   body.printing > *:not(#printQR){display:none!important}
@@ -606,6 +606,96 @@
     main{padding:0; border:0; box-shadow:none}
     body{background:#fff}
   }
+
+  /* ===== 깔끔한 앱 테마 (2026-10-29, 선생님 선택: 시안 ⑤ · 파랑) ===== */
+  :root{
+    --bg:#F2F4F6; --panel:#FFFFFF; --soft:#F2F4F6; --line:#E5E8EB; --line2:#D1D6DB;
+    --ink:#191F28; --sub:#4E5968;
+    --pri:#3182F6; --pri2:#64A8FF; --priSoft:#E8F3FF;
+    --good:#0F9D58; --goodSoft:#E6F6EE; --bad:#E5303F; --badSoft:#FDECEE;
+    --shadow:0 2px 10px rgba(25,31,40,.05);
+    --ease:cubic-bezier(.16,1,.3,1);
+  }
+  body{font-family:"Pretendard Variable",Pretendard,"Noto Sans KR",system-ui,sans-serif; letter-spacing:-.01em; font-variant-numeric:tabular-nums}
+  ::selection{background:#CFE3FF; color:var(--ink)}
+  :focus-visible{outline:3px solid var(--pri2); outline-offset:2px; border-radius:10px}
+  *{scrollbar-color:#C6CCD3 transparent; caret-color:var(--pri)}
+  header{background:var(--bg)}
+  header h1{font-size:24px; font-weight:800; letter-spacing:-.02em}
+  #status{background:var(--panel); border:0; box-shadow:var(--shadow)}
+  nav{gap:4px; background:#E5E8EB; border-radius:16px; padding:4px; margin:4px 0 12px; overflow:visible}
+  nav button{flex:1 1 0; display:flex; align-items:center; justify-content:center; gap:6px; min-height:52px; background:transparent; border:0; border-radius:12px; color:var(--sub); font-size:17px; font-weight:700; padding:0 10px; transition:background .25s var(--ease), color .25s var(--ease)}
+  nav button .ti{display:inline-flex; width:22px; height:22px}
+  nav button .ti svg{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round}
+  nav button.on{background:var(--panel); color:var(--ink); box-shadow:0 2px 8px rgba(25,31,40,.08)}
+  nav button.on .ti{color:var(--pri)}
+  main{border:0; border-radius:22px; box-shadow:var(--shadow); padding:20px 16px 26px}
+  h2,h3{letter-spacing:-.02em; font-weight:800}
+  .btn{border-radius:14px; background:var(--soft); box-shadow:none; font-weight:700; transition:transform .12s var(--ease), background .2s var(--ease)}
+  .btn:active{transform:scale(.97)}
+  .btn.pri{background:var(--pri)} .btn.pri:hover{background:#1B64DA}
+  .btn.ghost{background:var(--panel); box-shadow:inset 0 0 0 1px var(--line)}
+  input[type=text],input[type=number],input[type=email],input[type=password],select,textarea{background:var(--soft); border:1px solid transparent; border-radius:14px}
+  details.setup > summary{border-radius:16px}
+  /* 반 단추 줄 */
+  .clsChips button{border:0; background:var(--soft); color:var(--sub); font-weight:700; transition:background .2s var(--ease), color .2s var(--ease)}
+  .clsChips button.on{background:var(--priSoft); color:var(--pri)}
+  .clsChips button.main, .clsBar:not(:has(.pairTog.on)) .clsChips button.on{background:var(--ink); color:#fff}
+  .pairTog{background:var(--panel); box-shadow:inset 0 0 0 1.5px var(--line2); color:var(--ink)}
+  .pairTog .pIco{background:var(--soft); color:var(--pri); box-shadow:none}
+  .pairTog.on{background:var(--pri); color:#fff; box-shadow:0 6px 16px rgba(49,130,246,.28)}
+  .pairTog.on .pIco{background:#fff}
+  /* 큰 시작 단추 — 이 화면의 주인공 */
+  .startBtn{background:var(--pri); box-shadow:0 10px 24px rgba(49,130,246,.32); border-radius:24px; padding:14px 30px 14px 14px; transition:transform .15s var(--ease), box-shadow .25s var(--ease), background .2s var(--ease)}
+  .startBtn:hover{background:#1B64DA}
+  .startBtn:active{transform:scale(.97); box-shadow:0 4px 12px rgba(49,130,246,.3)}
+  .startBtn .ico{background:#fff; color:var(--pri); box-shadow:none}
+  .startBtn .sb1{font-family:inherit; letter-spacing:-.02em}
+  .acts3 .btn{background:var(--panel); box-shadow:inset 0 0 0 1px var(--line); border-radius:14px}
+  /* 조 목록 */
+  .growW .grow{border:0; background:var(--soft); border-radius:16px; box-shadow:none}
+  .gnc{background:var(--panel); border:0; box-shadow:inset 0 0 0 1px var(--line); font-weight:600}
+  .gnc[data-act]{transition:background .15s var(--ease), color .15s var(--ease)}
+  .gnc.sel{background:var(--pri); color:#fff; box-shadow:none}
+  .glist.fresh .growW{animation:rise .55s var(--ease) both}
+  .glist.fresh .growW:nth-child(1){animation-delay:0ms} .glist.fresh .growW:nth-child(2){animation-delay:45ms} .glist.fresh .growW:nth-child(3){animation-delay:90ms} .glist.fresh .growW:nth-child(4){animation-delay:135ms} .glist.fresh .growW:nth-child(5){animation-delay:180ms} .glist.fresh .growW:nth-child(6){animation-delay:225ms} .glist.fresh .growW:nth-child(7){animation-delay:270ms} .glist.fresh .growW:nth-child(8){animation-delay:315ms} .glist.fresh .growW:nth-child(9){animation-delay:360ms} .glist.fresh .growW:nth-child(10){animation-delay:405ms} .glist.fresh .growW:nth-child(11){animation-delay:450ms} .glist.fresh .growW:nth-child(12){animation-delay:495ms}
+  @keyframes rise{from{opacity:0; transform:translateY(10px)}to{opacity:1; transform:none}}
+  /* 결과 게이지 */
+  .gaugeBox{background:var(--panel); border:1px solid var(--line); border-radius:20px}
+  .gTrack{stroke:#E8EBEE} .gBar{stroke:var(--pri)}
+  .gaugeBox.full{background:var(--goodSoft); border-color:#BFE6CF}
+  .crow{border:0; background:var(--soft); box-shadow:none; transition:background .3s var(--ease)}
+  .crow.done{background:var(--goodSoft)}
+  .ecard{transition:box-shadow .3s var(--ease), border-color .3s var(--ease)}
+  /* 학생 심판 단추 */
+  .refPick{background:var(--priSoft); border:0; border-radius:18px}
+  .refBtns .btn{border:0; background:var(--panel); box-shadow:0 2px 6px rgba(25,31,40,.06)}
+  .refBtns .btn:active{background:var(--pri); color:#fff}
+  /* 토스트 */
+  #toast{border-radius:16px; transition:opacity .25s var(--ease), transform .35s var(--ease); transform:translate(-50%,12px)}
+  #toast.show{transform:translate(-50%,0)}
+  /* ── 모션 ── */
+  @keyframes gfill{from{stroke-dashoffset:var(--f)}to{stroke-dashoffset:var(--t)}}
+  @keyframes pop{0%{transform:scale(.5); opacity:0}60%{transform:scale(1.18); opacity:1}100%{transform:none}}
+  @keyframes glow{0%{box-shadow:0 0 0 0 rgba(15,157,88,.35)}100%{box-shadow:0 0 0 14px rgba(15,157,88,0)}}
+  @keyframes breathe{0%,100%{box-shadow:0 10px 24px rgba(49,130,246,.32), 0 0 0 0 rgba(49,130,246,.18)}50%{box-shadow:0 10px 24px rgba(49,130,246,.32), 0 0 0 12px rgba(49,130,246,0)}}
+  @keyframes tabIn{from{opacity:0; transform:translateY(8px)}to{opacity:1; transform:none}}
+  @keyframes bigIn{from{opacity:0; transform:scale(.985)}to{opacity:1; transform:none}}
+  @keyframes fall{0%{transform:translate(0,0) rotate(0); opacity:1}100%{transform:translate(var(--x),105vh) rotate(var(--r)); opacity:.85}}
+  .crow.pop{animation:glow .9s var(--ease)} .crow.pop .ci{display:inline-block; animation:pop .5s var(--ease)}
+  .gaugeBox.pop .gNum b{display:inline-block; animation:pop .6s var(--ease)}
+  .okDone.pop{animation:pop .5s var(--ease)}
+  .ecard.opened .prow, .ecard.opened .tapBtn{animation:rise .45s var(--ease) both}
+  .ecard.opened .prow:nth-of-type(1), .ecard.opened .tapBtn:nth-child(1){animation-delay:0ms} .ecard.opened .prow:nth-of-type(2), .ecard.opened .tapBtn:nth-child(2){animation-delay:50ms} .ecard.opened .prow:nth-of-type(3), .ecard.opened .tapBtn:nth-child(3){animation-delay:100ms} .ecard.opened .prow:nth-of-type(4), .ecard.opened .tapBtn:nth-child(4){animation-delay:150ms} .ecard.opened .prow:nth-of-type(5), .ecard.opened .tapBtn:nth-child(5){animation-delay:200ms} .ecard.opened .prow:nth-of-type(6), .ecard.opened .tapBtn:nth-child(6){animation-delay:250ms}
+  .startBtn.ready{animation:breathe 2.4s ease-in-out infinite}
+  main.tabIn{animation:tabIn .35s var(--ease)}
+  #big.show{animation:bigIn .45s var(--ease)}
+  #big .ok2.pop{display:inline-block; animation:pop .55s var(--ease)}
+  #big .bd2.swap .nm{animation:rise .5s var(--ease) both}
+  #big .bd2.swap .nm:nth-of-type(1){animation-delay:0ms} #big .bd2.swap .nm:nth-of-type(2){animation-delay:60ms} #big .bd2.swap .nm:nth-of-type(3){animation-delay:120ms} #big .bd2.swap .nm:nth-of-type(4){animation-delay:180ms} #big .bd2.swap .nm:nth-of-type(5){animation-delay:240ms} #big .bd2.swap .nm:nth-of-type(6){animation-delay:300ms}
+  #big .bd2{transition:background .4s var(--ease), border-color .4s var(--ease)}
+  .cf{position:fixed; top:-16px; width:10px; height:14px; border-radius:2px; z-index:9999; pointer-events:none; animation:fall 1.6s cubic-bezier(.2,.6,.4,1) forwards}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
 </style>
 </head>
 <body>
@@ -1038,7 +1128,7 @@ function startNext(cls) {
   }
   if (isClosed(cls, target.st, target.r)) put(P(cls, "closed", target.st, "r" + target.r), null, true);
   if (fresh) {   // 새로 짠 조는 바로 프로젝터로 넘기지 않는다 — 인원을 확인·변경한 뒤 [▶ 경기 시작]
-    $("big").classList.remove("show"); ui.tab = "groups"; ui.cls = cls; ui.mv = false;
+    $("big").classList.remove("show"); ui.tab = "groups"; ui.cls = cls; ui.mv = false; ui.freshAt = Date.now();
     toast(`${STAGES[target.st].name} ${target.r}라운드 — ${list.length}개 조를 편성했어요. 인원을 바꾼 뒤 [▶ 경기 시작]을 누르세요`);
     render(); return;
   }
@@ -1065,8 +1155,26 @@ function autoCloseRounds() {
   classNames().forEach(c => {
     const L = liveOf(c); if (!L || isClosed(c, L.st, L.r) || !allEntered(c, L.st, L.r)) return;
     put(P(c, "closed", L.st, "r" + L.r), Date.now(), true); stampAbs(c, L.st, L.r); put(P(c, "live"), null, true);
-    toast(`✔ ${c}반 ${STAGES[L.st].name} ${L.r}라운드 — 모든 다트가 저장되어 자동으로 종료했어요`);
+    toast(`✔ ${c}반 ${STAGES[L.st].name} ${L.r}라운드 — 모든 다트가 저장되어 자동으로 종료했어요`); burst();
   });
+}
+/* ── 모션 도우미 (2026-10-29) ── */
+const MO = new Set(); let moReady = false; setTimeout(() => { moReady = true; }, 1500);
+const once = k => { if (MO.has(k)) return false; MO.add(k); return moReady; };
+const gPrev = {};   // 게이지: 지난 값에서 새 값으로 차오르게
+function gAnim(id, off) { const pv = gPrev[id]; gPrev[id] = off; return pv != null && Math.abs(pv - off) > .5 ? `--f:${pv.toFixed(1)};--t:${off.toFixed(1)};animation:gfill .9s var(--ease) both;` : ""; }
+const wPrev = {};   // 프로젝터: 다트별 차례가 바뀌면 이름이 새로 올라온다
+/* 축하 꽃가루 — 라운드가 끝났을 때와 학생이 저장했을 때 */
+function burst() {
+  if (matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  const cols = ["#3182F6", "#0F9D58", "#FFC342", "#FF6B6B", "#7C5CFF"];
+  for (let i = 0; i < 46; i++) {
+    const d = document.createElement("i"); d.className = "cf";
+    d.style.left = Math.random() * 100 + "vw"; d.style.background = cols[i % cols.length];
+    d.style.setProperty("--x", (Math.random() * 160 - 80) + "px"); d.style.setProperty("--r", (Math.random() * 720 - 360) + "deg");
+    d.style.animationDelay = Math.random() * .25 + "s"; d.style.animationDuration = (1.3 + Math.random() * .8) + "s";
+    document.body.appendChild(d); setTimeout(() => d.remove(), 2600);
+  }
 }
 function setLive(cls, st, r) {
   if (!canTeach() || !cls) return;
@@ -1250,7 +1358,13 @@ const METHODS = {
 
 /* ---------- 화면 ---------- */
 // 명렬·출석은 학기 초에 한 번 쓰는 일이라 맨 뒤로 (2026-10-01 선생님 요청)
-const TABS = [["groups", "👥", "조 편성"], ["entry", "✏️", "결과"], ["grade", "🏆", "학년"], ["set", "⚙️", "설정"]]   // 성적은 학기 말에만 — 설정 탭 안 상자로 (2026-10-27);
+const ICO = {   // 한 가지 선 굵기(2)로 그린 아이콘 — 이모지 대신
+  groups: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="17" cy="9" r="2.6"/><path d="M15.5 14.3c2.4.2 4.2 1.8 4.8 4.7"/></svg>',
+  entry: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 9h6M9 13h6M9 17h3.5"/></svg>',
+  grade: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4.5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3.6M17 6h2.5a2.5 2.5 0 0 1-2.6 3.6M12 13.5V17M8.5 20h7"/></svg>',
+  set: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 3v2.5M12 18.5V21M4.2 7.5l2.2 1.3M17.6 15.2l2.2 1.3M4.2 16.5l2.2-1.3M17.6 8.8l2.2-1.3"/></svg>'
+};
+const TABS = [["groups", ICO.groups, "조 편성"], ["entry", ICO.entry, "결과"], ["grade", ICO.grade, "학년"], ["set", ICO.set, "설정"]]   // 성적은 학기 말에만 — 설정 탭 안 상자로 (2026-10-27);
 function render() {
   if (canTeach()) { autoCloseRounds(); syncOpen(); } else if (STU_DEMO) applyOpen();
   const names = classNames();
@@ -1286,6 +1400,7 @@ function render() {
   }
   const fn = { roster: scRoster, groups: scGroups, entry: scEntry, stand: scStand, grade: scGrade, set: scSet }[ui.tab] || scSet;
   $("main").innerHTML = (!VIEW && GRP == null && ui.cls ? clsBar() : "") + ((!ui.cls && ui.tab !== "set" && ui.tab !== "grade") ? VIEW ? `<h2>아직 등록된 반이 없어요</h2><p class="hint">선생님이 명렬을 등록하면 여기에 조 편성과 경기 결과가 나옵니다.</p>` : `<h2>먼저 반을 등록하세요</h2><p class="hint"><b>설정</b> 탭의 <b>명렬</b>에서 명렬표를 붙여넣으면 됩니다.</p><button class="btn pri big" data-act="tab" data-v="set">명렬 등록하러 가기</button>` : fn());
+  if (ui._lastTab !== ui.tab) { const m = $("main"); m.classList.remove("tabIn"); void m.offsetWidth; if (ui._lastTab) m.classList.add("tabIn"); ui._lastTab = ui.tab; }
   if (ui.tab === "set") drawQR();
   if (teacher && secret.day === today() && classNames().some(c => !(secret.pins || {})[c])) ensurePins();
   if (teacher && serverSeen && JSON.stringify((S.meta || {}).classes || []) !== JSON.stringify(classNames())) put("meta/classes", classNames().length ? classNames() : null, true);
@@ -1357,18 +1472,18 @@ function scGroups() {
     else if (running) { b1 = "▶ 다음 경기"; b2 = nx ? `${STAGES[nx.st].name} ${nx.r}라운드 조를 짜요` : "마지막 경기를 마쳐요"; }
     else if (formed) { b1 = "▶ 경기 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · 인원을 확인했으면 눌러요`; }
     else { b1 = "▶ 조 편성"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · ${METHODS[methodFor(cg.st)][0]}`; }
-    h += `<div class="startWrap noprint"><button class="startBtn" data-act="${nxAct}"><span class="ico">${b1.startsWith("✔") ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${b1.replace(/^[▶✔] /, "")}</span><span class="sb2">${b2}</span></span></button></div>`;
-    if (gs.length) h += `<div class="acts3 noprint"><button class="btn soft" data-act="big">📺 프로젝터</button><button class="btn soft" data-act="resetRound">↺ 이 라운드 리셋</button></div>`;
+    h += `<div class="startWrap noprint"><button class="startBtn ${!isPair && formed ? "ready" : ""}" data-act="${nxAct}"><span class="ico">${b1.startsWith("✔") ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${b1.replace(/^[▶✔] /, "")}</span><span class="sb2">${b2}</span></span></button></div>`;
+    if (gs.length) h += `<div class="acts3 noprint"><button class="btn soft" data-act="big">프로젝터</button><button class="btn soft" data-act="resetRound">이 라운드 리셋</button></div>`;
   }
   if (!VIEW) {
     const opts = METHOD_OPTS[st];
     if (!opts.includes(ui.method[st])) ui.method[st] = opts[0];
     const n0 = roster(cls).filter(s => !isAbs(cls, sidOf(s))).length, sz0 = sizes(n0, CFG.size, boardsOf(cls).length, fitOn());
     const nAbs = roster(cls).filter(st2 => isAbs(cls, sidOf(st2))).length;
-    h += `<details class="setup noprint" data-k="setup" ${ui.open.setup ? "open" : ""}><summary>⚙ 편성 옵션<span class="sp"></span><span class="sumR">${nAbs ? `<b style="color:var(--bad)">결석 ${nAbs}명</b> · ` : ""}${STAGES[st].name} ${r}R</span></summary>
+    h += `<details class="setup noprint" data-k="setup" ${ui.open.setup ? "open" : ""}><summary>편성 옵션<span class="sp"></span><span class="sumR">${nAbs ? `<b style="color:var(--bad)">결석 ${nAbs}명</b> · ` : ""}${STAGES[st].name} ${r}R</span></summary>
     <div class="card pane">
       ${absPicker(cls, false)}
-      ${`<details class="setup noprint" data-k="gpick" ${ui.open.gpick ? "open" : ""}><summary>🎮 경기 · 라운드 바꾸기<span class="sp"></span><span class="sumR">${STAGES[st].name} ${r}R</span></summary><div class="card" style="margin-bottom:14px">${gameSeg(cls)}</div></details>`}
+      ${`<details class="setup noprint" data-k="gpick" ${ui.open.gpick ? "open" : ""}><summary>경기 · 라운드 바꾸기<span class="sp"></span><span class="sumR">${STAGES[st].name} ${r}R</span></summary><div class="card" style="margin-bottom:14px">${gameSeg(cls)}</div></details>`}
       ${boardPicker(cls)}
       <div class="prow2"><span class="plbl">편성</span><div class="segc">${opts.map(k => `<button class="${ui.method[st] === k ? "on" : ""}" data-act="method" data-v="${k}">${SHORT_M[k]}</button>`).join("")}</div></div>
       ${buddyBox(cls)}
@@ -1392,7 +1507,7 @@ function scGroups() {
     h += `<div class="selBar noprint"><b>✋ ${esc(x.name)}</b><span class="selHint">바꿀 <b>다른 조 학생 이름</b>을 누르세요</span><span class="sp"></span><button class="btn sm danger" data-act="selAbs">${isAbs(cls, ui.sel) ? "출석" : "결석"}</button><button class="btn sm ghost" data-act="selCancel">취소</button></div>`;
   } else if (mvOn) h += `<p class="hint noprint" style="margin:0 0 8px">✋ 이름 두 개를 차례로 누르면 서로 바뀌어요</p>`;
   const opened = new Set(ui.gOpen || []);
-  h += `<div class="glist">${gs.map((g, gi) => (!mvOn && opened.has(gi)) ? `
+  h += `<div class="glist ${Date.now() - (ui.freshAt || 0) < 1200 ? "fresh" : ""}">${gs.map((g, gi) => (!mvOn && opened.has(gi)) ? `
     <div class="grp ${st}"><button class="ghd" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="sp"></span><span class="chev">접기 ▴</span></button>
     <div class="chips">${g.m.map(s => { const x = sm[s] || { no: "?", name: "(명렬 없음)" }, a = isAbs(cls, s);
       const extra = st === "x3" ? (() => { const r = record(cls, "cu", s); return r.played ? `카운트업 ${r.sum}점` : ""; })() : (x.seed ? "★" : "");
@@ -1449,7 +1564,7 @@ function startPair() {
 /* 오늘 참여하지 못하는 학생 — 고르면 조 편성에서 빠진다. 날짜가 바뀌면 자동으로 모두 출석 */
 function absPicker(cls, open) {
   const list = roster(cls), out = list.filter(st => isAbs(cls, sidOf(st)));
-  return `<details class="setup noprint" data-k="abs" ${ui.open.abs ? "open" : ""}><summary>🙋 빠지는 학생 ${out.length ? `<span style="color:var(--bad)">&nbsp;${out.length}명</span>` : "<span class=\"okTxt\">&nbsp;없음 · 전원 출석 ✔</span>"}<span class="sp"></span><span class="sumR">참여 ${list.length - out.length}</span></summary>
+  return `<details class="setup noprint" data-k="abs" ${ui.open.abs ? "open" : ""}><summary>빠지는 학생 ${out.length ? `<span style="color:var(--bad)">&nbsp;${out.length}명</span>` : "<span class=\"okTxt\">&nbsp;없음 · 전원 출석 ✔</span>"}<span class="sp"></span><span class="sumR">참여 ${list.length - out.length}</span></summary>
     <div class="card" style="margin-bottom:14px"><p class="hint keep" style="margin-top:0">누르면 <b>결석</b>, 다시 누르면 참여 · 미인정은 학기 말 성적 탭에서</p>
     <div class="absGrid">${list.map(st => { const s = sidOf(st), a = isAbs(cls, s); return `<button class="absBtn ${a ? "out" : ""}" data-act="abs" data-v="${s}">${esc(st.no)}. ${esc(st.name)}${a ? `<small>결석</small>` : ""}</button>`; }).join("")}</div>
     ${out.length ? `<div class="row" style="margin-top:10px"><button class="btn" data-act="allIn">모두 참여로</button></div>` : ""}</div></details>`;
@@ -1528,7 +1643,7 @@ function scEntry() {
   const pair = (ui.bigCls || []).filter(c => S.rosters[c]);
   if (VIEW && stuOK && !liveOf(cls)) return joinBox(cls) + `<p class="wait">⏳ 경기 시작을 기다리는 중</p>`;
   if (VIEW && stuOK) h += `<div class="lockTag">${STAGES[st].mark} ${STAGES[st].name} · ${ui.round}라운드</div>`;
-  else if (!VIEW) h += `<details class="setup noprint" data-k="gpick" ${ui.open.gpick ? "open" : ""}><summary>🎮 경기 · 라운드 바꾸기<span class="sp"></span><span class="sumR">${STAGES[st].name} ${ui.round}R</span></summary><div class="card" style="margin-bottom:14px">${gameSeg(cls)}</div></details>`;
+  else if (!VIEW) h += `<details class="setup noprint" data-k="gpick" ${ui.open.gpick ? "open" : ""}><summary>경기 · 라운드 바꾸기<span class="sp"></span><span class="sumR">${STAGES[st].name} ${ui.round}R</span></summary><div class="card" style="margin-bottom:14px">${gameSeg(cls)}</div></details>`;
   else h += gameSeg(cls);
   if (!gs.length) return (VIEW ? joinBox(cls) : "") + h + (VIEW ? `<p class="wait">⏳ 조 편성을 기다리는 중</p>` : `<div class="go one"><button class="btn pri big nextBig" data-act="startNext">▶ 경기 시작</button></div>`);
   const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi)), closed = isClosed(cls, st, ui.round);
@@ -1536,7 +1651,7 @@ function scEntry() {
     const nDone = gs.filter((g, gi) => cardDone(cls, g, rr, "g" + gi)).length;
     // 입력 게이지 — 다트가 다 저장되면 저절로 종료된다 (2026-10-27)
     const pct = gs.length ? nDone / gs.length : 0, CIR = 2 * Math.PI * 34, full = closed || allDone;
-    h += `<div class="gaugeBox ${full ? "full" : ""}"><div class="gWrap"><svg class="gauge" viewBox="0 0 84 84" aria-hidden="true"><defs><linearGradient id="gGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9890F2"/><stop offset="1" stop-color="#4A41D6"/></linearGradient></defs><circle cx="42" cy="42" r="34" class="gTrack"/><circle cx="42" cy="42" r="34" class="gBar" style="opacity:${pct || full ? 1 : 0}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - (full ? 1 : pct))).toFixed(1)}" transform="rotate(-90 42 42)"/></svg><div class="gNum">${full ? "<b>✔</b>" : `<b>${nDone}</b><small>/${gs.length}</small>`}</div></div>`
+    h += `<div class="gaugeBox ${full ? "full" : ""} ${full && once("gfull" + cls + st + ui.round) ? "pop" : ""}"><div class="gWrap"><svg class="gauge" viewBox="0 0 84 84" aria-hidden="true"><defs><linearGradient id="gGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9890F2"/><stop offset="1" stop-color="#4A41D6"/></linearGradient></defs><circle cx="42" cy="42" r="34" class="gTrack"/><circle cx="42" cy="42" r="34" class="gBar" style="opacity:${pct || full ? 1 : 0};${gAnim("res" + cls + st + ui.round, CIR * (1 - (full ? 1 : pct)))}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - (full ? 1 : pct))).toFixed(1)}" transform="rotate(-90 42 42)"/></svg><div class="gNum">${full ? "<b>✔</b>" : `<b>${nDone}</b><small>/${gs.length}</small>`}</div></div>`
       + `<div class="gTxt"><b>${closed ? "경기 종료" : allDone ? "모두 저장됨" : "다트 입력 중"}</b><small>${closed ? "학생 입력이 잠겼어요" : allDone ? "곧 자동으로 끝나요" : "모두 저장되면 자동으로 끝나요"}</small></div>`
       + (closed ? `<button class="endLink" data-act="reopenRound">다시 열기</button>` : `<button class="endLink" data-act="endRound">지금 종료</button>`) + `</div>`;
 
@@ -1565,7 +1680,7 @@ function scEntry() {
       const s = dartState(cls, g, rr, gi), res = rr["g" + gi] || {}, R = rolesAt(cls, st, ui.round, "g" + gi);
       const live = g.m.filter(x => (!isAbs(cls, x) || res[x]) && !(res[x] && res[x].out)), got = live.filter(x => res[x] && res[x].r >= 1).length;
       const who = R.by && R.by !== "T" ? `📱 ${esc((stuMap(R.byCls || cls)[R.by] || {}).name || "")}` : R.by === "T" ? "👤 선생님" : "대기";
-      return `<button class="crow ${s}" data-act="jumpCard" data-g="g${gi}"><span class="ci">${s === "done" ? "✔" : s === "part" ? "◐" : "○"}</span><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}<span class="gnames"><span class="who">${who}</span><small>${s !== "done" && got === live.length && live.length && R.by && R.by !== "T" && !R.ok ? "<b class=okw>확인 대기</b>" : `${got}/${live.length}명`}</small></span><span class="chev">입력 ▾</span></button>`;
+      return `<button class="crow ${s} ${s === "done" && once("crow" + cls + st + ui.round + gi) ? "pop" : ""}" data-act="jumpCard" data-g="g${gi}"><span class="ci">${s === "done" ? "✔" : s === "part" ? "◐" : "○"}</span><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}<span class="gnames"><span class="who">${who}</span><small>${s !== "done" && got === live.length && live.length && R.by && R.by !== "T" && !R.ok ? "<b class=okw>확인 대기</b>" : `${got}/${live.length}명`}</small></span><span class="chev">입력 ▾</span></button>`;
     }).join("")}`;
   } else h += `<div class="entryGrid">${cards.map(({ g, gi }) => card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}${g.tag ? " · " + g.tag : ""}`)).join("")}`;
   if (GRP == null) {
@@ -1573,7 +1688,7 @@ function scEntry() {
     if (Object.keys(mk).length) h += card(cls, st, "mk", Object.keys(mk), mk, "보충 경기");
   }
   h += `</div>`;
-  if (!VIEW && GRP == null) h += `<details class="setup noprint" data-k="tdel" ${ui.open.tdel ? "open" : ""}><summary>🧪 테스트 기록 지우기</summary><div class="card"><p class="hint keep" style="margin-top:0">시험 삼아 넣은 결과를 지웁니다. 명렬은 남아요.</p><div class="delRow"><button class="btn danger" data-act="clrRound">지금 라운드 결과만<br><small>${STAGES[st].name} ${ui.round}R</small></button><button class="btn danger" data-act="resetGames">${esc(cls)}반 전체<br><small>모든 경기 · 과제수행</small></button><button class="btn danger" data-act="wipeGames">모든 반 전체<br><small>조 편성 · 결과 · 출결</small></button></div></div></details>`;
+  if (!VIEW && GRP == null) h += `<details class="setup noprint" data-k="tdel" ${ui.open.tdel ? "open" : ""}><summary>테스트 기록 지우기</summary><div class="card"><p class="hint keep" style="margin-top:0">시험 삼아 넣은 결과를 지웁니다. 명렬은 남아요.</p><div class="delRow"><button class="btn danger" data-act="clrRound">지금 라운드 결과만<br><small>${STAGES[st].name} ${ui.round}R</small></button><button class="btn danger" data-act="resetGames">${esc(cls)}반 전체<br><small>모든 경기 · 과제수행</small></button><button class="btn danger" data-act="wipeGames">모든 반 전체<br><small>조 편성 · 결과 · 출결</small></button></div></div></details>`;
   return h;
 }
 /* 이 조 카드 입력이 끝났나 — 결석생, 같은 라운드를 다른 다트에서 이미 기록한(옮긴) 학생은 빼고 본다. 빈 조는 끝난 것으로 */
@@ -1646,7 +1761,8 @@ function card(cls, st, gk, members, res, title) {
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
   const rowsShown = needRef ? `<p class="refFirst">👆 먼저 위에서 <b>심판</b>(결과를 입력할 사람)을 눌러 주세요. 그러면 점수 칸이 열려요.</p><div class="memList">${live.map(s => `<span>${esc((sm[s] || {}).name || "?")}</span>`).join("")}</div>` : rows;
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rowsShown}
+  const opened = !needRef && hasRef && once("open" + cls + st + ui.round + key);
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""} ${opened ? "opened" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rowsShown}
     ${(() => {   // 순위가 다 안 들어갔으면 저장 단추를 잠근다
       const miss = live.filter(s => !(res[s] && res[s].r >= 1));
       if (ranked || !canEnter() || takenByOther || needRef || !live.some(s => res[s] && res[s].r >= 1)) return "";
@@ -1665,7 +1781,7 @@ function card(cls, st, gk, members, res, title) {
         ${can.length ? `<div class="goneRow"><span class="goneL">경기 못 하는 학생?</span>${can.map(s => `<button class="goneChip ask" data-act="midAbs" data-g="${key}" data-v="${s}">${nm(s)} 불참</button>`).join("")}</div>` : ""}</div>`;
     })()}
     ${okWait && canEnter() && !takenByOther ? `<div class="okBox"><p>👀 조원 모두 순위를 확인했나요?</p><button class="btn big okBtn" data-act="okCard" data-g="${key}">✔ 모두 확인 · 저장</button></div>` : ""}
-    ${okDone ? `<div class="okDone">✔ 저장 완료${canEnter() && (canTeach() || R0.dev === DEV) && !isClosed(cls, st, ui.round) ? `<button class="btn sm ghost" data-act="unokCard" data-g="${key}">수정</button>` : ""}</div>` : ""}
+    ${okDone ? `<div class="okDone ${once("ok" + cls + st + ui.round + key) ? "pop" : ""}">✔ 저장 완료${canEnter() && (canTeach() || R0.dev === DEV) && !isClosed(cls, st, ui.round) ? `<button class="btn sm ghost" data-act="unokCard" data-g="${key}">수정</button>` : ""}</div>` : ""}
     ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${RO ? "" : `<div class="foot"><button class="btn sm ghost" data-act="clearCard" data-g="${key}">🗑 지우기</button></div>`}</div>`;
 }
 /* 역할 기록 — 이 다트(조)·이 라운드에서 누가 입력했고, 누가 경기 진행·심판·준비 정리를 했나.
@@ -1676,7 +1792,7 @@ const rolesAt = (cls, st, r, key) => ((((C(cls).roles || {})[st] || {})["r" + r]
 const REF_ROLE = ["태블릿 들고 P1~P4 순서 부르기", "점수 · 남은 점수 불러주기", "3발 뒤 <i class=nx></i> 누르고 다트 뽑기", "맞은 칸 기억 → 뽑다가 점수가 더 들어가면 [되돌리기] 후 그 선수 점수 다시 입력", "결과 입력 · 저장"];
 const refGuide = full => full
   ? `<div class="refGuide"><b>🧑‍⚖️ 심판의 역할</b><ul>${REF_ROLE.map(x => `<li>${x}</li>`).join("")}</ul></div>`
-  : `<details class="refGuide mini" data-k="refg" ${ui.open.refg ? "open" : ""}><summary>🧑‍⚖️ 심판의 역할</summary><ul>${REF_ROLE.map(x => `<li>${x}</li>`).join("")}</ul></details>`;
+  : `<details class="refGuide mini" data-k="refg" ${ui.open.refg ? "open" : ""}><summary>심판의 역할</summary><ul>${REF_ROLE.map(x => `<li>${x}</li>`).join("")}</ul></details>`;
 function refPicker(cls, key, members) {
   const part = key[0] === "g" ? partnerOf(cls, +key.slice(1)) : null;   // 심판 교대: 짝 조 학생이 심판
   const sm = stuMap(cls), mem = (part ? part.m : members).filter(s => sm[s] && !isAbs(cls, s)), others = roster(cls).filter(st => !mem.includes(sidOf(st)));
@@ -1759,7 +1875,7 @@ function scStand() {
   if (!VIEW) {   // 결석 확인 — 학기 말에 나이스 출결과 맞춰 미인정만 누른다
     const items = [];
     rows.forEach(r => [["cu", r.a], ["x3", r.b]].forEach(([k, rec]) => rec.rounds.forEach(x => { if (x && (x.fill || x.zero)) items.push({ r, k, x }); })));
-    if (items.length) h += `<details class="setup noprint" data-k="absList" ${ui.open.absList ? "open" : ""}><summary>📋 결석 확인 <span style="color:var(--bad)">&nbsp;${items.length}건</span><span class="sp"></span><span class="sumR">미인정 ${items.filter(i => i.x.zero).length}</span></summary>
+    if (items.length) h += `<details class="setup noprint" data-k="absList" ${ui.open.absList ? "open" : ""}><summary>결석 확인 <span style="color:var(--bad)">&nbsp;${items.length}건</span><span class="sp"></span><span class="sumR">미인정 ${items.filter(i => i.x.zero).length}</span></summary>
       <div class="card"><p class="hint keep" style="margin-top:0">나이스 출결에서 <b>미인정</b>인 줄만 누르세요 (결석 = 내 평균, 최대 2.5 → 미인정 = 1점)</p>
       <div class="alist">${items.map(({ r, k, x }) => `<button class="arow ${x.zero ? "un" : ""}" data-act="absfix" data-v="${r.s}" data-k="${k}" data-r="${x.r}"><span class="an">${esc(r.st.no)}. ${esc(r.st.name)}</span><span class="ad">${roundDate(cls, k, x.r) || "-"}</span><span class="ag">${STAGES[k].mark} ${x.r}R</span><span class="ap">${x.zero ? "미인정 1" : "결석 " + x.pts}</span></button>`).join("")}</div></div></details>`;
   }
@@ -1767,7 +1883,7 @@ function scStand() {
     {   // 간단 보기 (2026-10-27): 한 줄에 Ⓐ Ⓑ Ⓒ 와 최종 점수
       h += `<div class="slim">${rows.map(r => `<div class="slr"><span class="sno">${esc(r.st.no)}</span><span class="snm">${esc(r.st.name)}</span><span class="sabc"><i>Ⓐ</i>${areaCell(r.a, r.s, "cu")}<i>Ⓑ</i>${areaCell(r.b, r.s, "x3")}<i>Ⓒ</i><span>${r.c}</span></span><b class="sg">${r.grade}${r.full ? "" : "<small>…</small>"}</b></div>`).join("")}</div>`;
       h += `<button class="linkBtn" data-act="standFull" style="margin-top:10px">📋 자세히 보기 (라운드별 · 준비·진행 체크)</button>`;
-      h += `<details class="setup" style="margin-top:14px"><summary>📏 채점 기준</summary>${rulesTable()}</details>`;
+      h += `<details class="setup" style="margin-top:14px"><summary>채점 기준</summary>${rulesTable()}</details>`;
       return h;
     }
   }
@@ -1782,7 +1898,7 @@ function scStand() {
       if (VIEW) return `<div class="srow"><div class="s1"><span class="sno">${esc(r.st.no)}</span><span class="snm">${esc(r.st.name)}</span>${ab}</div></div>`;
       return `<div class="srow"><div class="s1"><span class="sno">${esc(r.st.no)}</span><span class="snm">${esc(r.st.name)}</span><b class="sg">${r.grade}<small>점</small>${r.full ? "" : "<i>진행중</i>"}</b></div><div class="s2">${ab}<span class="sp"></span>${tasks}</div></div>`;
     }).join("")}</div>`;
-    if (!VIEW) h += `<details class="setup" style="margin-top:14px"><summary>📏 채점 기준</summary>${rulesTable()}</details>`;
+    if (!VIEW) h += `<details class="setup" style="margin-top:14px"><summary>채점 기준</summary>${rulesTable()}</details>`;
     return h;
   }
   if (!VIEW) h += `<button class="linkBtn noprint" data-act="standFull" style="margin-bottom:8px">↩ 간단히 보기</button>`;
@@ -1798,7 +1914,7 @@ function scStand() {
         return `<button class="tk ${on ? (m === 1 ? "on" : "auto") : ""}" data-act="task" data-v="${r.s}" data-k="${k}" title="${l}${n ? " " + n + "회" : ""}">${{ p: "준비", j: "진행", s: "심판" }[k]}${n ? " " + n : ""}</button>`; }).join("")}</td>
       <td class="sum rcol">${r.tot}</td><td class="grade">${r.grade}${r.full ? "" : `<span class="inprog">…</span>`}</td>`}
     </tr>`).join("")}</tbody></table></div>`;
-  if (!VIEW) h += `<details class="setup" style="margin-top:14px"><summary>📏 채점 기준</summary>${rulesTable()}</details>`;
+  if (!VIEW) h += `<details class="setup" style="margin-top:14px"><summary>채점 기준</summary>${rulesTable()}</details>`;
   return h;
 }
 /* 🏆 학년 전체 카운트 업 순위 — 반을 넘어 같은 학년 모두를 점수로 줄 세운다.
@@ -1856,15 +1972,15 @@ function scSet() {
   // 설정 상자 4개 (2026-10-27): 성적·엑셀 / 명렬 / 다트 / 자료 관리. 입력 코드·학생용 링크는 다트 QR로 바뀌어 뺐다
   const cls = ui.cls;
   return `<h2>설정</h2>
-    ${cls ? `<details class="setup" data-k="s-stand" ${ui.open["s-stand"] ? "open" : ""}><summary>📊 성적 · 엑셀<span class="sp"></span><span class="sumR">학기 말</span></summary><div class="card">${scStand()}</div></details>` : ""}
-    <details class="setup" data-k="s-roster" ${(ui.open["s-roster"] ?? !classNames().length) ? "open" : ""}><summary>📋 명렬 · 시드</summary><div class="card">${scRoster()}</div></details>
-    <details class="setup" data-k="s-dart" ${ui.open["s-dart"] ? "open" : ""}><summary>🎯 다트<span class="sp"></span><span class="sumR">켜기·끄기 · QR 인쇄</span></summary><div class="card">
+    ${cls ? `<details class="setup" data-k="s-stand" ${ui.open["s-stand"] ? "open" : ""}><summary>성적 · 엑셀<span class="sp"></span><span class="sumR">학기 말</span></summary><div class="card">${scStand()}</div></details>` : ""}
+    <details class="setup" data-k="s-roster" ${(ui.open["s-roster"] ?? !classNames().length) ? "open" : ""}><summary>명렬 · 시드</summary><div class="card">${scRoster()}</div></details>
+    <details class="setup" data-k="s-dart" ${ui.open["s-dart"] ? "open" : ""}><summary>다트<span class="sp"></span><span class="sumR">켜기·끄기 · QR 인쇄</span></summary><div class="card">
       <p class="hint" style="margin-top:0">고장 났거나 쓰지 않는 다트를 끄면 조 편성과 프로젝터에서 빠져요.</p>${powerPicker()}
       <h3>🖨 다트에 붙일 QR</h3>
       <p class="hint">학생이 찍으면 그 다트의 입력 카드가 바로 열려요. 한 번만 인쇄하면 계속 써요.</p>
       <button class="btn pri" data-act="printQR">🖨 다트 1~${allBoards().length}번 QR 인쇄</button>
     </div></details>
-    <details class="setup" data-k="s-data" ${ui.open["s-data"] ? "open" : ""}><summary>🗂 자료 관리<span class="sp"></span><span class="sumR">엑셀 · 백업 · 지우기</span></summary><div class="card">
+    <details class="setup" data-k="s-data" ${ui.open["s-data"] ? "open" : ""}><summary>자료 관리<span class="sp"></span><span class="sumR">엑셀 · 백업 · 지우기</span></summary><div class="card">
       <p class="hint" style="margin-top:0">${serverDenied || !fdb ? "⚠ 지금은 <b>이 기기에만</b> 저장돼요." : "기록은 서버에 저장되어 어느 기기에서 열어도 같아요."} 내려받은 엑셀·백업 파일에는 학생 정보가 있으니 교사 PC에만 두세요.</p>
       <div class="row"><button class="btn pri" data-act="xlsx">⬇ 엑셀 (모든 반)</button><button class="btn" data-act="backup">⬇ 전체 백업</button><label class="btn" style="display:inline-flex;align-items:center">⬆ 백업 불러오기<input type="file" accept=".json" id="restore" hidden></label></div>
       ${cls ? `<h3>${esc(cls)}반 지우기</h3><div class="row"><button class="btn danger" data-act="resetGames">경기 결과·과제수행</button><button class="btn danger" data-act="resetGroups">조 편성</button></div>` : ""}
@@ -1943,7 +2059,7 @@ function showBig() {
   // 입력 게이지 — 함께 띄운 반 전체의 다트 입력 현황, 숫자 하나만
   const gTot = show.reduce((a, c) => a + gOf(c).length, 0), gDone = show.reduce((a, c) => a + gOf(c).filter((g, gi) => dartState(c, g, roundRes(c, stOf(c), rOf(c)), gi, stOf(c), rOf(c)) === "done").length, 0);
   const CI = 2 * Math.PI * 16, gFull = gTot && gDone === gTot;
-  const miniG = gTot && canTeach() ? `<span class="miniG ${gFull ? "full" : ""}" title="입력 ${gDone}/${gTot}"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" class="mT"/><circle cx="20" cy="20" r="16" class="mB" style="opacity:${gDone ? 1 : 0}" stroke-dasharray="${CI.toFixed(1)}" stroke-dashoffset="${(CI * (1 - gDone / gTot)).toFixed(1)}" transform="rotate(-90 20 20)"/></svg><b>${gDone}<small>/${gTot}</small></b></span>` : "";
+  const miniG = gTot && canTeach() ? `<span class="miniG ${gFull ? "full" : ""}" title="입력 ${gDone}/${gTot}"><svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="16" class="mT"/><circle cx="20" cy="20" r="16" class="mB" style="opacity:${gDone ? 1 : 0};${gAnim("big", CI * (1 - gDone / gTot))}" stroke-dasharray="${CI.toFixed(1)}" stroke-dashoffset="${(CI * (1 - gDone / gTot)).toFixed(1)}" transform="rotate(-90 20 20)"/></svg><b>${gDone}<small>/${gTot}</small></b></span>` : "";
   // 심판 교대 안내 — 1차가 다 끝나면 [2차 시작] 단추
   const swapAny = show.some(c => swapOn(c, gOf(c).length));
   const w1Done = swapAny && show.every(c => gOf(c).every((g, gi) => waveOf(c, gi, gOf(c).length) !== 1 || dartState(c, g, roundRes(c, stOf(c), rOf(c)), gi, stOf(c), rOf(c)) === "done"));
@@ -1961,7 +2077,8 @@ function showBig() {
     ${Object.keys(slot).length ? "" : `<div class="waitMsg">⏳ 조 편성을 기다리는 중</div>`}
     <div class="arena" style="grid-template-columns:repeat(${(() => { const k = onBoards().filter(b => slot[b]).length || 1; return k <= 5 ? k : Math.ceil(k / 2); })()},1fr)">${onBoards().filter(b => slot[b]).map(b => { const g = slot[b] || [];
       const ds = g.length === 1 ? (() => { const c = g[0].c, r0 = rOf(c), s0 = stOf(c), gg = groupsOf(c, s0, r0)[g[0].gi]; return gg ? dartState(c, gg, roundRes(c, s0, r0), g[0].gi, s0, r0) : "none"; })() : "none";
-      return `<div class="bd2 g-${g.length ? stOf(g[0].c) : st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${maxW > 1 ? `<span class="wvTag">${actW[b]}차</span>` : ""}${charImg(b, "ch")}<span class="cn">${chOf(b)[1]}</span>${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
+      const swapNow = wPrev[b] != null && wPrev[b] !== actW[b]; wPrev[b] = actW[b];
+      return `<div class="bd2 ${swapNow ? "swap" : ""} g-${g.length ? stOf(g[0].c) : st} ${g.length ? "" : "empty"} ${g.length > 1 ? "clash" : ""} ${ds === "done" ? "done" : ""}" ${g.length === 1 ? `data-act="bigGo" data-c="${esc(g[0].c)}" data-g="${g[0].gi}"` : ""}><div class="hd"><span class="n">${b}</span>${maxW > 1 ? `<span class="wvTag">${actW[b]}차</span>` : ""}${charImg(b, "ch")}<span class="cn">${chOf(b)[1]}</span>${g.length > 1 ? `<span class="c">⚠ 겹침</span>` : ""}${ds === "done" ? `<span class="ok2 ${once("bd" + (g[0] || {}).c + b + (g[0] || {}).gi + ui.round + stOf((g[0] || {}).c)) ? "pop" : ""}">✔</span>` : ds === "part" ? `<span class="ok2 part">◐</span>` : ""}</div>
         ${g.flatMap(x => x.names).map(n => `<div class="nm">${n}</div>`).join("")}
         ${next[b] ? `<div class="nx ${next[b][0].ref ? "ref" : ""}"><span class="nxl">${next[b][0].ref ? "🧑‍⚖️ 심판·참관" : `${wv + 1}차`}</span><span class="nxn">${next[b].flatMap(x => x.names).map(n => `<i>${n}</i>`).join("")}</span></div>` : ""}</div>`; }).join("")}</div>`;
   $("big").classList.add("show");
@@ -2279,7 +2396,7 @@ document.addEventListener("click", e => {
 
 순위 없이 저장되고, 점수는 선생님이 처리합니다.`)) return; const res = curCard(b.dataset.g); res[v] = { out: 1 }; writeCard(b.dataset.g, res); toast(`${nm} — 이번 경기 불참`); break; }
     case "midBack": { const res = curCard(b.dataset.g); delete res[v]; writeCard(b.dataset.g, res); toast(`${(stuMap(cls)[v] || {}).name || ""} — 다시 참여`); break; }
-    case "okCard": stampRoles(b.dataset.g, R => { R.ok = Date.now(); }); toast("저장했습니다 — 수고했어요!"); break;
+    case "okCard": stampRoles(b.dataset.g, R => { R.ok = Date.now(); }); toast("저장했습니다 — 수고했어요!"); burst(); break;
     case "unokCard": stampRoles(b.dataset.g, R => { delete R.ok; }); break;
     case "clearCard": {
       if (!confirm(`이 다트의 ${ui.round}라운드 결과를 모두 지울까요?`)) return;
