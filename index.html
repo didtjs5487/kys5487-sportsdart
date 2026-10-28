@@ -688,6 +688,10 @@
   .blkHead{display:flex; align-items:center; gap:10px; margin:18px 0 8px; padding:10px 14px; border-radius:14px; background:var(--soft)}
   .blkHead b{font-size:20px} .blkHead span{color:var(--sub); font-size:16px; font-weight:600}
   .gnc.abs{opacity:.45; text-decoration:line-through}
+  .nextMode{display:flex; align-items:center; justify-content:center; gap:10px; margin:-4px 0 12px; font-size:15px; font-weight:700; color:var(--sub)}
+  .nmSeg{display:flex; background:var(--soft); border-radius:12px; padding:3px}
+  .nmSeg button{min-height:42px; padding:0 14px; border:0; border-radius:10px; background:transparent; color:var(--sub); font-size:16px; font-weight:700; cursor:pointer; transition:background .2s var(--ease), color .2s var(--ease)}
+  .nmSeg button.on{background:var(--panel); color:var(--pri); box-shadow:0 1px 4px rgba(25,31,40,.1)}
   /* ── 모션 ── */
   @keyframes gfill{from{stroke-dashoffset:var(--f)}to{stroke-dashoffset:var(--t)}}
   @keyframes pop{0%{transform:scale(.5); opacity:0}60%{transform:scale(1.18); opacity:1}100%{transform:none}}
@@ -830,7 +834,7 @@ if (PIN_BOARD) ui.board = PIN_BOARD;
 if (GRP != null) ui.tab = "entry";
 // 편성 기본은 랜덤 (2026-10-07) — 예전에 저장된 기기도 한 번 랜덤으로 맞춘다
 if (ui.mver !== 2) { ui.method = { cu: "random", x3: "random" }; ui.mver = 2; }
-const saveUI = () => lsSet(LSU, { mver: ui.mver, tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gst: ui.gst, bigCls: ui.bigCls, bigDay: ui.bigDay, fit: ui.fit, board: ui.board, boardKey: ui.boardKey });
+const saveUI = () => lsSet(LSU, { nextSame: ui.nextSame, mver: ui.mver, tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gst: ui.gst, bigCls: ui.bigCls, bigDay: ui.bigDay, fit: ui.fit, board: ui.board, boardKey: ui.boardKey });
 
 function getAt(o, path) { for (const k of path.split("/")) { if (o == null) return undefined; o = o[k]; } return o; }
 function setAt(o, path, v) {
@@ -1149,15 +1153,18 @@ function startNext(cls) {
   }
   ui.stage = target.st; ui.round = target.r; ui.sel = null; ui.focus = null;
   let list = groupsOf(cls, target.st, target.r), fresh = false;
+  let same = false;
   if (!list.length) {
-    list = makeGroups(cls, target.st, methodFor(target.st));
+    const pv = ui.nextSame ? prevRound(target.st, target.r) : null;
+    if (pv && groupsOf(cls, pv.st, pv.r).length) { list = sameGroups(cls, pv); same = list.length > 0; }
+    if (!list.length) list = makeGroups(cls, target.st, methodFor(target.st));
     if (!list.length) { toast("참여하는 학생이 없습니다 — 오늘 빠지는 학생을 확인하세요"); render(); return; }
     saveGroups(cls, target.st, list, methodFor(target.st), target.r); fresh = true;
   }
   if (isClosed(cls, target.st, target.r)) put(P(cls, "closed", target.st, "r" + target.r), null, true);
   if (fresh) {   // 새로 짠 조는 바로 프로젝터로 넘기지 않는다 — 인원을 확인·변경한 뒤 [▶ 경기 시작]
     $("big").classList.remove("show"); ui.tab = "groups"; ui.cls = cls; ui.mv = false; ui.freshAt = Date.now();
-    toast(`${STAGES[target.st].name} ${target.r}라운드 — ${list.length}개 조를 편성했어요. 인원을 바꾼 뒤 [▶ 경기 시작]을 누르세요`);
+    toast(`${STAGES[target.st].name} ${target.r}라운드 — ${same ? "지난 라운드와 같은 조로" : `${list.length}개 조를 새로`} 편성했어요. 확인한 뒤 [▶ 경기 시작]을 누르세요`);
     render(); return;
   }
   toast(`▶ ${STAGES[target.st].name} ${target.r}라운드 시작 — ${list.length}개 조 (${METHODS[methodFor(target.st)][0]})`);
@@ -1203,6 +1210,17 @@ function burst() {
     d.style.animationDelay = Math.random() * .25 + "s"; d.style.animationDuration = (1.3 + Math.random() * .8) + "s";
     document.body.appendChild(d); setTimeout(() => d.remove(), 2600);
   }
+}
+/* 다음 라운드 조: 새로 편성 또는 지난 라운드와 같은 조 (2026-10-29, ui.nextSame) */
+const prevRound = (st, r) => r > 1 ? { st, r: r - 1 } : st === "x3" ? { st: "cu", r: CFG.rounds } : null;
+const hasPrevGroups = (cls, g) => { const pv = g && prevRound(g.st, g.r); return !!(pv && groupsOf(cls, pv.st, pv.r).length); };
+function sameGroups(cls, from) {   // 지난 조 그대로 — 오늘 빠진 학생은 빼고, 새로 온 학생은 인원이 적은 조에 넣는다
+  const present = roster(cls).map(sidOf).filter(s => !isAbs(cls, s));
+  const list = groupsOf(cls, from.st, from.r).map(g => ({ m: g.m.filter(s => present.includes(s)), tag: g.tag || "" })).filter(g => g.m.length);
+  if (!list.length) return [];
+  const placed = new Set(list.flatMap(g => g.m));
+  present.filter(s => !placed.has(s)).forEach(s => list.slice().sort((a, b) => a.m.length - b.m.length)[0].m.push(s));
+  return list;
 }
 function setLive(cls, st, r) {
   if (!canTeach() || !cls) return;
@@ -1497,10 +1515,11 @@ function scGroups() {
       b1 = pairSel.some(c => liveStat(c).L) ? "▶ 끝난 반 다음 경기" : needForm ? "▶ 두 반 조 편성" : "▶ 두 반 경기 시작";
       b2 = pairSel.map(c => { const g = curGame(c); return g ? `${esc(c)}반 ${STAGES[g.st].name} ${g.r}R` : `${esc(c)}반 끝`; }).join(" · ");
     } else if (!cg) { b1 = "✔ 모든 경기가 끝났어요"; b2 = "눌러서 성적 보기"; }
-    else if (running) { b1 = "▶ 다음 경기"; b2 = nx ? `${STAGES[nx.st].name} ${nx.r}라운드 조를 짜요` : "마지막 경기를 마쳐요"; }
+    else if (running) { b1 = "▶ 다음 경기"; b2 = nx ? `${STAGES[nx.st].name} ${nx.r}라운드 · ${ui.nextSame ? "같은 조로 이어가요" : "조를 새로 짜요"}` : "마지막 경기를 마쳐요"; }
     else if (formed) { b1 = "▶ 경기 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · 인원을 확인했으면 눌러요`; }
-    else { b1 = "▶ 조 편성"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · ${METHODS[methodFor(cg.st)][0]}`; }
+    else { b1 = "▶ 조 편성"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · ${ui.nextSame && hasPrevGroups(cls, cg) ? "지난 라운드와 같은 조" : METHODS[methodFor(cg.st)][0]}`; }
     h += `<div class="startWrap noprint"><button class="startBtn ${!isPair && formed ? "ready" : ""}" data-act="${nxAct}"><span class="ico">${b1.startsWith("✔") ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${b1.replace(/^[▶✔] /, "")}</span><span class="sb2">${b2}</span></span></button></div>`;
+    if (cg && ((running && nx) || (!formed && !running && hasPrevGroups(cls, cg)))) h += `<div class="nextMode noprint"><span>다음 라운드 조</span><div class="nmSeg"><button class="${ui.nextSame ? "" : "on"}" data-act="nextSame" data-v="0">새로 편성</button><button class="${ui.nextSame ? "on" : ""}" data-act="nextSame" data-v="1">같은 조 그대로</button></div></div>`;
     if (gs.length) h += `<div class="acts3 noprint"><button class="btn soft" data-act="big">프로젝터</button><button class="btn soft" data-act="resetRound">이 라운드 리셋</button></div>`;
   }
   if (!VIEW) {
@@ -2197,6 +2216,7 @@ document.addEventListener("click", e => {
     case "gst": ui.gst = v; render(); break;
     case "standFull": ui.standFull = !ui.standFull; render(); break;
     case "refSwap": put("settings/refSwap", refSwapOn() ? false : null); break;
+    case "nextSame": ui.nextSame = v === "1"; render(); break;
     case "mvTog": ui.mv = !(ui.mv || ui.sel); ui.sel = null; render(); break;
     case "clsMenu": ui.clsMenu = !ui.clsMenu; render(); break;
     case "clsTap": {
