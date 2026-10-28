@@ -1529,6 +1529,16 @@ function scGroups() {
   lists.forEach(x => { h += groupBlock(x.c, x.st, x.r, isPair); });
   return h;
 }
+/* 결과 탭 — 두 반 함께일 때 다른 반의 다트별 입력 현황. 누르면 그 반 카드로 바로 간다 */
+function entryMini(c) {
+  const L = liveOf(c), g0 = L ? { st: L.st, r: L.r } : curGame(c);
+  if (!g0) return `<div class="blkHead"><b>${esc(c)}반</b><span>모든 경기 끝 ✔</span></div>`;
+  const { st, r } = g0, gs = groupsOf(c, st, r), rr = roundRes(c, st, r), n = gs.length, sm = stuMap(c);
+  if (!n) return `<div class="blkHead"><b>${esc(c)}반</b><span>${STAGES[st].name} ${r}R · 조 편성 전</span></div>`;
+  const nDone = gs.filter((g, gi) => cardDone(c, g, rr, "g" + gi, st, r)).length;
+  return `<div class="blkHead"><b>${esc(c)}반</b><span>${STAGES[st].name} ${r}R · 입력 ${nDone}/${n}</span></div><div class="clist">${gs.map((g, gi) => { const s2 = dartState(c, g, rr, gi, st, r);
+    return `<button class="crow ${s2}" data-act="goCls" data-c="${esc(c)}" data-st="${st}" data-r="${r}" data-g="g${gi}"><span class="ci">${s2 === "done" ? "✔" : s2 === "part" ? "◐" : "○"}</span><span class="gno ${st}">${boardOf(c, gi, n)}</span>${charImg(boardOf(c, gi, n), "gch")}<span class="gnames"><span class="who">${g.m.filter(x => !isAbs(c, x)).map(x => esc((sm[x] || {}).name || "?")).join(" · ")}</span></span><span class="chev">입력 ▾</span></button>`; }).join("")}</div>`;
+}
 /* 한 반의 조 목록 (선생님 화면) — 이름을 누르면 고르고, 같은 반의 다른 이름을 누르면 서로 바꾼다 */
 function groupBlock(c, st, r, head) {
   const sm = stuMap(c), gs = groupsOf(c, st, r), n = gs.length;
@@ -1552,7 +1562,7 @@ function clsBar() {
   const on = pairOn(), sel = on ? [ui.cls, ...bigPair()] : [ui.cls], shown = sel.slice().sort(numSort);
   const label = shown.map(c => `${esc(shortCls(c))}<small>반</small>`).join('<i class="dotSep">·</i>');
   const menu = ui.clsMenu ? `<div class="clsGrid noprint">${names.map(c => `<button class="${sel.includes(c) ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(shortCls(c))}<small>반</small></button>`).join("")}</div>` : "";
-  return `<div class="clsBar noprint"><button class="clsPickBtn ${ui.clsMenu ? "open" : ""}" data-act="clsMenu" aria-expanded="${!!ui.clsMenu}"><span class="clsNow">${label}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><button class="pairTog ${on ? "on" : ""}" data-act="pairTog" aria-pressed="${on}"><span class="pIco">${on ? "✓" : "＋"}</span>두 반 함께</button></div>${menu}${on && sel.length < 2 ? `<p class="hint noprint" style="margin:-4px 0 8px">함께할 반을 하나 더 눌러 주세요</p>` : ""}${on && sel.length === 2 ? pairRows(shown) : ""}`;
+  return `<div class="clsBar noprint"><button class="clsPickBtn ${ui.clsMenu ? "open" : ""}" data-act="clsMenu" aria-expanded="${!!ui.clsMenu}"><span class="clsNow">${label}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><button class="pairTog ${on ? "on" : ""}" data-act="pairTog" aria-pressed="${on}"><span class="pIco">${on ? "✓" : "＋"}</span>두 반 함께</button></div>${menu}${on && sel.length < 2 ? `<p class="hint noprint" style="margin:-4px 0 8px">함께할 반을 하나 더 눌러 주세요</p>` : ""}${on && sel.length === 2 && ui.tab !== "entry" ? pairRows(shown) : ""}`;
 }
 /* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
 function pairRows(cs) {
@@ -1679,6 +1689,7 @@ function scEntry() {
   const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi)), closed = isClosed(cls, st, ui.round);
   if (!VIEW && GRP == null) {
     const nDone = gs.filter((g, gi) => cardDone(cls, g, rr, "g" + gi)).length;
+    if (pairOn() && bigPair().length) h += `<div class="blkHead"><b>${esc(cls)}반</b><span>${STAGES[st].name} ${ui.round}R · 입력 ${nDone}/${gs.length}</span></div>`;
     // 입력 게이지 — 다트가 다 저장되면 저절로 종료된다 (2026-10-27)
     const pct = gs.length ? nDone / gs.length : 0, CIR = 2 * Math.PI * 34, full = closed || allDone;
     h += `<div class="gaugeBox ${full ? "full" : ""} ${full && once("gfull" + cls + st + ui.round) ? "pop" : ""}"><div class="gWrap"><svg class="gauge" viewBox="0 0 84 84" aria-hidden="true"><defs><linearGradient id="gGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9890F2"/><stop offset="1" stop-color="#4A41D6"/></linearGradient></defs><circle cx="42" cy="42" r="34" class="gTrack"/><circle cx="42" cy="42" r="34" class="gBar" style="opacity:${pct || full ? 1 : 0};${gAnim("res" + cls + st + ui.round, CIR * (1 - (full ? 1 : pct)))}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - (full ? 1 : pct))).toFixed(1)}" transform="rotate(-90 42 42)"/></svg><div class="gNum">${full ? "<b>✔</b>" : `<b>${nDone}</b><small>/${gs.length}</small>`}</div></div>`
@@ -1718,6 +1729,7 @@ function scEntry() {
     if (Object.keys(mk).length) h += card(cls, st, "mk", Object.keys(mk), mk, "보충 경기");
   }
   h += `</div>`;
+  if (!VIEW && GRP == null && pairOn()) bigPair().forEach(c => { h += entryMini(c); });   // 두 반 함께: 다른 반 다트도 함께 보인다
   if (!VIEW && GRP == null) h += `<details class="setup noprint" data-k="tdel" ${ui.open.tdel ? "open" : ""}><summary>테스트 기록 지우기</summary><div class="card"><p class="hint keep" style="margin-top:0">시험 삼아 넣은 결과를 지웁니다. 명렬은 남아요.</p><div class="delRow"><button class="btn danger" data-act="clrRound">지금 라운드 결과만<br><small>${STAGES[st].name} ${ui.round}R</small></button><button class="btn danger" data-act="resetGames">${esc(cls)}반 전체<br><small>모든 경기 · 과제수행</small></button><button class="btn danger" data-act="wipeGames">모든 반 전체<br><small>조 편성 · 결과 · 출결</small></button></div></div></details>`;
   return h;
 }
@@ -2278,6 +2290,10 @@ document.addEventListener("click", e => {
       const n = a.trim() === "" ? null : Math.max(0, Math.min(10, Math.round(+a)));
       if (n !== null && !Number.isFinite(n)) { toast("숫자를 넣어 주세요"); return; }
       put(P(cls, "manual", v, k), n); break;
+    }
+    case "goCls": {   // 다른 반 다트를 누르면 그 반으로 넘어가 카드를 연다 (두 반 함께는 그대로)
+      const c = b.dataset.c, prev = ui.cls; ui.cls = c; ui.stage = b.dataset.st; ui.round = +b.dataset.r; ui.bigCls = [c, prev]; ui.bigDay = today(); ui.focus = b.dataset.g; ui.sel = null;
+      render(); scrollTo(0, 0); const el = $("card-" + ui.focus); if (el) el.scrollIntoView({ block: "center" }); break;
     }
     case "jumpCard": { const k = v || b.dataset.g; ui.focus = ui.focus === k ? "none" : k; render(); const el = $("card-" + ui.focus); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); break; }
     case "gOpen": { const s = new Set(ui.gOpen || []), i = +v; s.has(i) ? s.delete(i) : s.add(i); ui.gOpen = [...s]; render(); break; }
