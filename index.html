@@ -676,6 +676,18 @@
   #toast.show{transform:translate(-50%,0)}
   header h1{display:flex; align-items:center; gap:8px}
   header h1 .logo{width:32px; height:32px; border-radius:9px; box-shadow:0 2px 6px rgba(49,130,246,.3)}
+  .clsBar{display:flex; gap:8px; align-items:center}
+  .clsPickBtn{flex:1; min-width:0; display:flex; align-items:center; justify-content:space-between; gap:8px; min-height:50px; padding:0 14px 0 18px; border:0; border-radius:16px; background:var(--soft); color:var(--ink); font-size:20px; font-weight:800; cursor:pointer}
+  .clsPickBtn small{font-size:15px; font-weight:700; margin-left:1px; color:var(--sub)} .clsPickBtn .dotSep{font-style:normal; margin:0 8px; color:var(--line2)}
+  .clsPickBtn svg{width:22px; height:22px; flex:none; fill:none; stroke:var(--sub); stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; transition:transform .25s var(--ease)}
+  .clsPickBtn.open svg{transform:rotate(180deg)}
+  .clsGrid{display:grid; grid-template-columns:repeat(5,1fr); gap:6px; margin:8px 0 10px; animation:tabIn .3s var(--ease)}
+  .clsGrid button{min-height:50px; border:0; border-radius:14px; background:var(--soft); color:var(--sub); font-size:19px; font-weight:800; cursor:pointer}
+  .clsGrid button small{font-size:13px; font-weight:700}
+  .clsGrid button.on{background:var(--priSoft); color:var(--pri)} .clsGrid button.main{background:var(--ink); color:#fff}
+  .blkHead{display:flex; align-items:center; gap:10px; margin:18px 0 8px; padding:10px 14px; border-radius:14px; background:var(--soft)}
+  .blkHead b{font-size:20px} .blkHead span{color:var(--sub); font-size:16px; font-weight:600}
+  .gnc.abs{opacity:.45; text-decoration:line-through}
   /* ── 모션 ── */
   @keyframes gfill{from{stroke-dashoffset:var(--f)}to{stroke-dashoffset:var(--t)}}
   @keyframes pop{0%{transform:scale(.5); opacity:0}60%{transform:scale(1.18); opacity:1}100%{transform:none}}
@@ -1510,36 +1522,37 @@ function scGroups() {
       ${gs.length ? `<button class="linkBtn danger" data-act="clrGroups">이 라운드 조 지우기</button>` : r > 1 && groupsOf(cls, st, r - 1).length ? `<button class="linkBtn" data-act="copyPrev">${r - 1}라운드 조 그대로 쓰기</button>` : ""}
     </div></details>`;
   }
-  if (!gs.length) return h;
-  const mvOn = !VIEW;   // 선생님은 언제나 이름 두 개를 눌러 바로 교체 (조 바꾸기 단추 없음, 2026-10-27)
-  const wait = gs.length - boardsOf(cls).length;
-  if (wait > 0 && !VIEW) h += swapOn(cls, gs.length)
-    ? `<div class="note">🔁 <b>심판 교대</b> · 1차 ${useN(cls, gs.length)}개 조 경기, 2차는 바꿔요</div>`
-    : `<div class="note">다트 위치(${boardsOf(cls).length}대)보다 조(${gs.length}개)가 많아 <b>${wait}개 조는 2차 경기</b>입니다 — 1차가 끝난 같은 다트에서 이어서 합니다.</div>`;
-  h += `<div class="row noprint" style="margin-bottom:8px"><b>${STAGES[st].mark}${r}R · ${gs.length}개 조 · ${gs.reduce((a, g) => a + g.m.length, 0)}명</b>
-    <span class="sp"></span>${VIEW ? "" : `<button class="btn sm" data-act="addGrp">＋ 조</button>`}</div>`;
-  if (!VIEW && ui.sel) {
-    const x = sm[ui.sel] || { name: "?" };
-    h += `<div class="selBar noprint"><b>✋ ${esc(x.name)}</b><span class="selHint">바꿀 <b>다른 조 학생 이름</b>을 누르세요</span><span class="sp"></span><button class="btn sm danger" data-act="selAbs">${isAbs(cls, ui.sel) ? "출석" : "결석"}</button><button class="btn sm ghost" data-act="selCancel">취소</button></div>`;
-  } else if (mvOn) h += `<p class="hint noprint" style="margin:0 0 8px">✋ 이름 두 개를 차례로 누르면 서로 바뀌어요</p>`;
-  const opened = new Set(ui.gOpen || []);
-  h += `<div class="glist ${Date.now() - (ui.freshAt || 0) < 1200 ? "fresh" : ""}">${gs.map((g, gi) => (!mvOn && opened.has(gi)) ? `
-    <div class="grp ${st}"><button class="ghd" data-act="gOpen" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="sp"></span><span class="chev">접기 ▴</span></button>
-    <div class="chips">${g.m.map(s => { const x = sm[s] || { no: "?", name: "(명렬 없음)" }, a = isAbs(cls, s);
-      const extra = st === "x3" ? (() => { const r = record(cls, "cu", s); return r.played ? `카운트업 ${r.sum}점` : ""; })() : (x.seed ? "★" : "");
-      return `<button class="chip ${ui.sel === s ? "sel" : ""} ${a ? "abs" : ""}" ${VIEW || !mvOn ? "disabled" : `data-act="pick" data-v="${s}"`}><span class="no">${esc(x.no)}</span>${esc(x.name)}${sexBadge(x)}<span class="info">${a ? "결석" : extra}</span></button>`; }).join("")}</div>
-    ${!g.m.length ? (VIEW ? "" : `<button class="btn ghost moveHere" data-act="delGrp" data-v="${gi}">빈 조 지우기</button>`) : ""}
-    
-    </div>` : `<div class="growW"><button class="grow" data-act="${VIEW ? "gOpen" : ""}" data-v="${gi}"><span class="gno ${st}">${boardOf(cls, gi)}</span>${charImg(boardOf(cls, gi), "gch")}${waves(cls) > 1 ? `<small>${waveOf(cls, gi)}차</small>` : ""}<span class="gnames">${VIEW || !mvOn ? (g.m.map(s => esc((sm[s] || {}).name || "?")).join(" · ") || "비어 있음") : (g.m.map(s => `<span class="gnc ${ui.sel === s ? "sel" : ""}" data-act="pick" data-v="${s}">${esc((sm[s] || {}).name || "?")}</span>`).join("") || "비어 있음")}</span>${VIEW ? `<span class="chev">▾</span>` : ""}</button>${mvOn && !g.m.length ? `<button class="btn sm ghost" data-act="delGrp" data-v="${gi}">빈 조 지우기</button>` : ""}</div>`).join("")}</div>`;
+  // 두 반 함께면 두 반의 조 편성을 위아래로 모두 보이고, 어느 반이든 이름을 눌러 고친다 (2026-10-29)
+  const lists = isPair ? pairSel.map(c => { if (c === cls) return { c, st, r }; const L = liveOf(c), g = L ? { st: L.st, r: L.r } : (curGame(c) || { st, r }); return { c, st: g.st, r: g.r }; }) : [{ c: cls, st, r }];
+  if (!lists.some(x => groupsOf(x.c, x.st, x.r).length)) return h;
+  h += `<p class="hint noprint" style="margin:4px 0 8px">✋ 이름 두 개를 차례로 누르면 서로 바뀌어요</p>`;
+  lists.forEach(x => { h += groupBlock(x.c, x.st, x.r, isPair); });
+  return h;
+}
+/* 한 반의 조 목록 (선생님 화면) — 이름을 누르면 고르고, 같은 반의 다른 이름을 누르면 서로 바꾼다 */
+function groupBlock(c, st, r, head) {
+  const sm = stuMap(c), gs = groupsOf(c, st, r), n = gs.length;
+  if (!n) return head ? `<div class="blkHead"><b>${esc(c)}반</b><span>아직 조 편성 전</span></div>` : "";
+  const ctx = `data-c="${esc(c)}" data-st="${st}" data-r="${r}"`, wv = Math.ceil(n / useN(c, n));
+  let h = head ? `<div class="blkHead"><b>${esc(c)}반</b><span>${STAGES[st].name} ${r}R · ${n}개 조 · ${gs.reduce((a, g) => a + g.m.length, 0)}명</span><span class="sp"></span><button class="btn sm" data-act="addGrp" ${ctx}>＋ 조</button></div>`
+    : `<div class="row noprint" style="margin-bottom:8px"><b>${STAGES[st].mark}${r}R · ${n}개 조 · ${gs.reduce((a, g) => a + g.m.length, 0)}명</b><span class="sp"></span><button class="btn sm" data-act="addGrp" ${ctx}>＋ 조</button></div>`;
+  const wait = n - boardsOf(c).length;
+  if (wait > 0) h += swapOn(c, n) ? `<div class="note">🔁 <b>심판 교대</b> · 1차 ${useN(c, n)}개 조 경기, 2차는 바꿔요</div>` : `<div class="note">다트(${boardsOf(c).length}대)보다 조(${n}개)가 많아 <b>${wait}개 조는 2차 경기</b>예요.</div>`;
+  if (ui.sel && ui.selC === c) { const x = sm[ui.sel] || { name: "?" };
+    h += `<div class="selBar noprint"><b>✋ ${esc(x.name)}</b><span class="selHint">바꿀 <b>다른 조 학생 이름</b>을 누르세요</span><span class="sp"></span><button class="btn sm danger" data-act="selAbs">${isAbs(c, ui.sel) ? "출석" : "결석"}</button><button class="btn sm ghost" data-act="selCancel">취소</button></div>`; }
+  h += `<div class="glist ${Date.now() - (ui.freshAt || 0) < 1200 ? "fresh" : ""}">${gs.map((g, gi) => `<div class="growW"><div class="grow"><span class="gno ${st}">${boardOf(c, gi, n)}</span>${charImg(boardOf(c, gi, n), "gch")}${wv > 1 ? `<small>${waveOf(c, gi, n)}차</small>` : ""}<span class="gnames">${g.m.map(s2 => `<span class="gnc ${ui.sel === s2 && ui.selC === c ? "sel" : ""} ${isAbs(c, s2) ? "abs" : ""}" data-act="pick" data-v="${s2}" ${ctx}>${esc((sm[s2] || {}).name || "?")}</span>`).join("") || "비어 있음"}</span></div>${!g.m.length ? `<button class="btn sm ghost" data-act="delGrp" data-v="${gi}" ${ctx}>빈 조 지우기</button>` : ""}</div>`).join("")}</div>`;
   return h;
 }
 /* 반 고르기 단추 + 두 반 함께 수업 (2026-10-27): 화면에서 반을 바로 누른다. 두 반 함께를 켜고 두 반을 고르면 다트를 반씩 나눠 한 번에 시작 */
 const pairOn = () => ui.pairOn === true;   // 이 화면에서 두 반 함께를 켰을 때만 (새로 열면 꺼짐)
+const shortCls = c => { const t = String(c); return t.includes("-") ? t.split("-").pop() : t; };   // 1-7 → 7
 function clsBar() {
   if (VIEW) return "";
   const names = classNames(); if (names.length < 2) return "";
-  const on = pairOn(), sel = on ? [ui.cls, ...bigPair()] : [ui.cls];
-  return `<div class="clsBar noprint"><div class="clsChips">${names.map(c => `<button class="${sel.includes(c) ? "on" : ""} ${on && c === ui.cls ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(c)}<small>반</small></button>`).join("")}</div><button class="pairTog ${on ? "on" : ""}" data-act="pairTog" aria-pressed="${on}"><span class="pIco">${on ? "✓" : "＋"}</span>두 반 함께</button></div>${on ? `<p class="hint noprint" style="margin:-4px 0 8px">${sel.length < 2 ? "함께할 반을 하나 더 눌러 주세요" : "다트는 반씩 나눠 써요"}</p>` : ""}${on && sel.length === 2 ? pairRows(sel.slice().sort(numSort)) : ""}`;
+  const on = pairOn(), sel = on ? [ui.cls, ...bigPair()] : [ui.cls], shown = sel.slice().sort(numSort);
+  const label = shown.map(c => `${esc(shortCls(c))}<small>반</small>`).join('<i class="dotSep">·</i>');
+  const menu = ui.clsMenu ? `<div class="clsGrid noprint">${names.map(c => `<button class="${sel.includes(c) ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(shortCls(c))}<small>반</small></button>`).join("")}</div>` : "";
+  return `<div class="clsBar noprint"><button class="clsPickBtn ${ui.clsMenu ? "open" : ""}" data-act="clsMenu" aria-expanded="${!!ui.clsMenu}"><span class="clsNow">${label}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><button class="pairTog ${on ? "on" : ""}" data-act="pairTog" aria-pressed="${on}"><span class="pIco">${on ? "✓" : "＋"}</span>두 반 함께</button></div>${menu}${on && sel.length < 2 ? `<p class="hint noprint" style="margin:-4px 0 8px">함께할 반을 하나 더 눌러 주세요</p>` : ""}${on && sel.length === 2 ? pairRows(shown) : ""}`;
 }
 /* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
 function pairRows(cs) {
@@ -2173,6 +2186,7 @@ document.addEventListener("click", e => {
     case "standFull": ui.standFull = !ui.standFull; render(); break;
     case "refSwap": put("settings/refSwap", refSwapOn() ? false : null); break;
     case "mvTog": ui.mv = !(ui.mv || ui.sel); ui.sel = null; render(); break;
+    case "clsMenu": ui.clsMenu = !ui.clsMenu; render(); break;
     case "clsTap": {
       if (pairOn()) {
         const sel = [ui.cls, ...bigPair()];
@@ -2181,9 +2195,11 @@ document.addEventListener("click", e => {
         else { ui.bigCls = [ui.cls, v]; ui.bigDay = today(); }
       } else ui.cls = v;
       { const L = liveOf(ui.cls); if (L) { ui.stage = L.st; ui.round = L.r; } else ui.round = openRound(ui.cls, ui.stage); }
-      ui.open = {}; ui.focus = null; ui.sel = null; render(); break;
+      ui.open = {}; ui.focus = null; ui.sel = null;
+      if (!pairOn() || [ui.cls, ...bigPair()].length === 2) ui.clsMenu = false;   // 반을 다 고르면 목록을 접는다
+      render(); break;
     }
-    case "pairTog": { const on = !pairOn(); ui.pairOn = on; ui.bigCls = [ui.cls]; ui.bigDay = today(); render(); break; }
+    case "pairTog": { const on = !pairOn(); ui.pairOn = on; ui.bigCls = [ui.cls]; ui.bigDay = today(); ui.clsMenu = on; render(); break; }
     case "startPair": startPair(); break;
     case "startOne": ui.cls = v; ui.bigCls = [v, ...bigPair().filter(c => c !== v)].slice(0, 2); ui.bigDay = today(); startNext(v); break;
     case "clrRound": {
@@ -2307,12 +2323,14 @@ document.addEventListener("click", e => {
     }
     case "bigRound": ui.round = +v; setLive(cls, ui.stage, ui.round); render(); showBig(); break;
     case "pick": {
-      if (!ui.sel) { ui.sel = v; render(); break; }
+      const c = b.dataset.c || cls, st2 = b.dataset.st || ui.stage, r2 = +(b.dataset.r || ui.round);
+      if (!ui.sel || ui.selC !== c) { ui.sel = v; ui.selC = c; render(); break; }   // 다른 반 이름이면 새로 고른다
       if (ui.sel === v) { ui.sel = null; render(); break; }
-      const list = groupsOf(cls, ui.stage), a = ui.sel;
+      const list = groupsOf(c, st2, r2), a = ui.sel;
       const ga = list.find(g => g.m.includes(a)), gb = list.find(g => g.m.includes(v));
+      if (!ga || !gb) { ui.sel = null; render(); break; }
       ga.m[ga.m.indexOf(a)] = v; gb.m[gb.m.indexOf(v)] = a;
-      ui.sel = null; saveGroups(cls, ui.stage, list); break;
+      ui.sel = null; saveGroups(c, st2, list, undefined, r2); break;
     }
     case "moveTo": {
       const list = groupsOf(cls, ui.stage), a = ui.sel;
@@ -2320,7 +2338,7 @@ document.addEventListener("click", e => {
       ui.sel = null; saveGroups(cls, ui.stage, list); break;
     }
     case "selCancel": ui.sel = null; render(); break;
-    case "selAbs": { const s = ui.sel; ui.sel = null; setAbs(cls, s, !isAbs(cls, s)); break; }
+    case "selAbs": { const s = ui.sel, c = ui.selC || cls; ui.sel = null; setAbs(c, s, !isAbs(c, s)); break; }
     case "newGrpWith": {
       const list = groupsOf(cls, ui.stage), a = ui.sel;
       list.forEach(g => g.m = g.m.filter(s => s !== a)); list.push({ m: [a], tag: "" });
@@ -2329,16 +2347,16 @@ document.addEventListener("click", e => {
     case "delGrp": {
       // 빈 조를 지우면 뒤 조들의 번호가 하나씩 당겨진다 — 입력해 둔 결과도 같이 당긴다
       // 조 편성이 라운드별이므로 이 라운드의 결과·역할만 당긴다
-      const i = +v, st = ui.stage, rk = "r" + ui.round, list = groupsOf(cls, st);
+      const cls = b.dataset.c || ui.cls, rN = +(b.dataset.r || ui.round), i = +v, st = b.dataset.st || ui.stage, rk = "r" + rN, list = groupsOf(cls, st, rN);
       if (list[i] && list[i].m.length) return;
       list.splice(i, 1);
       const shift = obj => { const out = {}; Object.keys(obj || {}).forEach(k => { const m = /^g(\d+)$/.exec(k); if (!m) out[k] = obj[k]; else if (+m[1] < i) out[k] = obj[k]; else if (+m[1] > i) out["g" + (+m[1] - 1)] = obj[k]; }); return out; };
-      const g2 = shift(roundRes(cls, st, ui.round)), r2 = shift((((C(cls).roles || {})[st]) || {})[rk]);
+      const g2 = shift(roundRes(cls, st, rN)), r2 = shift((((C(cls).roles || {})[st]) || {})[rk]);
       put(P(cls, "games", st, rk), Object.keys(g2).length ? g2 : null, true);
       put(P(cls, "roles", st, rk), Object.keys(r2).length ? r2 : null, true);
-      saveGroups(cls, st, list); break;
+      saveGroups(cls, st, list, undefined, rN); break;
     }
-    case "addGrp": { const list = groupsOf(cls, ui.stage); list.push({ m: [], tag: "" }); saveGroups(cls, ui.stage, list); break; }
+    case "addGrp": { const c = b.dataset.c || cls, st2 = b.dataset.st || ui.stage, r2 = +(b.dataset.r || ui.round), list = groupsOf(c, st2, r2); list.push({ m: [], tag: "" }); saveGroups(c, st2, list, undefined, r2); break; }
     case "big": openBig(cls); break;
     case "bigCls": {   // 1학급 또는 2학급: 고른 반을 누르면 빠지고(하나는 남김), 새 반을 누르면 더한다(이미 둘이면 짝을 바꿈)
       const sel = [cls, ...bigPair()];
