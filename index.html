@@ -344,7 +344,7 @@
   .clsChips button small{font-size:14px; font-weight:700; margin-left:1px}
   .clsChips button.on{background:var(--priSoft); border-color:var(--pri); color:var(--pri)}
   .clsChips button.main{background:var(--pri); border-color:var(--pri); color:#fff}
-  .pairTog{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:48px; padding:0 16px 0 6px; border:0; border-radius:999px; background:linear-gradient(135deg,#F1EFFE,#E4E0FC); color:var(--pri); font-size:16px; font-weight:800; box-shadow:inset 0 0 0 1.5px #D3CEFB; cursor:pointer; transition:transform .1s}
+  .pairTog{flex:none; display:inline-flex; align-items:center; gap:8px; min-height:50px; padding:0 16px 0 6px; border:0; border-radius:999px; background:linear-gradient(135deg,#F1EFFE,#E4E0FC); color:var(--pri); font-size:16px; font-weight:800; box-shadow:inset 0 0 0 1.5px #D3CEFB; cursor:pointer; transition:transform .1s}
   .pairTog .pIco{display:grid; place-items:center; width:36px; height:36px; border-radius:50%; background:#fff; color:var(--pri); font-size:20px; box-shadow:0 1px 4px rgba(91,81,232,.2)}
   .pairTog.on{background:linear-gradient(135deg,#7A71EE,#4A41D6); color:#fff; box-shadow:0 6px 14px rgba(91,81,232,.3)}
   .pairTog:active{transform:scale(.96)}
@@ -461,8 +461,8 @@
   .gTog button{min-width:84px; min-height:26px; border:0; border-radius:9px; background:transparent; font-size:15px; font-weight:800; color:var(--sub); padding:0 8px}
   .gTog button.on.cu{background:var(--cu); color:var(--cuInk)} .gTog button.on.x3{background:var(--x3); color:var(--x3Ink)}
   .rPills{flex:1; min-width:0; display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
-  .rPills button{min-width:0; min-height:56px; border-radius:12px; border:1px solid var(--line); background:var(--soft); color:var(--sub); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1; padding:2px}
-  .rPills button b{font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:22px} .rPills button small{font-size:12px; font-weight:700; white-space:nowrap; min-height:14px}
+  .rPills button{min-width:0; min-height:58px; border-radius:12px; border:1px solid var(--line); background:var(--soft); color:var(--sub); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1; padding:2px}
+  .rPills button b{font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:22px} .rPills button small{font-size:15px; font-weight:700; white-space:nowrap; min-height:14px}
   .rPills button.on.cu{background:var(--cuSoft); border:2px solid var(--cu); color:var(--cuInk)} .rPills button.on.x3{background:var(--x3Soft); border:2px solid var(--x3); color:var(--x3Ink)}
   .rStep{flex:1; min-width:0; display:flex; align-items:center; gap:4px}
   .rStep .arw{flex:none; width:48px; height:56px; border-radius:12px; border:1px solid var(--line2); background:var(--soft); font-size:28px; font-weight:800; color:var(--pri); line-height:1}
@@ -503,13 +503,13 @@
   .prow2{display:flex; align-items:center; gap:10px}
   .plbl{flex:none; width:40px; font-size:16px; font-weight:800; color:var(--sub)}
   .segc{flex:1; display:flex; background:var(--soft); border:1px solid var(--line); border-radius:14px; padding:4px; gap:4px; min-width:0}
-  .segc button{flex:1; min-width:0; min-height:46px; border:0; border-radius:10px; background:transparent; font-size:16px; font-weight:700; color:var(--sub); line-height:1.15; padding:2px; overflow-wrap:anywhere}
+  .segc button{flex:1; min-width:0; min-height:50px; border:0; border-radius:10px; background:transparent; font-size:16px; font-weight:700; color:var(--sub); line-height:1.15; padding:2px; overflow-wrap:anywhere}
   .segc button.on{background:var(--pri); color:#fff; box-shadow:0 3px 10px rgba(91,81,232,.28)}
   .boards.mini{grid-template-columns:repeat(var(--bcp,5),1fr)!important; gap:6px; margin-left:50px}
   .boards.mini .bd{min-height:46px; font-size:20px}
   .pane .switch{margin:0}
   .sumline{text-align:center; font-size:18px; color:var(--sub)} .sumline b{color:var(--ink); font-size:20px} .sumline span{font-size:15px}
-  .linkBtn{border:0; background:transparent; color:var(--pri); font-size:16px; font-weight:700; min-height:44px; text-decoration:underline; text-underline-offset:3px}
+  .linkBtn{border:0; background:transparent; color:var(--pri); font-size:16px; font-weight:700; min-height:50px; text-decoration:underline; text-underline-offset:3px}
   .linkBtn.danger{color:var(--bad)}
   .eq2{display:grid; grid-template-columns:1fr 1fr; gap:8px} .eq3{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
   .gHead{display:flex; flex-direction:column; gap:8px; margin-bottom:14px}
@@ -543,7 +543,7 @@
   .gseg button.cu.on{background:var(--cu); border-color:var(--cu); color:var(--cuInk)}
   .gseg button.x3.on{background:var(--x3); border-color:var(--x3); color:var(--x3Ink)}
   .go.three{grid-template-columns:2fr 1fr 1fr} .go.one{grid-template-columns:1fr}
-  .btn.sm{min-height:46px; font-size:16px; padding:0 14px}
+  .btn.sm{min-height:50px; font-size:16px; padding:0 14px}
   .wait{font-size:22px; font-weight:700; color:var(--sub); text-align:center; padding:28px 0}
   .joinBar{display:flex; align-items:center; gap:10px; margin-bottom:10px; font-size:19px}
   details.setup summary .sumR{font-weight:600; color:var(--sub)}
@@ -688,9 +688,9 @@
   .blkHead{display:flex; align-items:center; gap:10px; margin:18px 0 8px; padding:10px 14px; border-radius:14px; background:var(--soft)}
   .blkHead b{font-size:20px} .blkHead span{color:var(--sub); font-size:16px; font-weight:600}
   .gnc.abs{opacity:.45; text-decoration:line-through}
-  .nextMode{display:flex; align-items:center; justify-content:center; gap:10px; margin:-4px 0 12px; font-size:15px; font-weight:700; color:var(--sub)}
+  .nextMode{display:flex; align-items:center; justify-content:center; gap:10px; margin:6px 0 12px; font-size:16px; font-weight:700; color:var(--sub)}
   .nmSeg{display:flex; background:var(--soft); border-radius:12px; padding:3px}
-  .nmSeg button{min-height:42px; padding:0 14px; border:0; border-radius:10px; background:transparent; color:var(--sub); font-size:16px; font-weight:700; cursor:pointer; transition:background .2s var(--ease), color .2s var(--ease)}
+  .nmSeg button{min-height:50px; padding:0 14px; border:0; border-radius:10px; background:transparent; color:var(--sub); font-size:16px; font-weight:700; cursor:pointer; transition:background .2s var(--ease), color .2s var(--ease)}
   .nmSeg button.on{background:var(--panel); color:var(--pri); box-shadow:0 1px 4px rgba(25,31,40,.1)}
   .pairWrap{flex-direction:column; align-items:stretch; gap:10px}
   .pairWrap .startBtn{min-width:0; width:100%} .pairWrap .startBtn .sb1{font-size:23px}
@@ -708,16 +708,60 @@
   .pgW{position:relative; flex:none; width:56px; height:56px} .pgW svg{width:56px; height:56px; display:block}
   .pT{fill:none; stroke:var(--line2); stroke-width:6} .pB{fill:none; stroke:var(--pri); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset .6s ease}
   .clsCard.done .pB{stroke:var(--good)}
-  .pgN{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--ink)} .pgN b{font-size:19px} .pgN small{font-size:13px; color:var(--sub)}
+  .pgN{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--ink)} .pgN b{font-size:19px} .pgN small{font-size:15px; color:var(--sub)}
   .clsCard.done .pgN{color:var(--good); font-size:22px}
   .pgT{display:flex; flex-direction:column; min-width:0; flex:1} .pgT b{font-size:24px; line-height:1.15} .pgT b small{font-size:15px; margin-left:1px; color:var(--sub)} .pgT span{font-size:16px; font-weight:700} .pgT .cs{font-size:16px; font-weight:800; color:var(--sub)}
   .clsCard.run .cs, .clsCard.ready .cs{color:var(--pri)} .clsCard.done .cs{color:var(--good)} .clsCard.wait .cs{color:#B45F06}
   .clsCard .btn{flex:1 1 100%; min-height:50px}
-  .pgPips{flex:1 1 100%; display:flex; flex-wrap:wrap; gap:6px 14px} .pgG{display:flex; align-items:center; gap:4px} .pgG em{font-style:normal; font-size:14px; font-weight:700; color:var(--sub); margin-right:2px}
-  .pp{display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; font-style:normal; font-size:14px; font-weight:800; background:var(--soft); color:var(--sub)} .pp.done{background:var(--good); color:#fff} .pp.now{background:var(--pri); color:#fff}
+  .pgPips{flex:1 1 100%; display:flex; flex-wrap:wrap; gap:6px 14px} .pgG{display:flex; align-items:center; gap:4px} .pgG em{font-style:normal; font-size:16px; font-weight:700; color:var(--sub); margin-right:2px}
+  .pp{display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; font-style:normal; font-size:16px; font-weight:800; background:var(--soft); color:var(--sub)} .pp.done{background:var(--good); color:#fff} .pp.now{background:var(--pri); color:#fff}
   @media (max-width:520px){ .clsCards.two{grid-template-columns:1fr} }
-  .clsTools{display:flex; gap:8px; align-items:center} .clsMore{flex:1; min-height:48px; border:0; border-radius:999px; background:var(--soft); color:var(--ink); font-size:17px; font-weight:800; cursor:pointer}
+  .clsTools{display:flex; gap:8px; align-items:center} .clsMore{flex:1; min-height:50px; border:0; border-radius:999px; background:var(--soft); color:var(--ink); font-size:17px; font-weight:800; cursor:pointer}
+  /* 작은 화면: 시작 단추는 탭 막대 바로 위에 붙인다 — 한 손 엄지가 닿는 자리 */
+  @media (max-width:700px){ .startDock{position:fixed; left:12px; right:12px; bottom:calc(78px + env(safe-area-inset-bottom)); z-index:25; margin:0; padding:0; pointer-events:none} .startDock .startBtn{pointer-events:auto; width:100%; max-width:560px; box-shadow:0 10px 26px rgba(25,31,40,.22)} .startDock.pairWrap{flex-direction:row; gap:8px} .startDock.pairWrap .startBtn{flex:1; min-width:0} main:has(.startDock){padding-bottom:110px} }
+  .acts3{display:flex; gap:8px; margin:0 0 10px} .acts3 .btn{flex:1; min-height:50px}
   .endRow{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px} .endRow small{font-size:15px; color:var(--sub)}
+  /* ── 프로젝터: 어두운 무대 — 체육관 스크린에서 번호·캐릭터·이름이 멀리서도 읽히게 ── */
+  #big{background:radial-gradient(120% 90% at 50% -10%,#22385F 0%,#101B31 60%,#0A111F 100%); color:#F2F6FF}
+  #big .gName{color:#fff} #big .gName::before{box-shadow:0 0 0 4px rgba(255,255,255,.12)}
+  #big .gRound{color:#B8C6E0} #big .gRound b{color:#fff}
+  #big .gCls{background:rgba(125,180,255,.16); color:#9CC8FF}
+  #big .gMix{color:#fff}
+  #big .waves button, #big .iconB{background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16); color:#C9D6EE}
+  #big .waves button.on, #big .iconB.on{background:#fff; border-color:#fff; color:#0E1626}
+  #big .nextBtn{box-shadow:0 8px 22px rgba(49,130,246,.4)}
+  #big .joinQR{background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.14)} #big .joinQR b{color:#7DB4FF} #big .joinQR small, #big .joinQR .pinLine span{color:#B8C6E0}
+  #big .joinQR img{border-radius:10px; background:#fff; padding:3px}
+  #big .bigMenu{background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.14)}
+  #big .segc{background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.14)} #big .segc button{color:#C9D6EE} #big .segc button.on{background:#fff; color:#0E1626; box-shadow:none}
+  #big .bmEntry, #big .bmCls button{background:rgba(255,255,255,.08); border-color:rgba(255,255,255,.16); color:#C9D6EE} #big .bmCls button.on{background:var(--pri); border-color:var(--pri); color:#fff} #big .bmCls b{color:#B8C6E0} #big .bmCls{border-top-color:rgba(255,255,255,.14)}
+  #big .swapBar{background:rgba(125,180,255,.14); color:#E2ECFF}
+  #big .doneBar{background:rgba(46,158,96,.2); border-color:rgba(46,158,96,.5); color:#B6F0CE}
+  #big .waitMsg{color:#B8C6E0}
+  #big .miniG .mT{stroke:rgba(255,255,255,.18)} #big .miniG b{color:#fff} #big .miniG small{color:#B8C6E0} #big .miniG .mB{stroke:#7DB4FF} #big .miniG.full .mB{stroke:#4CD38A}
+  #big .bd2{position:relative; background:linear-gradient(180deg,#1F3150 0%,#15233F 100%); border:1px solid rgba(255,255,255,.1); border-top:1px solid rgba(255,255,255,.1); border-radius:22px; box-shadow:0 14px 30px rgba(0,0,0,.35); padding:1.6vh 18px 1.6vh}
+  #big .bd2::before{content:""; position:absolute; left:18px; right:18px; top:0; height:6px; border-radius:0 0 6px 6px; background:var(--gc)}
+  #big .bd2 .hd{gap:12px; margin:.8vh 0 1vh}
+  #big .bd2 .n{display:grid; place-items:center; flex:none; width:clamp(48px,9vh,82px); height:clamp(48px,9vh,82px); border-radius:50%; background:var(--gc); color:#0E1626; font-size:clamp(28px,5.4vh,50px); font-weight:800; box-shadow:0 0 0 5px rgba(255,255,255,.08)}
+  #big .bd2 .ch{width:clamp(56px,11vh,108px); height:clamp(56px,11vh,108px); margin-left:auto; filter:drop-shadow(0 6px 10px rgba(0,0,0,.4))}
+  #big .bd2 .cn{color:#B8C6E0} #big .bd2 .c{color:#B8C6E0}
+  #big .bd2 .wvTag{background:rgba(255,255,255,.14); color:#fff}
+  #big .bd2 .nm{color:#fff; font-weight:800}
+  #big .bd2 .nx{border-top-color:rgba(255,255,255,.2); color:#B8C6E0} #big .bd2 .nx.ref{color:#9CC8FF}
+  #big .bd2.done{background:linear-gradient(180deg,#14452D 0%,#0F3323 100%); border-color:rgba(76,211,138,.5)} #big .bd2.done::before{background:#4CD38A}
+  #big .bd2 .ok2{background:#4CD38A; color:#0E1626} #big .bd2 .ok2.part{background:transparent; border-color:var(--gc); color:var(--gc)}
+  #big .bd2.clash{border-color:#FF7A7A}
+  #big .bd2.empty{opacity:.55}
+  #big .gMix{font-size:clamp(24px,2.5vw,38px)} #big .gMix b{font-size:clamp(28px,2.9vw,44px)}
+  #big .bd2 .nx{font-size:clamp(16px,2.5vh,26px)} #big .bd2 .nx.ref{font-size:clamp(17px,2.6vh,28px)}
+  #big .miniG svg{width:52px; height:52px} #big .miniG b{font-size:28px}
+  #big .swapBar{font-size:clamp(18px,2.2vh,24px)}
+  @media (orientation:portrait) and (max-width:700px){
+    #big .bd2{padding:12px 12px 14px} #big .bd2 .hd{gap:6px; margin:6px 0 8px}
+    #big .bd2 .n{width:46px; height:46px; font-size:26px} #big .bd2 .ch{width:46px; height:46px} #big .bd2 .cn{display:none}
+    #big .bd2 .nx, #big .bd2 .nx.ref{font-size:16px} #big .gMix{font-size:22px} #big .gMix b{font-size:26px}
+  }
+  #big .bd2 .sx{background:rgba(255,255,255,.14)}
   /* ── 모션 ── */
   @keyframes gfill{from{stroke-dashoffset:var(--f)}to{stroke-dashoffset:var(--t)}}
   @keyframes pop{0%{transform:scale(.5); opacity:0}60%{transform:scale(1.18); opacity:1}100%{transform:none}}
@@ -1543,14 +1587,13 @@ function scGroups() {
       b2 = pairSel.map(c => { const g = curGame(c); return g ? `${esc(c)}반 ${STAGES[g.st].name} ${g.r}R` : `${esc(c)}반 끝`; }).join(" · ");
       const gg = pairSel.map(curGame); if (gg.every(Boolean) && (gg[0].st !== gg[1].st || gg[0].r !== gg[1].r)) b2 += " · 진도가 달라요";
     } else if (!cg) { b1 = "✔ 모든 경기가 끝났어요"; b2 = "눌러서 성적 보기"; }
-    else if (running) { b1 = "▶ 다음 경기"; b2 = nx ? `${STAGES[nx.st].name} ${nx.r}라운드 · ${ui.nextSame ? "같은 조로 이어가요" : "조를 새로 짜요"}` : "마지막 경기를 마쳐요"; }
+    else if (running) { const ls = liveStat(cls); b1 = "▶ 다음 경기"; b2 = (nx ? `${STAGES[nx.st].name} ${nx.r}라운드 · ${ui.nextSame ? "같은 조" : "새 조"}` : "마지막 경기를 마쳐요") + (ls.L && !ls.done ? ` · 지금 경기 ${ls.nd}/${ls.total} 입력` : ""); }
     else if (formed && unfinished(cls)) { b1 = "▶ 이어서 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · 남은 경기를 이어서 해요`; }
     else if (formed) { b1 = "▶ 경기 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · 인원을 확인했으면 눌러요`; }
     else { b1 = "▶ 조 편성"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · ${ui.nextSame && hasPrevGroups(cls, cg) ? "지난 라운드와 같은 조" : METHODS[methodFor(cg.st)][0]}`; }
-    if (isPair) h += `<div class="startWrap pairWrap noprint">${pairSel.map(pairCard).join("")}</div>`;
-    else h += `<div class="startWrap noprint"><button class="startBtn ${!isPair && formed ? "ready" : ""}" data-act="${nxAct}"><span class="ico">${b1.startsWith("✔") ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${b1.replace(/^[▶✔] /, "")}</span><span class="sb2">${b2}</span></span></button></div>`;
+    if (isPair) h += `<div class="startWrap pairWrap startDock noprint">${pairSel.map(pairCard).join("")}</div>`;
+    else h += `<div class="startWrap startDock noprint"><button class="startBtn ${!isPair && formed ? "ready" : ""}" data-act="${nxAct}"><span class="ico">${b1.startsWith("✔") ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${b1.replace(/^[▶✔] /, "")}</span><span class="sb2">${b2}</span></span></button></div>`;
     if (cg && ((running && nx) || (!formed && !running && hasPrevGroups(cls, cg)))) h += `<div class="nextMode noprint"><span>다음 라운드 조</span><div class="nmSeg"><button class="${ui.nextSame ? "" : "on"}" data-act="nextSame" data-v="0">새로 편성</button><button class="${ui.nextSame ? "on" : ""}" data-act="nextSame" data-v="1">같은 조 그대로</button></div></div>`;
-    if (gs.length) h += `<div class="acts3 noprint"><button class="btn soft" data-act="big">프로젝터</button><button class="btn soft" data-act="resetRound">이 라운드 리셋</button></div>`;
   }
   if (!VIEW) {
     const opts = METHOD_OPTS[st];
@@ -1566,6 +1609,7 @@ function scGroups() {
       ${buddyBox(cls)}
       <button class="switch ${fitOn() ? "on" : ""}" data-act="fit" data-v="${fitOn() ? 0 : 1}"><span>다트가 모자라면 5명 조</span><i></i></button>
       <button class="switch ${refSwapOn() ? "on" : ""}" data-act="refSwap"><span>조가 다트보다 많으면 심판 교대<br><small>1차 절반 경기·짝 조 심판, 2차는 바꿔서</small></span><i></i></button>
+      ${gs.length ? `<div class="acts3"><button class="btn soft" data-act="big">프로젝터 띄우기</button><button class="btn soft" data-act="resetRound">이 라운드 리셋</button></div>` : ""}
       <div class="sumline">${n0 ? `<b>${n0}명</b> → <b>${sz0.length}개 조</b> <span>(${sz0.join("·")}명)</span>` : "참여 학생 없음"}</div>
       <button class="btn pri big wide" data-act="make">${gs.length ? "다시 편성" : "편성하기"}</button>
       ${gs.length ? `<button class="linkBtn danger" data-act="clrGroups">이 라운드 조 지우기</button>` : r > 1 && groupsOf(cls, st, r - 1).length ? `<button class="linkBtn" data-act="copyPrev">${r - 1}라운드 조 그대로 쓰기</button>` : ""}
