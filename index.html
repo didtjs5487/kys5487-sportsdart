@@ -697,6 +697,18 @@
   .resumeNote{display:flex; flex-direction:column; gap:4px; margin:0 0 12px; padding:14px 16px; border-radius:18px; background:#FFF6E5; font-size:16px; line-height:1.5}
   .resumeNote b{font-size:18px} .resumeNote span{color:var(--sub); font-weight:600} .resumeNote .btn{align-self:flex-start; margin-top:6px}
   .takeBtn{margin-left:8px}
+  .progStrip{display:grid; gap:10px; margin:0 0 14px} .progStrip.two{grid-template-columns:1fr 1fr}
+  .progCard{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; padding:12px 14px; border-radius:20px; background:var(--panel); border:1.5px solid var(--line2)}
+  .progCard.cur{border-color:var(--pri)} .progCard.full{background:var(--goodSoft); border-color:#BFE6CF}
+  .pgW{position:relative; flex:none; width:56px; height:56px} .pgW svg{width:56px; height:56px; display:block}
+  .pT{fill:none; stroke:var(--line2); stroke-width:6} .pB{fill:none; stroke:var(--pri); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset .6s ease}
+  .progCard.full .pB{stroke:var(--good)}
+  .pgN{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--ink)} .pgN b{font-size:19px} .pgN small{font-size:13px; color:var(--sub)}
+  .progCard.full .pgN{color:var(--good); font-size:22px}
+  .pgT{display:flex; flex-direction:column; min-width:0; flex:1} .pgT b{font-size:20px} .pgT span{font-size:16px; font-weight:700} .pgT small{font-size:15px; color:var(--sub)}
+  .progCard .btn{flex:1 1 100%; min-height:50px}
+  .endRow{display:flex; justify-content:flex-end; margin:-4px 0 10px}
+  @media (max-width:520px){ .progStrip.two{grid-template-columns:1fr} }
   /* ── 모션 ── */
   @keyframes gfill{from{stroke-dashoffset:var(--f)}to{stroke-dashoffset:var(--t)}}
   @keyframes pop{0%{transform:scale(.5); opacity:0}60%{transform:scale(1.18); opacity:1}100%{transform:none}}
@@ -1631,6 +1643,25 @@ function pairRows(cs) {
     const lab = x.L ? "다음 경기" : u ? "이어서 시작" : formed ? "경기 시작" : "조 편성";
     return `<div class="pairRow ${x.done ? "done" : ""}"><b>${esc(c)}반</b><span>${txt}</span>${x.L || cg ? `<button class="btn sm ${x.done || !x.L ? "pri" : ""}" data-act="startOne" data-v="${esc(c)}">▶ ${lab}</button>` : ""}</div>`; }).join("")}</div>`;
 }
+/* 진행 현황 띠 — 선택한 반마다 게이지 + 상태 + 지금 누를 단추 하나. 게이지가 다 차면 초록 [다음 경기]로 바뀐다 */
+function progCard(c, cur) {
+  const x = liveStat(c), cg = curGame(c), u = !x.L && cg ? unfinished(c) : null, formed = !x.L && cg && groupsOf(c, cg.st, cg.r).length;
+  const CIR = 2 * Math.PI * 22, pct = x.total ? x.nd / x.total : 0, full = x.done;
+  const title = x.L ? `${STAGES[x.L.st].name} ${x.L.r}R` : cg ? `${STAGES[cg.st].name} ${cg.r}R` : "모든 경기 끝";
+  const sub = x.L ? (full ? "모두 저장됨" : "다트 입력 중")
+    : !cg ? "성적에서 확인해요"
+    : u ? `${u.swap ? u.wave + "차 경기가 " : ""}남았어요` : formed ? "조 확인 후 시작" : "조 편성 전";
+  const num = !x.L ? (cg ? "·" : "✔") : full ? "✔" : `<b>${x.nd}</b><small>/${x.total}</small>`;
+  const lab = x.L ? (full ? "다음 경기" : cur ? "" : "입력 보기") : u ? "이어서 시작" : formed ? "경기 시작" : cg ? "조 편성" : "";
+  const act = x.L ? (full ? "startOne" : "pickCls") : (cg ? "startOne" : "");
+  const btn = lab && act ? `<button class="btn sm ${full || !x.L ? "pri" : ""}" data-act="${act}" data-v="${esc(c)}">${x.L && !full ? "" : "▶ "}${lab}</button>` : "";
+  return `<div class="progCard ${cur ? "cur" : ""} ${full ? "full" : ""}"><div class="pgW"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="22" class="pT"/><circle cx="26" cy="26" r="22" class="pB" style="opacity:${pct || full ? 1 : 0}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - (full ? 1 : pct))).toFixed(1)}" transform="rotate(-90 26 26)"/></svg><div class="pgN">${num}</div></div><div class="pgT"><b>${esc(shortCls(c))}반</b><span>${title}</span><small>${sub}</small></div>${btn}</div>`;
+}
+function progStrip() {
+  if (VIEW || !ui.cls) return "";
+  const cs = (pairOn() ? [ui.cls, ...bigPair()] : [ui.cls]).sort(numSort);
+  return `<div class="progStrip noprint ${cs.length > 1 ? "two" : ""}">${cs.map(c => progCard(c, c === ui.cls)).join("")}</div>`;
+}
 /* 한 반의 지금 라운드 입력 현황 */
 function liveStat(c) {
   const L = liveOf(c); if (!L || isClosed(c, L.st, L.r)) return { c, L: null, total: 0, nd: 0, done: false };
@@ -1769,12 +1800,14 @@ function scEntry() {
   const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi)), closed = isClosed(cls, st, ui.round);
   if (!VIEW && GRP == null) {
     const nDone = gs.filter((g, gi) => cardDone(cls, g, rr, "g" + gi)).length;
-    if (pairOn() && bigPair().length) h += `<div class="blkHead"><b>${esc(cls)}반</b><span>${STAGES[st].name} ${ui.round}R · 입력 ${nDone}/${gs.length}</span></div>`;
+    const two = pairOn() && bigPair().length;
+    if (two) h += progStrip();
     // 입력 게이지 — 다트가 다 저장되면 저절로 종료된다 (2026-10-27)
     const pct = gs.length ? nDone / gs.length : 0, CIR = 2 * Math.PI * 34, full = closed || allDone;
-    h += `<div class="gaugeBox ${full ? "full" : ""} ${full && once("gfull" + cls + st + ui.round) ? "pop" : ""}"><div class="gWrap"><svg class="gauge" viewBox="0 0 84 84" aria-hidden="true"><defs><linearGradient id="gGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9890F2"/><stop offset="1" stop-color="#4A41D6"/></linearGradient></defs><circle cx="42" cy="42" r="34" class="gTrack"/><circle cx="42" cy="42" r="34" class="gBar" style="opacity:${pct || full ? 1 : 0};${gAnim("res" + cls + st + ui.round, CIR * (1 - (full ? 1 : pct)))}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - (full ? 1 : pct))).toFixed(1)}" transform="rotate(-90 42 42)"/></svg><div class="gNum">${full ? "<b>✔</b>" : `<b>${nDone}</b><small>/${gs.length}</small>`}</div></div>`
+    if (!two) h += `<div class="gaugeBox ${full ? "full" : ""} ${full && once("gfull" + cls + st + ui.round) ? "pop" : ""}"><div class="gWrap"><svg class="gauge" viewBox="0 0 84 84" aria-hidden="true"><defs><linearGradient id="gGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9890F2"/><stop offset="1" stop-color="#4A41D6"/></linearGradient></defs><circle cx="42" cy="42" r="34" class="gTrack"/><circle cx="42" cy="42" r="34" class="gBar" style="opacity:${pct || full ? 1 : 0};${gAnim("res" + cls + st + ui.round, CIR * (1 - (full ? 1 : pct)))}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - (full ? 1 : pct))).toFixed(1)}" transform="rotate(-90 42 42)"/></svg><div class="gNum">${full ? "<b>✔</b>" : `<b>${nDone}</b><small>/${gs.length}</small>`}</div></div>`
       + `<div class="gTxt"><b>${closed ? "경기 종료" : allDone ? "모두 저장됨" : "다트 입력 중"}</b><small>${closed ? "학생 입력이 잠겼어요" : allDone ? "곧 자동으로 끝나요" : "모두 저장되면 자동으로 끝나요"}</small></div>`
       + (closed ? `<button class="endLink" data-act="reopenRound">다시 열기</button>` : `<button class="endLink" data-act="endRound">지금 종료</button>`) + `</div>`;
+    if (two) h += `<div class="endRow noprint">${closed ? `<button class="endLink" data-act="reopenRound">${esc(shortCls(cls))}반 다시 열기</button>` : `<button class="endLink" data-act="endRound">${esc(shortCls(cls))}반 지금 종료</button>`}</div>`;
 
   }
 
@@ -2292,6 +2325,7 @@ document.addEventListener("click", e => {
       if (!pairOn() || [ui.cls, ...bigPair()].length === 2) ui.clsMenu = false;   // 반을 다 고르면 목록을 접는다
       render(); break;
     }
+    case "pickCls": { if (v !== ui.cls) { ui.bigCls = [v, ui.cls]; ui.bigDay = today(); ui.cls = v; const L = liveOf(v); if (L) { ui.stage = L.st; ui.round = L.r; } ui.focus = null; ui.sel = null; } render(); break; }
     case "pairTog": { const on = !pairOn(); ui.pairOn = on; ui.bigCls = [ui.cls]; ui.bigDay = today(); ui.clsMenu = on; render(); break; }
     case "startPair": startPair(); break;
     case "startOne": { const o = [ui.cls, ...bigPair()].find(c => c !== v); if (o && pairOn()) pairBoards(...[v, o].sort(numSort)); ui.cls = v; ui.bigCls = [v, ...bigPair().filter(c => c !== v)].slice(0, 2); ui.bigDay = today(); startNext(v); break; }
