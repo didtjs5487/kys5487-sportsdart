@@ -1782,6 +1782,11 @@ function hasAny(cls, stage) { const g = (C(cls).games || {})[stage] || {}; retur
 
 /* ③ 경기 결과 입력 */
 /* 아직 다 입력하지 않은 첫 라운드 — 결과 입력 화면에 들어올 때 거기서 시작한다 */
+/* 반을 바꿀 때: 그 반의 진도(진행 중이거나 아직 안 끝난 첫 라운드)로 간다 — 다른 반의 경기·라운드가 따라오지 않게 */
+function focusGame(cls) {
+  const g = curGame(cls);
+  if (g) { ui.stage = g.st; ui.round = g.r; } else ui.round = openRound(cls, ui.stage);
+}
 function openRound(cls, st) {
   const L = liveOf(cls);
   if (L && L.st === st) return L.r;                       // 진행 중인 라운드가 있으면 거기서
@@ -2294,7 +2299,7 @@ document.addEventListener("click", e => {
   switch (act) {
     case "tab": ui.tab = v; ui.sel = null; ui.focus = null; ui.gOpen = []; if (v === "entry" || v === "groups") ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
     case "stage": ui.stage = v; ui.sel = null; ui.focus = null; ui.round = openRound(cls, v); if (ui.tab === "groups" && groupsOf(cls, v).length) setLive(cls, v, ui.round); render(); break;
-    case "cls": { ui.open = {}; ui.cls = v; ui.focus = null; const L = liveOf(v); if (L) { ui.stage = L.st; ui.round = L.r; } else ui.round = openRound(v, ui.stage); render(); break; }
+    case "cls": { ui.open = {}; ui.cls = v; ui.focus = null; focusGame(v); render(); break; }
     case "goEntry": ui.tab = "entry"; ui.focus = null; ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
     case "toX3": ui.tab = "groups"; ui.stage = "x3"; ui.round = 1; render(); scrollTo(0, 0); break;
     case "bigEntry": $("big").classList.remove("show"); ui.tab = "entry"; ui.focus = null; ui.round = openRound(cls, ui.stage); render(); scrollTo(0, 0); break;
@@ -2320,12 +2325,12 @@ document.addEventListener("click", e => {
         if (sel.includes(v)) { ui.bigCls = [v, ui.cls]; ui.cls = v; }   // 함께하는 다른 반을 보던 반으로
         else { ui.bigCls = [ui.cls, v]; ui.bigDay = today(); }
       } else ui.cls = v;
-      { const L = liveOf(ui.cls); if (L) { ui.stage = L.st; ui.round = L.r; } else ui.round = openRound(ui.cls, ui.stage); }
+      focusGame(ui.cls);
       ui.open = {}; ui.focus = null; ui.sel = null;
       if (!pairOn() || [ui.cls, ...bigPair()].length === 2) ui.clsMenu = false;   // 반을 다 고르면 목록을 접는다
       render(); break;
     }
-    case "pickCls": { if (v !== ui.cls) { ui.bigCls = [v, ui.cls]; ui.bigDay = today(); ui.cls = v; const L = liveOf(v); if (L) { ui.stage = L.st; ui.round = L.r; } ui.focus = null; ui.sel = null; } render(); break; }
+    case "pickCls": { if (v !== ui.cls) { ui.bigCls = [v, ui.cls]; ui.bigDay = today(); ui.cls = v; focusGame(v); ui.focus = null; ui.sel = null; } render(); break; }
     case "pairTog": { const on = !pairOn(); ui.pairOn = on; ui.bigCls = [ui.cls]; ui.bigDay = today(); ui.clsMenu = on; render(); break; }
     case "startPair": startPair(); break;
     case "startOne": { const o = [ui.cls, ...bigPair()].find(c => c !== v); if (o && pairOn()) pairBoards(...[v, o].sort(numSort)); ui.cls = v; ui.bigCls = [v, ...bigPair().filter(c => c !== v)].slice(0, 2); ui.bigDay = today(); startNext(v); break; }
@@ -2494,7 +2499,7 @@ document.addEventListener("click", e => {
       const sel = [cls, ...bigPair()];
       if (sel.includes(v)) { if (sel.length < 2) break; const rest = sel.filter(c => c !== v); ui.cls = rest[0]; ui.bigCls = rest; }
       else ui.bigCls = [cls, v];
-      if (ui.cls !== cls) { const L = liveOf(ui.cls); ui.round = L && L.st === ui.stage ? L.r : openRound(ui.cls, ui.stage); }
+      if (ui.cls !== cls) focusGame(ui.cls);
       ui.bigDay = today(); saveUI(); render(); showBig(); break;
     }
     case "bigMenu": ui.bigMenu = !ui.bigMenu; showBig(); break;
@@ -2661,7 +2666,7 @@ document.addEventListener("focusout", e => {
     if (inputs[i + 1]) inputs[i + 1].focus();
   }, 30);
 });
-$("clsSel").addEventListener("change", e => { ui.cls = e.target.value; ui.focus = null; if (ui.tab === "entry") ui.round = openRound(ui.cls, ui.stage); render(); });
+$("clsSel").addEventListener("change", e => { ui.cls = e.target.value; ui.focus = null; focusGame(ui.cls); render(); });
 
 function doImport() {
   const text = $("paste").value; if (!text.trim()) { toast("명렬표를 붙여넣어 주세요"); return; }
