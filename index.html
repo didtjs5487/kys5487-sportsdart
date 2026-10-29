@@ -173,7 +173,7 @@
   .roles{margin-top:12px; background:var(--soft); border-radius:14px; padding:12px}
   .rtitle{font-size:17px; font-weight:700; margin-bottom:8px} .rtitle small{font-size:14px; font-weight:600; color:var(--sub); margin-left:6px}
   .refPick{background:var(--priSoft); border:1px solid #D3CEFB; border-radius:14px; padding:12px; margin:4px 0 10px}
-  .refPick b{display:block; font-size:19px} .refPick small{display:block; font-size:14px; color:var(--sub); margin:2px 0 8px}
+  .refPick b{display:block; font-size:21px} .refPick small{display:block; font-size:16px; color:var(--sub); margin:2px 0 8px}
   .refBtns{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; margin-top:8px}
   .refBtns .btn{min-height:68px; font-size:23px; font-weight:800; background:var(--panel); border:2px solid #D3CEFB; border-radius:16px}
   .refBtns .btn:active{background:var(--pri); color:#fff}
@@ -402,6 +402,12 @@
   .selHint{flex:1 1 180px; font-size:15px; line-height:1.4; color:var(--sub)}
   .moveHint{padding:8px 12px; border-radius:12px; background:var(--priSoft); font-size:16px}
   .delRow{display:flex; flex-wrap:wrap; gap:8px} .delRow .btn{flex:1 1 150px; min-height:60px} .delRow small{font-weight:600; opacity:.85}
+  .memHead{margin:8px 0 2px; font-size:16px; font-weight:700; color:var(--sub)}
+  .steps{list-style:none; display:flex; gap:6px; margin:0 0 10px; padding:0}
+  .steps li{flex:1; min-width:0; display:flex; align-items:center; justify-content:center; gap:6px; min-height:50px; padding:0 6px; border-radius:14px; background:var(--soft); color:var(--sub); font-size:16px; font-weight:800; white-space:nowrap}
+  .steps li i{flex:none; display:grid; place-items:center; width:26px; height:26px; border-radius:50%; background:var(--line2); color:var(--sub); font-style:normal; font-size:15px}
+  .steps li.now{background:var(--pri); color:#fff} .steps li.now i{background:#fff; color:var(--pri)}
+  .steps li.done{background:var(--goodSoft); color:var(--good)} .steps li.done i{background:var(--good); color:#fff}
   .refFirst{margin:6px 0; padding:10px 12px; border-radius:12px; background:#FFF6E5; font-size:17px}
   .memList{display:flex; flex-wrap:wrap; gap:6px; margin:6px 0} .memList span{padding:6px 12px; border-radius:99px; background:var(--soft); border:1px solid var(--line2); font-size:18px; font-weight:700}
   .turnBox{margin:10px 0 4px; padding:10px 12px; border-radius:12px; background:var(--priSoft); display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; font-size:18px}
@@ -1931,10 +1937,13 @@ function card(cls, st, gk, members, res, title) {
       <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
-  const rowsShown = needRef ? `<p class="refFirst">👆 먼저 위에서 <b>심판</b>(결과를 입력할 사람)을 눌러 주세요. 그러면 점수 칸이 열려요.</p><div class="memList">${live.map(s => `<span>${esc((sm[s] || {}).name || "?")}</span>`).join("")}</div>` : rows;
+  const rowsShown = needRef ? `<p class="memHead">이번 조 · 심판이 정해지면 점수 칸이 열려요</p><div class="memList">${live.map(s => `<span>${esc((sm[s] || {}).name || "?")}</span>`).join("")}</div>` : rows;
+  const stepNow = needRef ? 1 : okDone ? 4 : ranked ? 3 : 2;
+  const stepBar = !canTeach() && stuOK && !takenByOther && !isClosed(cls, st, ui.round) && gk !== "mk"
+    ? `<ol class="steps" aria-label="입력 순서">${[["심판 고르기"], [tap301 ? "순위 누르기" : "점수 적기"], ["저장하기"]].map((x, i) => `<li class="${stepNow > i + 1 ? "done" : stepNow === i + 1 ? "now" : ""}"><i>${stepNow > i + 1 ? "✔" : i + 1}</i><span>${x[0]}</span></li>`).join("")}</ol>` : "";
   const opened = !needRef && hasRef && once("open" + cls + st + ui.round + key);
   const cheer = okDone && once("cheer" + cls + st + ui.round + key);
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""} ${opened ? "opened" : ""} ${cheer ? "cheer" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중<button class="btn sm pri takeBtn" data-act="takeRef" data-g="${key}">내가 입력할게요</button></p>` : ""}${needRef ? refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rowsShown}
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""} ${opened ? "opened" : ""} ${cheer ? "cheer" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${stepBar}${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중<button class="btn sm pri takeBtn" data-act="takeRef" data-g="${key}">내가 입력할게요</button></p>` : ""}${needRef ? refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rowsShown}
     ${(() => {   // 순위가 다 안 들어갔으면 저장 단추를 잠근다
       const miss = live.filter(s => !(res[s] && res[s].r >= 1));
       if (ranked || !canEnter() || takenByOther || needRef || !live.some(s => res[s] && res[s].r >= 1)) return "";
@@ -1968,7 +1977,7 @@ const refGuide = full => full
 function refPicker(cls, key, members) {
   const part = key[0] === "g" ? partnerOf(cls, +key.slice(1)) : null;   // 심판 교대: 짝 조 학생이 심판
   const sm = stuMap(cls), mem = (part ? part.m : members).filter(s => sm[s] && !isAbs(cls, s)), others = roster(cls).filter(st => !mem.includes(sidOf(st)));
-  return `<div class="refPick"><b>🧑‍⚖️ 대표 심판 1명 <span style="font-weight:600;color:var(--sub);font-size:16px">내 이름을 눌러요 · 나머지는 참관</span>${part ? ` <small class="refPart">짝 조(${waveOf(cls, part.gi)}차) 학생 중에서</small>` : ""}</b>
+  return `<div class="refPick"><b>🧑‍⚖️ 내 이름을 눌러 주세요</b><small>대표 심판 1명이 입력해요 · 나머지는 참관${part ? ` · 짝 조(${waveOf(cls, part.gi)}차) 학생` : ""}</small>
     <div class="refBtns">${mem.map(s => `<button class="btn" data-act="claimRef" data-g="${key}" data-s="${s}">${esc(sm[s].name)}</button>`).join("")}</div>
     ${others.length ? `<select class="refOther" data-g="${key}"><option value="">다른 조 학생</option>${others.map(o => `<option value="${sidOf(o)}">${esc(o.no)}. ${esc(o.name)}</option>`).join("")}</select>` : ""}</div>`;
 }
