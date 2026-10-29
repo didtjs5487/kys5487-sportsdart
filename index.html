@@ -1518,6 +1518,7 @@ function scGroups() {
       const needForm = pairSel.some(c => { const g = curGame(c); return g && !liveStat(c).L && !groupsOf(c, g.st, g.r).length; });
       b1 = pairSel.some(c => liveStat(c).L) ? "▶ 끝난 반 다음 경기" : needForm ? "▶ 두 반 조 편성" : "▶ 두 반 경기 시작";
       b2 = pairSel.map(c => { const g = curGame(c); return g ? `${esc(c)}반 ${STAGES[g.st].name} ${g.r}R` : `${esc(c)}반 끝`; }).join(" · ");
+      const gg = pairSel.map(curGame); if (gg.every(Boolean) && (gg[0].st !== gg[1].st || gg[0].r !== gg[1].r)) b2 += " · 진도가 달라요";
     } else if (!cg) { b1 = "✔ 모든 경기가 끝났어요"; b2 = "눌러서 성적 보기"; }
     else if (running) { b1 = "▶ 다음 경기"; b2 = nx ? `${STAGES[nx.st].name} ${nx.r}라운드 · ${ui.nextSame ? "같은 조로 이어가요" : "조를 새로 짜요"}` : "마지막 경기를 마쳐요"; }
     else if (formed && unfinished(cls)) { b1 = "▶ 이어서 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · 남은 경기를 이어서 해요`; }
@@ -1607,8 +1608,15 @@ function clsBar() {
 }
 /* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
 function pairRows(cs) {
-  const st = cs.map(liveStat); if (!st.some(x => x.L)) return "";
-  return `<div class="pairRows noprint">${st.map(x => `<div class="pairRow ${x.done ? "done" : ""}"><b>${esc(x.c)}반</b><span>${x.L ? `${STAGES[x.L.st].name} ${x.L.r}R · 입력 <b>${x.nd}/${x.total}</b>${x.done ? " ✔" : ""}` : curGame(x.c) ? "다음 경기 전" : "모든 경기 끝 ✔"}</span>${x.L || curGame(x.c) ? `<button class="btn sm ${x.done || !x.L ? "pri" : ""}" data-act="startOne" data-v="${esc(x.c)}">▶ ${x.L ? "다음 경기" : "시작"}</button>` : ""}</div>`).join("")}</div>`;
+  const st = cs.map(liveStat);
+  return `<div class="pairRows noprint">${st.map(x => {
+    const c = x.c, cg = curGame(c), u = !x.L && cg ? unfinished(c) : null, formed = !x.L && cg && groupsOf(c, cg.st, cg.r).length;
+    const txt = x.L ? `${STAGES[x.L.st].name} ${x.L.r}R · 입력 <b>${x.nd}/${x.total}</b>${x.done ? " ✔" : ""}`
+      : !cg ? "모든 경기 끝 ✔"
+      : u ? `${STAGES[cg.st].name} ${cg.r}R · ${u.swap ? u.wave + "차 경기가 " : ""}남았어요`
+      : formed ? `${STAGES[cg.st].name} ${cg.r}R · 조 확인 후 시작` : `${STAGES[cg.st].name} ${cg.r}R · 조 편성 전`;
+    const lab = x.L ? "다음 경기" : u ? "이어서 시작" : formed ? "경기 시작" : "조 편성";
+    return `<div class="pairRow ${x.done ? "done" : ""}"><b>${esc(c)}반</b><span>${txt}</span>${x.L || cg ? `<button class="btn sm ${x.done || !x.L ? "pri" : ""}" data-act="startOne" data-v="${esc(c)}">▶ ${lab}</button>` : ""}</div>`; }).join("")}</div>`;
 }
 /* 한 반의 지금 라운드 입력 현황 */
 function liveStat(c) {
@@ -1619,17 +1627,25 @@ function liveStat(c) {
 }
 /* 두 반이 함께 수업하면 진행 속도가 다르다 — 시작 전이면 둘 다 시작하고, 진행 중이면 입력이 끝난 반만 다음 경기로 넘어간다.
    아직 끝나지 않은 반은 그대로 나머지 경기를 이어 간다(반마다 [▶ 다음 경기]로 따로 넘길 수도 있다) */
+function pairBoards(a, b) {
+  const on = onBoards(), half = Math.ceil(on.length / 2), ca = carryBoards(a), cb = carryBoards(b);
+  let la = boardsOf(a), lb = boardsOf(b);
+  if (!la.some(x => lb.includes(x)) && (pairSwap(a) || ca) && (pairSwap(b) || cb)) return;   // 이미 나눠져 있다
+  if (ca && cb) return;   // 둘 다 지난 시간 배정을 이어간다 — 그대로 둔다
+  if (ca) { lb = on.filter(x => !la.includes(x)); if (!lb.length) lb = on.slice(half); }
+  else if (cb) { la = on.filter(x => !lb.includes(x)); if (!la.length) la = on.slice(0, half); }
+  else if (la.some(x => lb.includes(x))) { la = on.slice(0, half); lb = on.slice(half); }
+  // 두 반 함께는 짝수 조로 편성하고 심판 교대 — 이어하는 반은 배정을 바꾸지 않는다
+  if (!ca) put(P(a, "boards"), { day: today(), list: la, swap: true }, true);
+  if (!cb) put(P(b, "boards"), { day: today(), list: lb, swap: true }, true);
+}
 function startPair() {
   const [a, b] = [ui.cls, ...bigPair()].sort(numSort);
   if (!b) { toast("함께할 반을 하나 더 골라 주세요"); return; }
   const stat = [a, b].map(liveStat), running = stat.filter(x => x.L);
   if (stat.every(x => !x.L && !curGame(x.c))) { toast("두 반 모두 경기가 끝났습니다 — 성적 탭에서 확인하세요"); return; }
   if (!running.length) {
-    let la = boardsOf(a), lb = boardsOf(b);
-    if (la.some(x => lb.includes(x))) { const on = onBoards(), half = Math.ceil(on.length / 2); la = on.slice(0, half); lb = on.slice(half); }   // 다트가 겹치면 반씩
-    // 두 반 함께는 짝수 조로 편성하고 심판 교대 — 1차·2차에 경기 ↔ 심판(대표 1명)·참관을 바꾼다
-    put(P(a, "boards"), { day: today(), list: la, swap: true }, true);
-    put(P(b, "boards"), { day: today(), list: lb, swap: true }, true);
+    pairBoards(a, b);
     ui.bigCls = [a, b]; ui.bigDay = today(); ui.cls = a;
     const todo = [b, a].filter(c => curGame(c)), needForm = todo.filter(c => { const g = curGame(c); return !groupsOf(c, g.st, g.r).length; });
     (needForm.length ? needForm : todo).forEach(c => startNext(c));   // 조가 없으면 편성만, 다 있으면 시작
@@ -2265,7 +2281,7 @@ document.addEventListener("click", e => {
     }
     case "pairTog": { const on = !pairOn(); ui.pairOn = on; ui.bigCls = [ui.cls]; ui.bigDay = today(); ui.clsMenu = on; render(); break; }
     case "startPair": startPair(); break;
-    case "startOne": ui.cls = v; ui.bigCls = [v, ...bigPair().filter(c => c !== v)].slice(0, 2); ui.bigDay = today(); startNext(v); break;
+    case "startOne": { const o = [ui.cls, ...bigPair()].find(c => c !== v); if (o && pairOn()) pairBoards(...[v, o].sort(numSort)); ui.cls = v; ui.bigCls = [v, ...bigPair().filter(c => c !== v)].slice(0, 2); ui.bigDay = today(); startNext(v); break; }
     case "clrRound": {
       const st = ui.stage, r = ui.round;
       if (!confirm(`${cls}반 ${STAGES[st].name} ${r}라운드에 입력한 결과를 지울까요?\n\n조 편성은 그대로 남습니다.`)) break;
