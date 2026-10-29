@@ -730,10 +730,12 @@
   #big .arena{padding-top:3vh}
   #big .bd2{overflow:visible; container-type:inline-size}   /* 카드 폭에 맞춰 번호·캐릭터 크기를 정한다(cqw) — 화면 배율이 높아 카드가 좁아도 겹치지 않게 */
   #big .bd2 .hd{gap:clamp(5px,2.4cqw,12px); margin:0 0 1.4vh; padding:.8vh clamp(10px,5cqw,16px); border-radius:26px 26px 0 0; background:var(--gc)}
-  #big .bd2 .n{display:grid; place-items:center; flex:none; width:clamp(38px,min(24cqw,9.4vh),84px); height:clamp(38px,min(24cqw,9.4vh),84px); border-radius:50%; background:#fff; color:#191F28; font-size:clamp(22px,min(14cqw,5.6vh),52px); font-weight:800; box-shadow:0 3px 8px rgba(0,0,0,.14)}
-  #big .bd2 .ch{flex:0 1 auto; min-width:0; width:clamp(44px,min(28cqw,15vh),140px); height:clamp(44px,min(28cqw,15vh),140px); margin:-2.6vh 0 -.4vh auto; filter:drop-shadow(0 6px 8px rgba(0,0,0,.25))}
+  #big .bd2 .n{display:grid; place-items:center; flex:none; width:clamp(34px,min(21cqw,9.4vh),84px); height:clamp(34px,min(21cqw,9.4vh),84px); border-radius:50%; background:#fff; color:#191F28; font-size:clamp(22px,min(14cqw,5.6vh),52px); font-weight:800; box-shadow:0 3px 8px rgba(0,0,0,.14)}
+  #big .bd2 .ch{flex:0 1 auto; min-width:0; width:clamp(48px,min(35cqw,17vh),160px); height:clamp(48px,min(35cqw,17vh),160px); margin:-2.6vh 0 -.4vh auto; filter:drop-shadow(0 6px 8px rgba(0,0,0,.25))}
   #big .bd2 .cn{display:none}
   #big .waves button{white-space:nowrap; flex:none}
+  #big .bd2 .nx .nxn{flex-wrap:nowrap; gap:0 12px} #big .bd2 .nx .nxn i{flex:none}
+  @container (max-width:300px){ #big .bd2 .nx .nxn{flex-direction:column; gap:1px} }
   #big .bd2 .wvTag{white-space:nowrap; font-size:clamp(16px,2.4vh,24px); padding:3px clamp(6px,3.4cqw,12px)}
   #big .bd2 .wvTag{background:rgba(255,255,255,.6); color:#191F28}
   #big .bd2 .nm{margin:0 18px; color:#191F28; font-weight:800}
