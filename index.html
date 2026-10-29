@@ -299,7 +299,7 @@
   .goneBox{margin-top:10px; display:flex; flex-direction:column; gap:8px}
   .goneRow{display:flex; flex-wrap:wrap; align-items:center; gap:6px}
   .goneL{font-size:15px; font-weight:800; color:var(--sub); margin-right:2px}
-  .goneChip{min-height:44px; border-radius:999px; border:1px solid var(--line2); background:var(--panel); padding:0 14px; font-size:16px; font-weight:700; color:var(--ink)}
+  .goneChip{min-height:50px; border-radius:999px; border:1px solid var(--line2); background:var(--panel); padding:0 14px; font-size:16px; font-weight:700; color:var(--ink)}
   .goneChip.ask{border-style:dashed; color:var(--bad)} .goneChip.off{display:inline-flex; align-items:center; color:var(--sub); text-decoration:line-through}
   .alist{display:flex; flex-direction:column; gap:6px}
   .arow{display:grid; grid-template-columns:minmax(0,1fr) auto auto auto; align-items:center; gap:6px; min-height:52px; border-radius:12px; border:1px solid var(--line); background:var(--panel); padding:0 12px; text-align:left; font-size:16px; font-weight:700; color:var(--ink)}
@@ -388,7 +388,7 @@
   .gNum b{font-size:30px; font-weight:800; line-height:1} .gNum small{font-size:16px; font-weight:700; color:var(--sub)}
   .gaugeBox.full .gNum b{color:var(--good); font-size:32px}
   .gTxt{display:flex; flex-direction:column; gap:2px; min-width:0} .gTxt b{font-size:20px; font-weight:800} .gTxt small{font-size:15px; color:var(--sub)}
-  .endLink{margin-left:auto; flex:none; min-height:44px; padding:0 4px; border:0; background:none; color:var(--sub); font-size:15px; font-weight:700; text-decoration:underline; text-underline-offset:3px; cursor:pointer}
+  .endLink{margin-left:auto; flex:none; min-height:50px; min-width:64px; padding:0 8px; border:0; background:none; color:var(--sub); font-size:16px; font-weight:700; text-decoration:underline; text-underline-offset:3px; cursor:pointer}
   .gMix{display:inline-flex; align-items:baseline; gap:6px; margin-right:14px; font-size:22px; font-weight:800; white-space:nowrap} .gMix b{font-size:26px}
   .pairRows{display:flex; flex-direction:column; gap:6px; margin:0 0 10px}
   .pairRow{display:flex; align-items:center; gap:10px; min-height:56px; padding:6px 12px; border:1.5px solid var(--line2); border-radius:12px; background:var(--panel); font-size:17px}
@@ -457,12 +457,12 @@
   .gBar{display:flex; align-items:center; gap:10px; margin-bottom:12px; background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:8px; box-shadow:var(--shadow)}
   .gBar .gchip{flex:none; min-height:56px; border:0; display:flex; align-items:center; gap:6px; padding:0 14px; border-radius:12px; font-size:18px}
   .gBar .gchip .swap{font-size:16px; opacity:.75}
-  .gTog{flex:none; display:flex; flex-direction:column; gap:4px; background:var(--soft); border:1px solid var(--line); border-radius:12px; padding:3px}
-  .gTog button{min-width:84px; min-height:26px; border:0; border-radius:9px; background:transparent; font-size:15px; font-weight:800; color:var(--sub); padding:0 8px}
+  .gTog{flex:none; display:flex; flex-direction:row; gap:4px; background:var(--soft); border:1px solid var(--line); border-radius:12px; padding:3px}
+  .gTog button{min-width:76px; min-height:50px; border:0; border-radius:9px; background:transparent; font-size:16px; font-weight:800; color:var(--sub); padding:0 8px}
   .gTog button.on.cu{background:var(--cu); color:var(--cuInk)} .gTog button.on.x3{background:var(--x3); color:var(--x3Ink)}
   .rPills{flex:1; min-width:0; display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
   .rPills button{min-width:0; min-height:58px; border-radius:12px; border:1px solid var(--line); background:var(--soft); color:var(--sub); display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1.1; padding:2px}
-  .rPills button b{font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:22px} .rPills button small{font-size:15px; font-weight:700; white-space:nowrap; min-height:14px}
+  .rPills button b{font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:22px} .rPills button small{font-size:16px; font-weight:700; white-space:nowrap; min-height:14px}
   .rPills button.on.cu{background:var(--cuSoft); border:2px solid var(--cu); color:var(--cuInk)} .rPills button.on.x3{background:var(--x3Soft); border:2px solid var(--x3); color:var(--x3Ink)}
   .rStep{flex:1; min-width:0; display:flex; align-items:center; gap:4px}
   .rStep .arw{flex:none; width:48px; height:56px; border-radius:12px; border:1px solid var(--line2); background:var(--soft); font-size:28px; font-weight:800; color:var(--pri); line-height:1}
@@ -479,7 +479,7 @@
   details.gPick .chev{font-size:20px}
   .gchip.cu{background:var(--cu); color:var(--cuInk)} .gchip.x3{background:var(--x3); color:var(--x3Ink)}
   details.gPick small{font-size:15px; font-weight:700; color:var(--sub)} details.gPick small.live{color:var(--good)}
-  .chev{font-size:15px; font-weight:700; color:var(--pri); white-space:nowrap}
+  .chev{font-size:16px; font-weight:700; color:var(--pri); white-space:nowrap}
   .acts2{display:grid; grid-template-columns:minmax(0,1fr) 92px 76px; gap:8px; margin-bottom:12px}
   .acts2 .nextBig{padding:0 8px; white-space:nowrap}
   @media (max-width:420px){ .acts2{grid-template-columns:minmax(0,1fr) 82px 60px} }
@@ -708,7 +708,7 @@
   .pgW{position:relative; flex:none; width:56px; height:56px} .pgW svg{width:56px; height:56px; display:block}
   .pT{fill:none; stroke:var(--line2); stroke-width:6} .pB{fill:none; stroke:var(--pri); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset .6s ease}
   .clsCard.done .pB{stroke:var(--good)}
-  .pgN{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--ink)} .pgN b{font-size:19px} .pgN small{font-size:15px; color:var(--sub)}
+  .pgN{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--ink)} .pgN b{font-size:19px} .pgN small{font-size:16px; color:var(--sub)}
   .clsCard.done .pgN{color:var(--good); font-size:22px}
   .pgT{display:flex; flex-direction:column; min-width:0; flex:1} .pgT b{font-size:24px; line-height:1.15} .pgT b small{font-size:15px; margin-left:1px; color:var(--sub)} .pgT span{font-size:16px; font-weight:700} .pgT .cs{font-size:16px; font-weight:800; color:var(--sub)}
   .clsCard.run .cs, .clsCard.ready .cs{color:var(--pri)} .clsCard.done .cs{color:var(--good)} .clsCard.wait .cs{color:#B45F06}
@@ -720,7 +720,8 @@
   /* 작은 화면: 시작 단추는 탭 막대 바로 위에 붙인다 — 한 손 엄지가 닿는 자리 */
   @media (max-width:700px){ .startDock{position:fixed; left:12px; right:12px; bottom:calc(78px + env(safe-area-inset-bottom)); z-index:25; margin:0; padding:0; pointer-events:none} .startDock .startBtn{pointer-events:auto; width:100%; max-width:560px; box-shadow:0 10px 26px rgba(25,31,40,.22)} .startDock.pairWrap{flex-direction:row; gap:8px} .startDock.pairWrap .startBtn{flex:1; min-width:0} main:has(.startDock){padding-bottom:110px} }
   .acts3{display:flex; gap:8px; margin:0 0 10px} .acts3 .btn{flex:1; min-height:50px}
-  .endRow{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px} .endRow small{font-size:15px; color:var(--sub)}
+  .btn.sm.ghost, .row .btn.sm{min-width:50px}
+  .endRow{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px} .endRow small{font-size:16px; color:var(--sub)}
   /* ── 프로젝터: 밝은 하늘색 무대 + 색 띠 카드 — 멀리서도 번호·캐릭터·이름이 또렷하게 ── */
   #big{background:linear-gradient(180deg,#DCEBFF 0%,#F4F8FF 55%,#FFFFFF 100%)}
   #big .gMix{font-size:clamp(24px,2.5vw,38px)} #big .gMix b{font-size:clamp(28px,2.9vw,44px)}
