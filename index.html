@@ -1577,6 +1577,7 @@ function scGroups() {
     else { b1 = "▶ 조 편성"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · ${ui.nextSame && hasPrevGroups(cls, cg) ? "지난 라운드와 같은 조" : METHODS[methodFor(cg.st)][0]}`; }
     if (isPair) h += `<div class="startWrap pairWrap startDock noprint">${pairSel.map(pairCard).join("")}</div>`;
     else h += `<div class="startWrap startDock noprint"><button class="startBtn ${!isPair && formed ? "ready" : ""}" data-act="${nxAct}"><span class="ico">${b1.startsWith("✔") ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${b1.replace(/^[▶✔] /, "")}</span><span class="sb2">${b2}</span></span></button></div>`;
+    if (gs.length) h += `<div class="acts3 noprint"><button class="btn soft" data-act="big">프로젝터 띄우기</button></div>`;
     if (cg && ((running && nx) || (!formed && !running && hasPrevGroups(cls, cg)))) h += `<div class="nextMode noprint"><span>다음 라운드 조</span><div class="nmSeg"><button class="${ui.nextSame ? "" : "on"}" data-act="nextSame" data-v="0">새로 편성</button><button class="${ui.nextSame ? "on" : ""}" data-act="nextSame" data-v="1">같은 조 그대로</button></div></div>`;
   }
   if (!VIEW) {
@@ -1593,7 +1594,7 @@ function scGroups() {
       ${buddyBox(cls)}
       <button class="switch ${fitOn() ? "on" : ""}" data-act="fit" data-v="${fitOn() ? 0 : 1}"><span>다트가 모자라면 5명 조</span><i></i></button>
       <button class="switch ${refSwapOn() ? "on" : ""}" data-act="refSwap"><span>조가 다트보다 많으면 심판 교대<br><small>1차 절반 경기·짝 조 심판, 2차는 바꿔서</small></span><i></i></button>
-      ${gs.length ? `<div class="acts3"><button class="btn soft" data-act="big">프로젝터 띄우기</button><button class="btn soft" data-act="resetRound">이 라운드 리셋</button></div>` : ""}
+      ${gs.length ? `<div class="acts3"><button class="btn soft" data-act="resetRound">이 라운드 리셋</button></div>` : ""}
       <div class="sumline">${n0 ? `<b>${n0}명</b> → <b>${sz0.length}개 조</b> <span>(${sz0.join("·")}명)</span>` : "참여 학생 없음"}</div>
       <button class="btn pri big wide" data-act="make">${gs.length ? "다시 편성" : "편성하기"}</button>
       ${gs.length ? `<button class="linkBtn danger" data-act="clrGroups">이 라운드 조 지우기</button>` : r > 1 && groupsOf(cls, st, r - 1).length ? `<button class="linkBtn" data-act="copyPrev">${r - 1}라운드 조 그대로 쓰기</button>` : ""}
