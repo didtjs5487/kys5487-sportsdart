@@ -1324,7 +1324,7 @@ function sizes(n, size, boards, fit) {
   const base = Math.floor(n / k), extra = n % k;
   return Array.from({ length: k }, (_, i) => base + (i < extra ? 1 : 0));
 }
-const fitOn = () => ui.fit !== false;
+const fitOn = () => ui.fit === true;   // 기본은 4명 조 + 모자라는 인원은 3명 조 (5명 조는 켠 때만)
 function chunk(list, sz) { const out = []; let i = 0; sz.forEach(s => { out.push(list.slice(i, i + s)); i += s; }); return out; }
 /* 카운트업 성적 순으로 줄 세우기 (합산 승점 → 총점 → 무작위) */
 function byCU(cls, list) {
