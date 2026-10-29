@@ -692,6 +692,8 @@
   .nmSeg{display:flex; background:var(--soft); border-radius:12px; padding:3px}
   .nmSeg button{min-height:42px; padding:0 14px; border:0; border-radius:10px; background:transparent; color:var(--sub); font-size:16px; font-weight:700; cursor:pointer; transition:background .2s var(--ease), color .2s var(--ease)}
   .nmSeg button.on{background:var(--panel); color:var(--pri); box-shadow:0 1px 4px rgba(25,31,40,.1)}
+  .pairWrap{flex-direction:column; align-items:stretch; gap:10px}
+  .pairWrap .startBtn{min-width:0; width:100%} .pairWrap .startBtn .sb1{font-size:23px}
   .resumeNote{display:flex; flex-direction:column; gap:4px; margin:0 0 12px; padding:14px 16px; border-radius:18px; background:#FFF6E5; font-size:16px; line-height:1.5}
   .resumeNote b{font-size:18px} .resumeNote span{color:var(--sub); font-weight:600} .resumeNote .btn{align-self:flex-start; margin-top:6px}
   .takeBtn{margin-left:8px}
@@ -1510,7 +1512,7 @@ function scGroups() {
   const info = grpRec(cls, st, r);
   let h = VIEW ? gameSeg(cls) : "";
   const pairSel = !VIEW && pairOn() ? [ui.cls, ...bigPair()].sort(numSort) : [], isPair = pairSel.length === 2, nxAct = isPair ? "startPair" : "startNext";
-  if (!VIEW) h += (isPair ? pairSel : [cls]).map(c => resumeNote(c, nxAct)).join("");
+  if (!VIEW && !isPair) h += resumeNote(cls, nxAct);
   if (!VIEW) {   // 수업 중 누를 것은 이 큰 단추 하나: 알아서 다음 경기·라운드를 골라 편성하고 프로젝터에 띄운다
     const cg = curGame(cls), running = !!(gs.length && liveOf(cls)), nx = cg && running ? nextStep(cg.st, cg.r) : null, formed = !!(cg && !running && groupsOf(cls, cg.st, cg.r).length);
     let b1, b2;
@@ -1524,7 +1526,8 @@ function scGroups() {
     else if (formed && unfinished(cls)) { b1 = "▶ 이어서 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · 남은 경기를 이어서 해요`; }
     else if (formed) { b1 = "▶ 경기 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · 인원을 확인했으면 눌러요`; }
     else { b1 = "▶ 조 편성"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · ${ui.nextSame && hasPrevGroups(cls, cg) ? "지난 라운드와 같은 조" : METHODS[methodFor(cg.st)][0]}`; }
-    h += `<div class="startWrap noprint"><button class="startBtn ${!isPair && formed ? "ready" : ""}" data-act="${nxAct}"><span class="ico">${b1.startsWith("✔") ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${b1.replace(/^[▶✔] /, "")}</span><span class="sb2">${b2}</span></span></button></div>`;
+    if (isPair) h += `<div class="startWrap pairWrap noprint">${pairSel.map(pairCard).join("")}</div>`;
+    else h += `<div class="startWrap noprint"><button class="startBtn ${!isPair && formed ? "ready" : ""}" data-act="${nxAct}"><span class="ico">${b1.startsWith("✔") ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${b1.replace(/^[▶✔] /, "")}</span><span class="sb2">${b2}</span></span></button></div>`;
     if (cg && ((running && nx) || (!formed && !running && hasPrevGroups(cls, cg)))) h += `<div class="nextMode noprint"><span>다음 라운드 조</span><div class="nmSeg"><button class="${ui.nextSame ? "" : "on"}" data-act="nextSame" data-v="0">새로 편성</button><button class="${ui.nextSame ? "on" : ""}" data-act="nextSame" data-v="1">같은 조 그대로</button></div></div>`;
     if (gs.length) h += `<div class="acts3 noprint"><button class="btn soft" data-act="big">프로젝터</button><button class="btn soft" data-act="resetRound">이 라운드 리셋</button></div>`;
   }
@@ -1604,9 +1607,19 @@ function clsBar() {
   const on = pairOn(), sel = on ? [ui.cls, ...bigPair()] : [ui.cls], shown = sel.slice().sort(numSort);
   const label = shown.map(c => `${esc(shortCls(c))}<small>반</small>`).join('<i class="dotSep">·</i>');
   const menu = ui.clsMenu ? `<div class="clsGrid noprint">${names.map(c => `<button class="${sel.includes(c) ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(shortCls(c))}<small>반</small></button>`).join("")}</div>` : "";
-  return `<div class="clsBar noprint"><button class="clsPickBtn ${ui.clsMenu ? "open" : ""}" data-act="clsMenu" aria-expanded="${!!ui.clsMenu}"><span class="clsNow">${label}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><button class="pairTog ${on ? "on" : ""}" data-act="pairTog" aria-pressed="${on}"><span class="pIco">${on ? "✓" : "＋"}</span>두 반 함께</button></div>${menu}${on && sel.length < 2 ? `<p class="hint noprint" style="margin:-4px 0 8px">함께할 반을 하나 더 눌러 주세요</p>` : ""}${on && sel.length === 2 && ui.tab !== "entry" ? pairRows(shown) : ""}`;
+  return `<div class="clsBar noprint"><button class="clsPickBtn ${ui.clsMenu ? "open" : ""}" data-act="clsMenu" aria-expanded="${!!ui.clsMenu}"><span class="clsNow">${label}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><button class="pairTog ${on ? "on" : ""}" data-act="pairTog" aria-pressed="${on}"><span class="pIco">${on ? "✓" : "＋"}</span>두 반 함께</button></div>${menu}${on && sel.length < 2 ? `<p class="hint noprint" style="margin:-4px 0 8px">함께할 반을 하나 더 눌러 주세요</p>` : ""}`;
 }
 /* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
+/* 두 반 함께: 반마다 큰 단추 하나씩 — 반의 진도에 맞게 이어서 시작 · 조 편성 · 경기 시작 · 다음 경기 */
+function pairCard(c) {
+  const x = liveStat(c), cg = curGame(c), u = !x.L && cg ? unfinished(c) : null, formed = !x.L && cg && groupsOf(c, cg.st, cg.r).length;
+  const lab = x.L ? "다음 경기" : !cg ? "모든 경기 끝" : u ? "이어서 시작" : formed ? "경기 시작" : "조 편성";
+  const sub = x.L ? `${STAGES[x.L.st].name} ${x.L.r}R · 입력 ${x.nd}/${x.total}${x.done ? " ✔" : ""}`
+    : !cg ? "성적에서 확인해요"
+    : u ? `${STAGES[cg.st].name} ${cg.r}R · ${u.swap ? u.wave + "차 경기가 " : ""}남았어요`
+    : formed ? `${STAGES[cg.st].name} ${cg.r}R · 인원 확인 후 시작` : `${STAGES[cg.st].name} ${cg.r}R · ${METHODS[methodFor(cg.st)][0]}`;
+  return `<button class="startBtn pairBtn ${formed || u || x.done ? "ready" : ""}" data-act="${cg || x.L ? "startOne" : ""}" data-v="${esc(c)}"><span class="ico">${!cg && !x.L ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${esc(shortCls(c))}반 · ${lab}</span><span class="sb2">${sub}</span></span></button>`;
+}
 function pairRows(cs) {
   const st = cs.map(liveStat);
   return `<div class="pairRows noprint">${st.map(x => {
