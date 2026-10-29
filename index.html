@@ -694,21 +694,25 @@
   .nmSeg button.on{background:var(--panel); color:var(--pri); box-shadow:0 1px 4px rgba(25,31,40,.1)}
   .pairWrap{flex-direction:column; align-items:stretch; gap:10px}
   .pairWrap .startBtn{min-width:0; width:100%} .pairWrap .startBtn .sb1{font-size:23px}
+  /* 경기 시작 단추는 작고 단정하게 */
+  .startBtn{min-width:0; gap:12px; padding:8px 22px 8px 8px; border-radius:18px; box-shadow:0 6px 16px rgba(49,130,246,.28)}
+  .startBtn .ico{width:42px; height:42px; font-size:19px} .startBtn .sb1{font-size:20px} .startBtn .sb2{font-size:15px}
+  .pairWrap .startBtn .sb1{font-size:19px}
   .resumeNote{display:flex; flex-direction:column; gap:4px; margin:0 0 12px; padding:14px 16px; border-radius:18px; background:#FFF6E5; font-size:16px; line-height:1.5}
   .resumeNote b{font-size:18px} .resumeNote span{color:var(--sub); font-weight:600} .resumeNote .btn{align-self:flex-start; margin-top:6px}
   .takeBtn{margin-left:8px}
-  .progStrip{display:grid; gap:10px; margin:0 0 14px} .progStrip.two{grid-template-columns:1fr 1fr}
-  .progCard{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; padding:12px 14px; border-radius:20px; background:var(--panel); border:1.5px solid var(--line2)}
-  .progCard.cur{border-color:var(--pri)} .progCard.full{background:var(--goodSoft); border-color:#BFE6CF}
-  .pgW{position:relative; flex:none; width:56px; height:56px} .pgW svg{width:56px; height:56px; display:block}
-  .pT{fill:none; stroke:var(--line2); stroke-width:6} .pB{fill:none; stroke:var(--pri); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset .6s ease}
-  .progCard.full .pB{stroke:var(--good)}
-  .pgN{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--ink)} .pgN b{font-size:19px} .pgN small{font-size:13px; color:var(--sub)}
-  .progCard.full .pgN{color:var(--good); font-size:22px}
-  .pgT{display:flex; flex-direction:column; min-width:0; flex:1} .pgT b{font-size:20px} .pgT span{font-size:16px; font-weight:700} .pgT small{font-size:15px; color:var(--sub)}
-  .progCard .btn{flex:1 1 100%; min-height:50px}
-  .endRow{display:flex; justify-content:flex-end; margin:-4px 0 10px}
-  @media (max-width:520px){ .progStrip.two{grid-template-columns:1fr} }
+  .clsBar{flex-direction:column; align-items:stretch; gap:8px}
+  .clsCards{display:grid; grid-template-columns:1fr; gap:8px} .clsCards.two{grid-template-columns:1fr 1fr}
+  .clsCard{position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:flex-start; gap:1px; min-height:92px; padding:12px 14px 14px; border:2px solid transparent; border-radius:18px; background:var(--soft); color:var(--ink); text-align:left; cursor:pointer}
+  .clsCard b{font-size:26px; font-weight:800; line-height:1.1} .clsCard b small{font-size:16px; margin-left:1px}
+  .clsCard .cg{font-size:16px; font-weight:700; color:var(--sub)} .clsCard .cs{margin-top:2px; font-size:18px; font-weight:800}
+  .clsCard .cb{position:absolute; left:0; bottom:0; height:6px; border-radius:0 6px 6px 0; background:var(--pri); transition:width .6s ease}
+  .clsCard.cur{border-color:var(--pri); background:var(--panel)}
+  .clsCard.idle .cs{color:var(--sub)} .clsCard.ready .cs, .clsCard.run .cs{color:var(--pri)}
+  .clsCard.done{background:var(--goodSoft)} .clsCard.done .cs{color:var(--good)} .clsCard.done .cb{background:var(--good)}
+  .clsCard.wait{background:#FFF6E5} .clsCard.wait .cs{color:#B45F06}
+  .clsTools{display:flex; gap:8px; align-items:center} .clsMore{flex:1; min-height:48px; border:0; border-radius:999px; background:var(--soft); color:var(--ink); font-size:17px; font-weight:800; cursor:pointer}
+  .endRow{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px} .endRow small{font-size:15px; color:var(--sub)}
   /* ── 모션 ── */
   @keyframes gfill{from{stroke-dashoffset:var(--f)}to{stroke-dashoffset:var(--t)}}
   @keyframes pop{0%{transform:scale(.5); opacity:0}60%{transform:scale(1.18); opacity:1}100%{transform:none}}
@@ -1616,21 +1620,18 @@ const shortCls = c => { const t = String(c); return t.includes("-") ? t.split("-
 function clsBar() {
   if (VIEW) return "";
   const names = classNames(); if (names.length < 2) return "";
-  const on = pairOn(), sel = on ? [ui.cls, ...bigPair()] : [ui.cls], shown = sel.slice().sort(numSort);
-  const label = shown.map(c => `${esc(shortCls(c))}<small>반</small>`).join('<i class="dotSep">·</i>');
+  const on = pairOn(), sel = (on ? [ui.cls, ...bigPair()] : [ui.cls]).sort(numSort), two = sel.length > 1;
+  const chips = sel.map(c => { const t = classState(c);
+    return `<button class="clsCard ${t.k} ${c === ui.cls ? "cur" : ""}" data-act="${two ? "pickCls" : "clsMenu"}" data-v="${esc(c)}"><b>${esc(shortCls(c))}<small>반</small></b><span class="cg">${t.game}</span><span class="cs">${t.txt}</span><i class="cb" style="width:${Math.round(t.pct * 100)}%"></i></button>`; }).join("");
   const menu = ui.clsMenu ? `<div class="clsGrid noprint">${names.map(c => `<button class="${sel.includes(c) ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(shortCls(c))}<small>반</small></button>`).join("")}</div>` : "";
-  return `<div class="clsBar noprint"><button class="clsPickBtn ${ui.clsMenu ? "open" : ""}" data-act="clsMenu" aria-expanded="${!!ui.clsMenu}"><span class="clsNow">${label}</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button><button class="pairTog ${on ? "on" : ""}" data-act="pairTog" aria-pressed="${on}"><span class="pIco">${on ? "✓" : "＋"}</span>두 반 함께</button></div>${menu}${on && sel.length < 2 ? `<p class="hint noprint" style="margin:-4px 0 8px">함께할 반을 하나 더 눌러 주세요</p>` : ""}`;
+  return `<div class="clsBar noprint"><div class="clsCards ${two ? "two" : ""}">${chips}</div><div class="clsTools"><button class="clsMore ${ui.clsMenu ? "open" : ""}" data-act="clsMenu" aria-expanded="${!!ui.clsMenu}">반 바꾸기 <span>▾</span></button><button class="pairTog ${on ? "on" : ""}" data-act="pairTog" aria-pressed="${on}"><span class="pIco">${on ? "✓" : "＋"}</span>두 반 함께</button></div></div>${menu}${on && !two ? `<p class="hint noprint" style="margin:-4px 0 8px">함께할 반을 하나 더 눌러 주세요</p>` : ""}`;
 }
 /* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
 /* 두 반 함께: 반마다 큰 단추 하나씩 — 반의 진도에 맞게 이어서 시작 · 조 편성 · 경기 시작 · 다음 경기 */
 function pairCard(c) {
   const x = liveStat(c), cg = curGame(c), u = !x.L && cg ? unfinished(c) : null, formed = !x.L && cg && groupsOf(c, cg.st, cg.r).length;
   const lab = x.L ? "다음 경기" : !cg ? "모든 경기 끝" : u ? "이어서 시작" : formed ? "경기 시작" : "조 편성";
-  const sub = x.L ? `${STAGES[x.L.st].name} ${x.L.r}R · 입력 ${x.nd}/${x.total}${x.done ? " ✔" : ""}`
-    : !cg ? "성적에서 확인해요"
-    : u ? `${STAGES[cg.st].name} ${cg.r}R · ${u.swap ? u.wave + "차 경기가 " : ""}남았어요`
-    : formed ? `${STAGES[cg.st].name} ${cg.r}R · 인원 확인 후 시작` : `${STAGES[cg.st].name} ${cg.r}R · ${METHODS[methodFor(cg.st)][0]}`;
-  return `<button class="startBtn pairBtn ${formed || u || x.done ? "ready" : ""}" data-act="${cg || x.L ? "startOne" : ""}" data-v="${esc(c)}"><span class="ico">${!cg && !x.L ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${esc(shortCls(c))}반 · ${lab}</span><span class="sb2">${sub}</span></span></button>`;
+  return `<button class="startBtn pairBtn ${formed || u || x.done ? "ready" : ""}" data-act="${cg || x.L ? "startOne" : ""}" data-v="${esc(c)}"><span class="ico">${!cg && !x.L ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${esc(shortCls(c))}반 · ${lab}</span></span></button>`;
 }
 function pairRows(cs) {
   const st = cs.map(liveStat);
@@ -1643,24 +1644,13 @@ function pairRows(cs) {
     const lab = x.L ? "다음 경기" : u ? "이어서 시작" : formed ? "경기 시작" : "조 편성";
     return `<div class="pairRow ${x.done ? "done" : ""}"><b>${esc(c)}반</b><span>${txt}</span>${x.L || cg ? `<button class="btn sm ${x.done || !x.L ? "pri" : ""}" data-act="startOne" data-v="${esc(c)}">▶ ${lab}</button>` : ""}</div>`; }).join("")}</div>`;
 }
-/* 진행 현황 띠 — 선택한 반마다 게이지 + 상태 + 지금 누를 단추 하나. 게이지가 다 차면 초록 [다음 경기]로 바뀐다 */
-function progCard(c, cur) {
+/* 반 단추에 넣는 한 줄 상태 — 회색 조 편성 전 · 파랑 경기 중 n/m · 초록 입력 끝 · 주황 이어서 하기 */
+function classState(c) {
   const x = liveStat(c), cg = curGame(c), u = !x.L && cg ? unfinished(c) : null, formed = !x.L && cg && groupsOf(c, cg.st, cg.r).length;
-  const CIR = 2 * Math.PI * 22, pct = x.total ? x.nd / x.total : 0, full = x.done;
-  const title = x.L ? `${STAGES[x.L.st].name} ${x.L.r}R` : cg ? `${STAGES[cg.st].name} ${cg.r}R` : "모든 경기 끝";
-  const sub = x.L ? (full ? "모두 저장됨" : "다트 입력 중")
-    : !cg ? "성적에서 확인해요"
-    : u ? `${u.swap ? u.wave + "차 경기가 " : ""}남았어요` : formed ? "조 확인 후 시작" : "조 편성 전";
-  const num = !x.L ? (cg ? "·" : "✔") : full ? "✔" : `<b>${x.nd}</b><small>/${x.total}</small>`;
-  const lab = x.L ? (full ? "다음 경기" : cur ? "" : "입력 보기") : u ? "이어서 시작" : formed ? "경기 시작" : cg ? "조 편성" : "";
-  const act = x.L ? (full ? "startOne" : "pickCls") : (cg ? "startOne" : "");
-  const btn = lab && act ? `<button class="btn sm ${full || !x.L ? "pri" : ""}" data-act="${act}" data-v="${esc(c)}">${x.L && !full ? "" : "▶ "}${lab}</button>` : "";
-  return `<div class="progCard ${cur ? "cur" : ""} ${full ? "full" : ""}"><div class="pgW"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="22" class="pT"/><circle cx="26" cy="26" r="22" class="pB" style="opacity:${pct || full ? 1 : 0}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - (full ? 1 : pct))).toFixed(1)}" transform="rotate(-90 26 26)"/></svg><div class="pgN">${num}</div></div><div class="pgT"><b>${esc(shortCls(c))}반</b><span>${title}</span><small>${sub}</small></div>${btn}</div>`;
-}
-function progStrip() {
-  if (VIEW || !ui.cls) return "";
-  const cs = (pairOn() ? [ui.cls, ...bigPair()] : [ui.cls]).sort(numSort);
-  return `<div class="progStrip noprint ${cs.length > 1 ? "two" : ""}">${cs.map(c => progCard(c, c === ui.cls)).join("")}</div>`;
+  if (x.L) return { k: x.done ? "done" : "run", game: `${STAGES[x.L.st].name} ${x.L.r}R`, txt: x.done ? "입력 끝 ✔" : `경기 중 ${x.nd}/${x.total}`, pct: x.total ? x.nd / x.total : 0 };
+  if (!cg) return { k: "done", game: "전체", txt: "모든 경기 끝 ✔", pct: 1 };
+  const game = `${STAGES[cg.st].name} ${cg.r}R`;
+  return u ? { k: "wait", game, txt: "이어서 하기", pct: 0 } : formed ? { k: "ready", game, txt: "조 확인 후 시작", pct: 0 } : { k: "idle", game, txt: "조 편성 전", pct: 0 };
 }
 /* 한 반의 지금 라운드 입력 현황 */
 function liveStat(c) {
@@ -1804,16 +1794,7 @@ function scEntry() {
   if (!gs.length) return (VIEW ? joinBox(cls) : "") + h + (VIEW ? `<p class="wait">⏳ 조 편성을 기다리는 중</p>` : `<div class="go one"><button class="btn pri big nextBig" data-act="startNext">▶ 경기 시작</button></div>`);
   const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi)), closed = isClosed(cls, st, ui.round);
   if (!VIEW && GRP == null) {
-    const nDone = gs.filter((g, gi) => cardDone(cls, g, rr, "g" + gi)).length;
-    const two = pairOn() && bigPair().length;
-    if (two) h += progStrip();
-    // 입력 게이지 — 다트가 다 저장되면 저절로 종료된다 (2026-10-27)
-    const pct = gs.length ? nDone / gs.length : 0, CIR = 2 * Math.PI * 34, full = closed || allDone;
-    if (!two) h += `<div class="gaugeBox ${full ? "full" : ""} ${full && once("gfull" + cls + st + ui.round) ? "pop" : ""}"><div class="gWrap"><svg class="gauge" viewBox="0 0 84 84" aria-hidden="true"><defs><linearGradient id="gGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9890F2"/><stop offset="1" stop-color="#4A41D6"/></linearGradient></defs><circle cx="42" cy="42" r="34" class="gTrack"/><circle cx="42" cy="42" r="34" class="gBar" style="opacity:${pct || full ? 1 : 0};${gAnim("res" + cls + st + ui.round, CIR * (1 - (full ? 1 : pct)))}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - (full ? 1 : pct))).toFixed(1)}" transform="rotate(-90 42 42)"/></svg><div class="gNum">${full ? "<b>✔</b>" : `<b>${nDone}</b><small>/${gs.length}</small>`}</div></div>`
-      + `<div class="gTxt"><b>${closed ? "경기 종료" : allDone ? "모두 저장됨" : "다트 입력 중"}</b><small>${closed ? "학생 입력이 잠겼어요" : allDone ? "곧 자동으로 끝나요" : "모두 저장되면 자동으로 끝나요"}</small></div>`
-      + (closed ? `<button class="endLink" data-act="reopenRound">다시 열기</button>` : `<button class="endLink" data-act="endRound">지금 종료</button>`) + `</div>`;
-    if (two) h += `<div class="endRow noprint">${closed ? `<button class="endLink" data-act="reopenRound">${esc(shortCls(cls))}반 다시 열기</button>` : `<button class="endLink" data-act="endRound">${esc(shortCls(cls))}반 지금 종료</button>`}</div>`;
-
+    h += `<div class="endRow noprint"><small>${closed ? "학생 입력이 잠겼어요" : allDone ? "모두 저장됐어요 · 곧 자동으로 끝나요" : "모두 저장되면 자동으로 끝나요"}</small>${closed ? `<button class="endLink" data-act="reopenRound">다시 열기</button>` : `<button class="endLink" data-act="endRound">지금 종료</button>`}</div>`;
   }
 
   let cards = gs.map((g, gi) => ({ g, gi }));
