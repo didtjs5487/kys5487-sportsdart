@@ -692,6 +692,9 @@
   .nmSeg{display:flex; background:var(--soft); border-radius:12px; padding:3px}
   .nmSeg button{min-height:42px; padding:0 14px; border:0; border-radius:10px; background:transparent; color:var(--sub); font-size:16px; font-weight:700; cursor:pointer; transition:background .2s var(--ease), color .2s var(--ease)}
   .nmSeg button.on{background:var(--panel); color:var(--pri); box-shadow:0 1px 4px rgba(25,31,40,.1)}
+  .resumeNote{display:flex; flex-direction:column; gap:4px; margin:0 0 12px; padding:14px 16px; border-radius:18px; background:#FFF6E5; font-size:16px; line-height:1.5}
+  .resumeNote b{font-size:18px} .resumeNote span{color:var(--sub); font-weight:600} .resumeNote .btn{align-self:flex-start; margin-top:6px}
+  .takeBtn{margin-left:8px}
   /* ── 모션 ── */
   @keyframes gfill{from{stroke-dashoffset:var(--f)}to{stroke-dashoffset:var(--t)}}
   @keyframes pop{0%{transform:scale(.5); opacity:0}60%{transform:scale(1.18); opacity:1}100%{transform:none}}
@@ -818,7 +821,7 @@ let VIEW = true;
 const TEACHERS = ["teacher112@yeongjong.icehs.kr", "teacher74@yeongjong.icehs.kr", "bogang@yeongjong.icehs.kr"];   // bogang = 보강 선생님 공용 계정
 let teacher = null, authKnown = false, fbFailed = false, stuOK = false, secret = {};
 let me = lsGet("darts-me" + TEST);   // 코드를 넣은 휴대폰 {day}
-const DEV = lsGet("darts-dev") || (() => { const d = Math.random().toString(36).slice(2, 10); lsSet("darts-dev", d); return d; })();   // 이 휴대폰 표시
+const DEV = lsGet("darts-dev") || (() => { try { const v = sessionStorage.getItem("darts-dev"); if (v) return v; } catch (e) {} const d = Math.random().toString(36).slice(2, 10); lsSet("darts-dev", d); try { sessionStorage.setItem("darts-dev", d); } catch (e) {} return d; })();   // 이 휴대폰 표시
 /* ?local=1&student — 서버 없이 학생 입력 화면을 미리 보는 시연 모드 */
 const STU_DEMO = !!TEST && params.has("student");
 const canTeach = () => (!!TEST && !STU_DEMO) || (fbFailed && !STU_DEMO) || !!teacher || (!authKnown && lsGet("darts-teacher") === true);
@@ -1507,6 +1510,7 @@ function scGroups() {
   const info = grpRec(cls, st, r);
   let h = VIEW ? gameSeg(cls) : "";
   const pairSel = !VIEW && pairOn() ? [ui.cls, ...bigPair()].sort(numSort) : [], isPair = pairSel.length === 2, nxAct = isPair ? "startPair" : "startNext";
+  if (!VIEW) h += (isPair ? pairSel : [cls]).map(c => resumeNote(c, nxAct)).join("");
   if (!VIEW) {   // 수업 중 누를 것은 이 큰 단추 하나: 알아서 다음 경기·라운드를 골라 편성하고 프로젝터에 띄운다
     const cg = curGame(cls), running = !!(gs.length && liveOf(cls)), nx = cg && running ? nextStep(cg.st, cg.r) : null, formed = !!(cg && !running && groupsOf(cls, cg.st, cg.r).length);
     let b1, b2;
@@ -1516,6 +1520,7 @@ function scGroups() {
       b2 = pairSel.map(c => { const g = curGame(c); return g ? `${esc(c)}반 ${STAGES[g.st].name} ${g.r}R` : `${esc(c)}반 끝`; }).join(" · ");
     } else if (!cg) { b1 = "✔ 모든 경기가 끝났어요"; b2 = "눌러서 성적 보기"; }
     else if (running) { b1 = "▶ 다음 경기"; b2 = nx ? `${STAGES[nx.st].name} ${nx.r}라운드 · ${ui.nextSame ? "같은 조로 이어가요" : "조를 새로 짜요"}` : "마지막 경기를 마쳐요"; }
+    else if (formed && unfinished(cls)) { b1 = "▶ 이어서 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · 남은 경기를 이어서 해요`; }
     else if (formed) { b1 = "▶ 경기 시작"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · 인원을 확인했으면 눌러요`; }
     else { b1 = "▶ 조 편성"; b2 = `${STAGES[cg.st].name} ${cg.r}라운드 · ${ui.nextSame && hasPrevGroups(cls, cg) ? "지난 라운드와 같은 조" : METHODS[methodFor(cg.st)][0]}`; }
     h += `<div class="startWrap noprint"><button class="startBtn ${!isPair && formed ? "ready" : ""}" data-act="${nxAct}"><span class="ico">${b1.startsWith("✔") ? "✔" : "▶"}</span><span class="txt"><span class="sb1">${b1.replace(/^[▶✔] /, "")}</span><span class="sb2">${b2}</span></span></button></div>`;
@@ -1557,6 +1562,23 @@ function entryMini(c) {
   const nDone = gs.filter((g, gi) => cardDone(c, g, rr, "g" + gi, st, r)).length;
   return `<div class="blkHead"><b>${esc(c)}반</b><span>${STAGES[st].name} ${r}R · 입력 ${nDone}/${n}</span></div><div class="clist">${gs.map((g, gi) => { const s2 = dartState(c, g, rr, gi, st, r);
     return `<button class="crow ${s2}" data-act="goCls" data-c="${esc(c)}" data-st="${st}" data-r="${r}" data-g="g${gi}"><span class="ci">${s2 === "done" ? "✔" : s2 === "part" ? "◐" : "○"}</span><span class="gno ${st}">${boardOf(c, gi, n)}</span>${charImg(boardOf(c, gi, n), "gch")}<span class="gnames"><span class="who">${g.m.filter(x => !isAbs(c, x)).map(x => esc((sm[x] || {}).name || "?")).join(" · ")}</span></span><span class="chev">입력 ▾</span></button>`; }).join("")}</div>`;
+}
+/* 수업이 끝나 못 마친 라운드 — 시작은 했는데 모든 다트가 저장되지 않은 첫 라운드 (오늘 이미 이어서 하는 중이면 null) */
+function unfinished(cls) {
+  for (const st of ["cu", "x3"]) for (let r = 1; r <= CFG.rounds; r++) {
+    if (isClosed(cls, st, r)) continue;
+    const gs = groupsOf(cls, st, r); if (!gs.length) continue;
+    if (!hasAnyRound(cls, st, r) || allEntered(cls, st, r)) return null;
+    const L = liveOf(cls); if (L && L.st === st && L.r === r) return null;
+    const rr = roundRes(cls, st, r), n = gs.length, left = gs.map((g, gi) => cardDone(cls, g, rr, "g" + gi, st, r) ? -1 : gi).filter(gi => gi >= 0);
+    return { st, r, n, left, wave: left.length ? waveOf(cls, left[0], n) : 1, swap: swapOn(cls, n) };
+  }
+  return null;
+}
+function resumeNote(c, act) {
+  const u = unfinished(c); if (!u) return "";
+  const names = u.left.map(g => (g + 1) + "조").join(" · ");
+  return `<div class="resumeNote noprint"><b>지난 시간에 끝내지 못한 경기가 있어요</b><span>${esc(c)}반 ${STAGES[u.st].name} ${u.r}라운드 — ${u.swap ? u.wave + "차 경기 · " : ""}아직 입력이 안 된 조: ${names}</span><button class="btn pri" data-act="${act}">▶ 이어서 시작</button></div>`;
 }
 /* 한 반의 조 목록 (선생님 화면) — 이름을 누르면 고르고, 같은 반의 다른 이름을 누르면 서로 바꾼다 */
 function groupBlock(c, st, r, head) {
@@ -1638,7 +1660,17 @@ const isOff = n => !!((S.settings || {}).off || {})["b" + n];
 /* 켜진 다트 — 고장 났거나 오늘 안 쓰는 다트는 꺼 두면 조 배정·화면에서 빠진다 */
 function onBoards() { const on = allBoards().filter(n => !isOff(n)); return on.length ? on : allBoards(); }
 /* 반이 고른 다트 위치는 그날만 쓴다 — 다음 수업(다른 날)에는 다시 켜진 다트 전체 (2026-10-05) */
-function chosenBoards(cls) { const b = C(cls).boards; return b && !Array.isArray(b) && b.day === today() ? (b.list || []) : []; }
+/* 수업 시간이 모자라 1차만 하고 끝난 라운드는 다음 시간에 같은 다트 배정으로 이어 간다 (2026-10-29) */
+function carryBoards(cls) {
+  const b = C(cls).boards; if (!b || Array.isArray(b) || b.day === today()) return false;
+  for (const st of ["cu", "x3"]) for (let r = 1; r <= CFG.rounds; r++) {
+    if (isClosed(cls, st, r)) continue;
+    const gs = groupsOf(cls, st, r); if (!gs.length) continue;
+    return hasAnyRound(cls, st, r) && !allEntered(cls, st, r);   // 시작은 했지만 아직 다 못 끝낸 첫 라운드
+  }
+  return false;
+}
+function chosenBoards(cls) { const b = C(cls).boards; return b && !Array.isArray(b) && (b.day === today() || carryBoards(cls)) ? (b.list || []) : []; }
 function boardsOf(cls) {
   const on = onBoards();
   const b = chosenBoards(cls).map(Number).filter(n => on.includes(n));
@@ -1648,7 +1680,7 @@ function boardsOf(cls) {
    1차에는 앞쪽 조가 경기하고 짝 조(같은 다트의 2차 조)가 심판, 2차에는 바꾼다. 설정 settings/refSwap=false 면 예전처럼(1차에 다트 수만큼, 남는 조만 2차) */
 const refSwapOn = () => ((S.settings || {}).refSwap) !== false;
 const nGroups = cls => { if (cls !== ui.cls) { const L = liveOf(cls); if (L) return groupsOf(cls, L.st, L.r).length; } return groupsOf(cls, ui.stage, ui.round).length; };
-const pairSwap = cls => { const b = C(cls).boards; return !!(b && !Array.isArray(b) && b.day === today() && b.swap); };   // 오늘 두 반 함께로 시작한 반
+const pairSwap = cls => { const b = C(cls).boards; return !!(b && !Array.isArray(b) && (b.day === today() || carryBoards(cls)) && b.swap); };   // 오늘 두 반 함께로 시작한 반
 const swapOn = (cls, n = nGroups(cls)) => { const len = boardsOf(cls).length; return refSwapOn() && n > 1 && n <= 2 * len && (n > len || pairSwap(cls)); };
 const useN = (cls, n = nGroups(cls)) => swapOn(cls, n) ? Math.ceil(n / 2) : boardsOf(cls).length;
 const boardOf = (cls, gi, n) => { const b = boardsOf(cls); return b[gi % useN(cls, n)]; };
@@ -1824,7 +1856,7 @@ function card(cls, st, gk, members, res, title) {
   const rowsShown = needRef ? `<p class="refFirst">👆 먼저 위에서 <b>심판</b>(결과를 입력할 사람)을 눌러 주세요. 그러면 점수 칸이 열려요.</p><div class="memList">${live.map(s => `<span>${esc((sm[s] || {}).name || "?")}</span>`).join("")}</div>` : rows;
   const opened = !needRef && hasRef && once("open" + cls + st + ui.round + key);
   const cheer = okDone && once("cheer" + cls + st + ui.round + key);
-  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""} ${opened ? "opened" : ""} ${cheer ? "cheer" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중</p>` : ""}${needRef ? refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rowsShown}
+  return `<div class="ecard ${done ? "done" : ""} ${focus ? "focus" : ""} ${opened ? "opened" : ""} ${cheer ? "cheer" : ""}" id="card-${gk === "mk" ? "mk" : "g" + gk}"><h4 ${!VIEW && focus ? `data-act="jumpCard" data-g="${key}" style="cursor:pointer"` : ""}>${gk !== "mk" ? charImg(boardOf(cls, +gk), "hdimg") : ""}${title}${gk !== "mk" && live.length ? ` <span class="tag">${live.length}명 · ${ptsRow(live.length)}</span>` : ""}<span class="st ${done ? "ok" : ""}">${done ? "✔ 입력 완료" : ""}</span></h4>${takenByOther ? `<p class="note" style="margin:0 0 6px">🧑‍⚖️ <b>${esc((stuMap(R0.byCls || cls)[R0.by] || {}).name || "다른 학생")}</b> 심판이 입력 중<button class="btn sm pri takeBtn" data-act="takeRef" data-g="${key}">내가 입력할게요</button></p>` : ""}${needRef ? refPicker(cls, key, members) : VIEW && !canTeach() && !takenByOther ? refGuide(false) : ""}${gk === "mk" && !RO ? `<p class="hint" style="margin:0 0 4px">함께 던진 조에서 받은 <b>순위를 직접</b> 누르세요.</p>` : ""}${rowsShown}
     ${(() => {   // 순위가 다 안 들어갔으면 저장 단추를 잠근다
       const miss = live.filter(s => !(res[s] && res[s].r >= 1));
       if (ranked || !canEnter() || takenByOther || needRef || !live.some(s => res[s] && res[s].r >= 1)) return "";
@@ -1843,7 +1875,7 @@ function card(cls, st, gk, members, res, title) {
         ${can.length ? `<div class="goneRow"><span class="goneL">경기 못 하는 학생?</span>${can.map(s => `<button class="goneChip ask" data-act="midAbs" data-g="${key}" data-v="${s}">${nm(s)} 불참</button>`).join("")}</div>` : ""}</div>`;
     })()}
     ${okWait && canEnter() && !takenByOther ? `<div class="okBox"><p>👀 조원 모두 순위를 확인했나요?</p><button class="btn big okBtn" data-act="okCard" data-g="${key}">✔ 모두 확인 · 저장</button></div>` : ""}
-    ${okDone ? `<div class="okDone ${once("ok" + cls + st + ui.round + key) ? "pop" : ""}">✔ 저장 완료${canEnter() && (canTeach() || R0.dev === DEV) && !isClosed(cls, st, ui.round) ? `<button class="btn sm ghost" data-act="unokCard" data-g="${key}">수정</button>` : ""}</div>` : ""}
+    ${okDone ? `<div class="okDone ${once("ok" + cls + st + ui.round + key) ? "pop" : ""}">✔ 저장 완료${canEnter() && !isClosed(cls, st, ui.round) ? `<button class="btn sm ghost" data-act="unokCard" data-g="${key}">수정</button>` : ""}</div>` : ""}
     ${rolesBox(cls, st, key, ids.filter(s => !elsewhere[s]), RO)}${RO ? "" : `<div class="foot"><button class="btn sm ghost" data-act="clearCard" data-g="${key}">🗑 지우기</button></div>`}</div>`;
 }
 /* 역할 기록 — 이 다트(조)·이 라운드에서 누가 입력했고, 누가 경기 진행·심판·준비 정리를 했나.
@@ -2334,6 +2366,7 @@ document.addEventListener("click", e => {
     }
     case "renewPin": if (confirm(`${cls}반 코드를 새로 만들까요? 지금 코드로 들어온 학생은 다시 넣어야 합니다.`)) { ensurePins(cls); toast("새 코드를 만들었습니다"); } break;
     case "claimRef": claimRef(b.dataset.g, b.dataset.s); break;
+    case "takeRef": { if (!confirm("이 휴대폰으로 결과를 입력할까요?\n(지금 심판 폰은 보기만 가능해져요)")) break; stampRoles(b.dataset.g, R => { R.dev = DEV; }); toast("이 폰으로 입력할 수 있어요"); break; }
     case "unclaim": {
       if (!confirm("이 경기 심판을 다시 고를까요?")) return;
       const R = JSON.parse(JSON.stringify(rolesAt(cls, ui.stage, ui.round, b.dataset.g))); delete R.by; delete R.byCls; delete R.dev;
@@ -2471,7 +2504,7 @@ document.addEventListener("click", e => {
 순위 없이 저장되고, 점수는 선생님이 처리합니다.`)) return; const res = curCard(b.dataset.g); res[v] = { out: 1 }; writeCard(b.dataset.g, res); toast(`${nm} — 이번 경기 불참`); break; }
     case "midBack": { const res = curCard(b.dataset.g); delete res[v]; writeCard(b.dataset.g, res); toast(`${(stuMap(cls)[v] || {}).name || ""} — 다시 참여`); break; }
     case "okCard": stampRoles(b.dataset.g, R => { R.ok = Date.now(); }); toast("저장했습니다 — 수고했어요!"); burst(); break;
-    case "unokCard": stampRoles(b.dataset.g, R => { delete R.ok; }); break;
+    case "unokCard": stampRoles(b.dataset.g, R => { delete R.ok; if (!canTeach()) R.dev = DEV; }); break;
     case "clearCard": {
       if (!confirm(`이 다트의 ${ui.round}라운드 결과를 모두 지울까요?`)) return;
       put(P(cls, "games", ui.stage, "r" + ui.round, b.dataset.g), null); stampRoles(b.dataset.g, R => { delete R.ok; }); break;
