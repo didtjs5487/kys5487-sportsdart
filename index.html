@@ -703,14 +703,19 @@
   .takeBtn{margin-left:8px}
   .clsBar{flex-direction:column; align-items:stretch; gap:8px}
   .clsCards{display:grid; grid-template-columns:1fr; gap:8px} .clsCards.two{grid-template-columns:1fr 1fr}
-  .clsCard{position:relative; overflow:hidden; display:flex; flex-direction:column; align-items:flex-start; gap:1px; min-height:92px; padding:12px 14px 14px; border:2px solid transparent; border-radius:18px; background:var(--soft); color:var(--ink); text-align:left; cursor:pointer}
-  .clsCard b{font-size:26px; font-weight:800; line-height:1.1} .clsCard b small{font-size:16px; margin-left:1px}
-  .clsCard .cg{font-size:16px; font-weight:700; color:var(--sub)} .clsCard .cs{margin-top:2px; font-size:18px; font-weight:800}
-  .clsCard .cb{position:absolute; left:0; bottom:0; height:6px; border-radius:0 6px 6px 0; background:var(--pri); transition:width .6s ease}
-  .clsCard.cur{border-color:var(--pri); background:var(--panel)}
-  .clsCard.idle .cs{color:var(--sub)} .clsCard.ready .cs, .clsCard.run .cs{color:var(--pri)}
-  .clsCard.done{background:var(--goodSoft)} .clsCard.done .cs{color:var(--good)} .clsCard.done .cb{background:var(--good)}
-  .clsCard.wait{background:#FFF6E5} .clsCard.wait .cs{color:#B45F06}
+  .clsCard{display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; padding:12px 14px; border:2px solid var(--line2); border-radius:20px; background:var(--panel); color:var(--ink); cursor:pointer}
+  .clsCard.cur{border-color:var(--pri)} .clsCard.done{background:var(--goodSoft); border-color:#BFE6CF} .clsCard.wait{background:#FFF6E5; border-color:#F3D9A4}
+  .pgW{position:relative; flex:none; width:56px; height:56px} .pgW svg{width:56px; height:56px; display:block}
+  .pT{fill:none; stroke:var(--line2); stroke-width:6} .pB{fill:none; stroke:var(--pri); stroke-width:6; stroke-linecap:round; transition:stroke-dashoffset .6s ease}
+  .clsCard.done .pB{stroke:var(--good)}
+  .pgN{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--ink)} .pgN b{font-size:19px} .pgN small{font-size:13px; color:var(--sub)}
+  .clsCard.done .pgN{color:var(--good); font-size:22px}
+  .pgT{display:flex; flex-direction:column; min-width:0; flex:1} .pgT b{font-size:24px; line-height:1.15} .pgT b small{font-size:15px; margin-left:1px; color:var(--sub)} .pgT span{font-size:16px; font-weight:700} .pgT .cs{font-size:16px; font-weight:800; color:var(--sub)}
+  .clsCard.run .cs, .clsCard.ready .cs{color:var(--pri)} .clsCard.done .cs{color:var(--good)} .clsCard.wait .cs{color:#B45F06}
+  .clsCard .btn{flex:1 1 100%; min-height:50px}
+  .pgPips{flex:1 1 100%; display:flex; flex-wrap:wrap; gap:6px 14px} .pgG{display:flex; align-items:center; gap:4px} .pgG em{font-style:normal; font-size:14px; font-weight:700; color:var(--sub); margin-right:2px}
+  .pp{display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; font-style:normal; font-size:14px; font-weight:800; background:var(--soft); color:var(--sub)} .pp.done{background:var(--good); color:#fff} .pp.now{background:var(--pri); color:#fff}
+  @media (max-width:520px){ .clsCards.two{grid-template-columns:1fr} }
   .clsTools{display:flex; gap:8px; align-items:center} .clsMore{flex:1; min-height:48px; border:0; border-radius:999px; background:var(--soft); color:var(--ink); font-size:17px; font-weight:800; cursor:pointer}
   .endRow{display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 10px} .endRow small{font-size:15px; color:var(--sub)}
   /* ── 모션 ── */
@@ -1621,9 +1626,10 @@ function clsBar() {
   if (VIEW) return "";
   const names = classNames(); if (names.length < 2) return "";
   const on = pairOn(), sel = (on ? [ui.cls, ...bigPair()] : [ui.cls]).sort(numSort), two = sel.length > 1;
-  const chips = sel.map(c => { const t = classState(c);
-    return `<button class="clsCard ${t.k} ${c === ui.cls ? "cur" : ""}" data-act="${two ? "pickCls" : "clsMenu"}" data-v="${esc(c)}"><b>${esc(shortCls(c))}<small>반</small></b><span class="cg">${t.game}</span><span class="cs">${t.txt}</span><i class="cb" style="width:${Math.round(t.pct * 100)}%"></i></button>`; }).join("");
-  const menu = ui.clsMenu ? `<div class="clsGrid noprint">${names.map(c => `<button class="${sel.includes(c) ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(shortCls(c))}<small>반</small></button>`).join("")}</div>` : "";
+  const CIR = 2 * Math.PI * 22;
+  const chips = sel.map(c => { const t = classState(c), nx = ui.tab === "entry" && t.k === "done" && t.L ? `<button class="btn sm pri" data-act="startOne" data-v="${esc(c)}">▶ 다음 경기</button>` : "";
+    return `<div class="clsCard ${t.k} ${c === ui.cls ? "cur" : ""}" role="button" tabindex="0" data-act="${two ? "pickCls" : "clsMenu"}" data-v="${esc(c)}"><div class="pgW"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="22" class="pT"/><circle cx="26" cy="26" r="22" class="pB" style="opacity:${t.pct ? 1 : 0}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - t.pct)).toFixed(1)}" transform="rotate(-90 26 26)"/></svg><div class="pgN">${t.num}</div></div><div class="pgT"><b>${esc(shortCls(c))}<small>반</small></b><span>${t.game}</span><small class="cs">${t.txt}</small></div>${nx}${pips(c, t.cg)}</div>`; }).join("");
+    const menu = ui.clsMenu ? `<div class="clsGrid noprint">${names.map(c => `<button class="${sel.includes(c) ? "main" : ""}" data-act="clsTap" data-v="${esc(c)}">${esc(shortCls(c))}<small>반</small></button>`).join("")}</div>` : "";
   return `<div class="clsBar noprint"><div class="clsCards ${two ? "two" : ""}">${chips}</div><div class="clsTools"><button class="clsMore ${ui.clsMenu ? "open" : ""}" data-act="clsMenu" aria-expanded="${!!ui.clsMenu}">반 바꾸기 <span>▾</span></button><button class="pairTog ${on ? "on" : ""}" data-act="pairTog" aria-pressed="${on}"><span class="pIco">${on ? "✓" : "＋"}</span>두 반 함께</button></div></div>${menu}${on && !two ? `<p class="hint noprint" style="margin:-4px 0 8px">함께할 반을 하나 더 눌러 주세요</p>` : ""}`;
 }
 /* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
@@ -1644,13 +1650,18 @@ function pairRows(cs) {
     const lab = x.L ? "다음 경기" : u ? "이어서 시작" : formed ? "경기 시작" : "조 편성";
     return `<div class="pairRow ${x.done ? "done" : ""}"><b>${esc(c)}반</b><span>${txt}</span>${x.L || cg ? `<button class="btn sm ${x.done || !x.L ? "pri" : ""}" data-act="startOne" data-v="${esc(c)}">▶ ${lab}</button>` : ""}</div>`; }).join("")}</div>`;
 }
+/* 6경기 한눈에: ✔ 끝남 · 파랑 지금 · 회색 아직 */
+function pips(c, cg) {
+  const grp = st => `<span class="pgG"><em>${STAGES[st].name.replace(" ", "")}</em>${[1, 2, 3].map(r => { const k = isClosed(c, st, r) ? "done" : cg && cg.st === st && cg.r === r ? "now" : "todo"; return `<i class="pp ${k}">${k === "done" ? "✔" : r}</i>`; }).join("")}</span>`;
+  return `<div class="pgPips">${grp("cu")}${grp("x3")}</div>`;
+}
 /* 반 단추에 넣는 한 줄 상태 — 회색 조 편성 전 · 파랑 경기 중 n/m · 초록 입력 끝 · 주황 이어서 하기 */
 function classState(c) {
   const x = liveStat(c), cg = curGame(c), u = !x.L && cg ? unfinished(c) : null, formed = !x.L && cg && groupsOf(c, cg.st, cg.r).length;
-  if (x.L) return { k: x.done ? "done" : "run", game: `${STAGES[x.L.st].name} ${x.L.r}R`, txt: x.done ? "입력 끝 ✔" : `경기 중 ${x.nd}/${x.total}`, pct: x.total ? x.nd / x.total : 0 };
-  if (!cg) return { k: "done", game: "전체", txt: "모든 경기 끝 ✔", pct: 1 };
+  if (x.L) return { k: x.done ? "done" : "run", game: `${STAGES[x.L.st].name} ${x.L.r}R`, txt: x.done ? "입력 끝 ✔" : `경기 중 ${x.nd}/${x.total}`, pct: x.total ? x.nd / x.total : 0, num: x.done ? "✔" : `<b>${x.nd}</b><small>/${x.total}</small>`, L: x.L, cg };
+  if (!cg) return { k: "done", game: "전체", txt: "모든 경기 끝 ✔", pct: 1, num: "✔", cg };
   const game = `${STAGES[cg.st].name} ${cg.r}R`;
-  return u ? { k: "wait", game, txt: "이어서 하기", pct: 0 } : formed ? { k: "ready", game, txt: "조 확인 후 시작", pct: 0 } : { k: "idle", game, txt: "조 편성 전", pct: 0 };
+  return u ? { k: "wait", game, txt: "이어서 하기", pct: 0, num: "·", cg } : formed ? { k: "ready", game, txt: "조 확인 후 시작", pct: 0, num: "·", cg } : { k: "idle", game, txt: "조 편성 전", pct: 0, num: "·", cg };
 }
 /* 한 반의 지금 라운드 입력 현황 */
 function liveStat(c) {
