@@ -2056,8 +2056,8 @@ function scStand() {
   if (!VIEW) h += `<p class="hint noprint" hidden>칸의 숫자는 그 라운드 <b>승점</b>(4명 조 4·3·2·1, 3명 조 4·3·1, 5명 조 4·3·3·2·1). 노란 칸 = 기록 없음. 6라운드 모두 끝난 학생 ${done}/${rows.length}명.
     Ⓒ <b>심판</b>은 경기 결과를 입력한 학생에게 자동 인정(연두색, 숫자 = 횟수)되고, 준비·정리와 경기 진행은 선생님이 단추를 눌러 인정합니다(누르면 인정 ↔ 취소).</p>
     <div class="row noprint" style="margin-bottom:10px"><button class="btn sm pri" data-act="xlsx">⬇ 엑셀</button><button class="btn sm" data-act="print">🖨 인쇄</button></div>
-    <details class="setup noprint" data-k="sheetSync" ${ui.open.sheetSync ? "open" : ""}><summary>☁ 구글 시트 자동 연동<span class="sp"></span><span class="sumR" id="sheetStat">${sheetStatusText()}</span></summary><div class="card">
-      <p class="hint" style="margin-top:0">한 번 연결하면 <b>새 성적이 생길 때마다</b> 구글 시트가 저절로 갱신돼요(앱이 열려 있으면 1분 안, 닫혀 있었다면 다음에 열 때 바로). 연결 정보는 선생님 전용 서버에 저장되어 다른 선생님 기기에도 저절로 적용돼요. 연결하는 법은 '성적시트_연동방법' 안내를 보세요.</p>
+    <details class="setup noprint" data-k="sheetSync" ${ui.open.sheetSync ? "open" : ""}><summary>☁ 구글 시트 자동 연동<span class="sp"></span><span class="sumR" id="sheetStat">${sheetStatusFull()}</span></summary><div class="card">
+      <p class="hint" style="margin-top:0">한 번 연결하면 <b>새 성적이 생길 때마다</b> 구글 시트가 저절로 갱신돼요(앱이 열려 있으면 1분 안, 닫혀 있었다면 다음에 열 때 바로). 성적 기록이 <b>줄어들었을 때는 자동으로 바꾸지 않아요</b>(실수로 지워지는 것을 막기 위해). 늘거나 그대로일 때만 반영돼요. 연결 정보는 선생님 전용 서버에 저장되어 다른 선생님 기기에도 저절로 적용돼요. 연결하는 법은 '성적시트_연동방법' 안내를 보세요.</p>
       <input type="text" id="sheetUrl" class="inp" placeholder="연동 주소 붙여넣기 (https://script.google.com/…)" value="${esc(lsGet(SHEET_URL) || "")}" autocomplete="off" style="width:100%;min-height:50px;font-size:16px;margin-bottom:8px">
       <div class="row"><button class="btn pri" data-act="sheetSave">연결하고 지금 보내기</button><button class="btn" data-act="sheetNow">지금 다시 보내기</button></div>
     </div></details>`;
@@ -2774,18 +2774,30 @@ async function downloadXLSX() {
 }
 /* 구글 시트 자동 연동 — 선생님이 만든 Apps Script 웹 앱 주소로 성적 시트를 보낸다.
    성적이 바뀔 때마다(앱이 열려 있으면 1분 안, 닫혀 있었다면 다음에 열 때 바로) 자동으로 보낸다. 비밀 코드는 쓰지 않는다(예전에 정한 코드가 저장돼 있으면 그대로 함께 보냄). */
-const SHEET_URL = "darts-sheet-url", SHEET_TOK = "darts-sheet-token", SHEET_AT = "darts-sheet-at", SHEET_HASH = "darts-sheet-hash";
+const SHEET_URL = "darts-sheet-url", SHEET_TOK = "darts-sheet-token", SHEET_AT = "darts-sheet-at", SHEET_HASH = "darts-sheet-hash", SHEET_AMT = "darts-sheet-amt";
+/* 지금까지 입력된 경기 기록 수(학생×경기 중 실제로 한 라운드). 줄어들면 실수로 지워졌거나 덜 불러온 것일 수 있어 자동으로는 시트에 반영하지 않는다 */
+const resultCount = () => classNames().reduce((n, cls) => n + roster(cls).reduce((m, st) => { const s = sidOf(st); return m + record(cls, "cu", s).played + record(cls, "x3", s).played; }, 0), 0);
+let sheetHold = false;
 const hashStr = t => { let h = 5381; for (let k = 0; k < t.length; k++) h = ((h << 5) + h + t.charCodeAt(k)) | 0; return String(h); };
 const sheetStatusText = () => { const at = lsGet(SHEET_AT); return !lsGet(SHEET_URL) ? "아직 연결 안 됨" : at ? "마지막 전송 " + new Date(at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "numeric", minute: "2-digit" }) : "연결됨 · 아직 보낸 적 없음"; };
+const sheetStatusFull = () => sheetStatusText() + (sheetHold ? " · 기록이 줄어 보류 중" : "");
 async function sendToSheet(force) {
   const url = lsGet(SHEET_URL); if (!url) { if (force) toast("먼저 구글 시트 주소를 넣어 주세요"); return; }
   if (!canTeach() || !roster(ui.cls || "").length && !classNames().length) return;
   const sheets = buildGradeSheets(), h = hashStr(JSON.stringify(sheets));
   if (!force && lsGet(SHEET_HASH) === h) return;   // 바뀐 게 없으면 보내지 않는다
+  const amt = resultCount(), last = lsGet(SHEET_AMT) || 0;
+  if (amt < last) {   // 기록이 줄었다 — 자동으로는 시트를 바꾸지 않는다(직접 보낼 때만, 확인 후)
+    sheetHold = true; const el0 = document.getElementById("sheetStat"); if (el0) el0.textContent = sheetStatusFull();
+    if (!force) return;
+    if (!confirm(`지금 기록(${amt}건)이 마지막으로 시트에 보낸 기록(${last}건)보다 적어요.\n그래도 시트를 지금 기록으로 바꿀까요?`)) return;
+  }
+  sheetHold = false;
   try {
     await fetch(url, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ token: lsGet(SHEET_TOK) || "", at: new Date().toLocaleString("ko-KR"), sheets }) });
-    lsSet(SHEET_HASH, h); lsSet(SHEET_AT, Date.now());
-    const el = document.getElementById("sheetStat"); if (el) el.textContent = sheetStatusText();
+    lsSet(SHEET_HASH, h); lsSet(SHEET_AT, Date.now()); lsSet(SHEET_AMT, amt);
+    if (fdb && teacher) fmod.set(fmod.ref(fdb, "darts/sheetLink/amt"), amt).catch(() => {});   // 다른 기기도 같은 기준으로 비교
+    const el = document.getElementById("sheetStat"); if (el) el.textContent = sheetStatusFull();
     if (force) toast("구글 시트로 보냈어요 — 잠시 뒤 시트를 새로 고쳐 보세요");
   } catch (e) { if (force) toast("보내지 못했어요 — 인터넷과 주소를 확인하세요"); }
 }
@@ -2796,9 +2808,9 @@ function watchSheetLink() {
   if (sheetLinkOn || !fdb) return; sheetLinkOn = true;
   fmod.onValue(fmod.ref(fdb, "darts/sheetLink"), s => {
     const v = s.val();
-    if (v && v.url) { lsSet(SHEET_URL, v.url); lsSet(SHEET_TOK, v.token || ""); }
-    else if (lsGet(SHEET_URL)) fmod.set(fmod.ref(fdb, "darts/sheetLink"), { url: lsGet(SHEET_URL), token: lsGet(SHEET_TOK) || "" }).catch(() => {});
-    const el = document.getElementById("sheetStat"); if (el) el.textContent = sheetStatusText();
+    if (v && v.url) { lsSet(SHEET_URL, v.url); lsSet(SHEET_TOK, v.token || ""); if (typeof v.amt === "number") lsSet(SHEET_AMT, v.amt); }
+    else if (lsGet(SHEET_URL)) fmod.set(fmod.ref(fdb, "darts/sheetLink"), { url: lsGet(SHEET_URL), token: lsGet(SHEET_TOK) || "", amt: lsGet(SHEET_AMT) || 0 }).catch(() => {});
+    const el = document.getElementById("sheetStat"); if (el) el.textContent = sheetStatusFull();
   }, () => { sheetLinkOn = false; });
 }
 setInterval(() => { if (!params.has("local") && lsGet(SHEET_URL) && !document.hidden) sendToSheet(false); }, 60000);
