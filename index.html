@@ -1932,7 +1932,7 @@ function card(cls, st, gk, members, res, title) {
   const ranked = live.length && live.every(s => res[s] && res[s].r >= 1) && !needTn;
   const okWait = ranked && R0.by && R0.by !== "T" && !R0.ok, okDone = ranked && !!R0.ok, done = ranked && !okWait;
   const turnBox = winner ? `<div class="turnBox"><span class="tq">🥇 <b>${winners.map(w => esc((sm[w] || {}).name || "?")).join(" · ")}</b> 몇 라운드 만에 끝냈나요?</span><span class="tin2"><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" enterkeyhint="done" autocomplete="off" placeholder="?" value="${res[winner].tn || ""}" ${RO ? "disabled" : ""} data-g="${key}" data-s="${winner}" class="tin"> 라운드</span></div>` : "";
-  const rows = tap301 && !rem301 ? tapGrid(cls, key, tapIds, res, n, RO) + turnBox : (simpleCU && !RO ? `<p class="tapHint">✏️ 최종 점수를 적으면 순위가 저절로 정해져요</p>` : rem301 && !RO ? `<p class="tapHint">🥇 먼저 끝낸 학생은 [끝냄], 나머지는 <b>남은 점수</b>를 적어요. 같은 점수는 같은 순위예요.</p>` : "") + ids.filter(s => !(simpleCU && res[s] && res[s].out)).map(s => {
+  const rows = tap301 && !rem301 ? tapGrid(cls, key, tapIds, res, n, RO) + turnBox : (simpleCU && !RO ? `<p class="tapHint">✏️ 최종 점수를 적으면 순위가 저절로 정해져요</p>` : rem301 && !RO ? `<p class="tapHint">🥇 <b>누가 끝냈으면</b> 그 학생은 [끝냄]을 누르고 몇 라운드인지 적고, 나머지는 <b>남은 점수</b>를 적어요.<br>⏱ <b>정해진 라운드까지 아무도 못 끝냈으면</b> 모두 남은 점수를 적어요(가장 낮은 점수가 1위). 같은 점수는 같은 순위예요.</p>` : "") + ids.filter(s => !(simpleCU && res[s] && res[s].out)).map(s => {
     const x = sm[s] || { no: "?", name: "(명렬 없음)" }, r = res[s] || {};
     if (elsewhere[s]) return `<div class="prow abs"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)} · 이번 라운드는 ${esc(kName(elsewhere[s]))}에서 기록</div></div>`;
     const a = isAbs(cls, s) && !res[s];
