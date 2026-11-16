@@ -1855,15 +1855,14 @@ function scEntry() {
   // 빠진 경기 결과 직접 입력 — 이 라운드에서 아직 결과가 없는 학생을 보여 주고, 라운드 전체 또는 일부 경기(그 경기를 던진 학생만)를 골라 입력칸을 연다
   const missing = VIEW ? [] : roster(cls).filter(x => { const sid = sidOf(x); return !Object.keys(rr).some(k => rr[k] && rr[k][sid] && rr[k][sid].r >= 1) && !(rr.mk && rr.mk[sid]); });
   const mkBox = VIEW ? "" : `<details class="setup noprint" data-k="mkOpen" ${ui.open.mkOpen ? "open" : ""}><summary>✍ 빠진 경기 결과 직접 입력</summary><div class="card"><p class="hint" style="margin-top:0">결과가 사라졌을 때, 갖고 있는 기록(엑셀·종이)을 보고 직접 적어요. <b>먼저 위에서 ${STAGES[st].name} ${ui.round}라운드가 맞는지 확인</b>하세요(다른 라운드는 [경기 · 라운드 바꾸기]).</p>
-    <h3>① 라운드 전체가 사라졌을 때</h3>
-    <p class="hint" style="margin-top:0">조 편성부터 전부 입력해요. 학생마다 조 번호를 정해 조를 만든 뒤, 조 카드에 점수를 적어요.</p>
-    <button class="btn pri" data-act="mkRound">✍ 조 편성부터 전체 입력</button>
-    <h3>② 일부 조만 사라졌을 때 · ③ 한 명만 빠졌을 때</h3>
-    ${missing.length ? `<p class="hint" style="margin-top:0">결과가 없는 학생이에요. 입력할 학생을 체크하세요.<br>· <b>조별</b>: 그 조 학생을 체크 → [한 조로 만들기] (조마다 반복)<br>· <b>개인별</b>: 그 학생만 체크 → [한 명씩 입력]</p>
+    <h3>① 조 구성은 모르고 순위·인원만 알 때 (가장 쉬워요)</h3>
+    ${missing.length ? `<p class="hint" style="margin-top:0">학생마다 <b>순위 · 함께 던진 인원</b>만 적으면 승점이 저절로 계산돼요(승점은 따로 적지 않아요). 입력할 학생을 체크하세요. <b>라운드 전체</b>가 사라졌으면 [전체 선택], 일부만이면 그 학생만, 한 명이면 그 한 명만 체크하세요.</p>
     <div class="mkList">${missing.map(x => `<label class="mkItem"><input type="checkbox" data-mk="${sidOf(x)}"><span><small>${esc(x.no)}</small>${esc(x.name)}</span></label>`).join("")}</div>
     <div class="row" style="margin:6px 0"><button class="btn sm" data-act="mkAll">전체 선택</button><button class="btn sm" data-act="mkNone">모두 해제</button></div>
-    <div class="mkBtns"><button class="btn pri" data-act="mkGroup">👥 선택한 학생을 한 조로 만들기</button><button class="btn" data-act="mkOpen">👤 선택한 학생을 한 명씩 입력</button></div>` : `<p class="hint" style="margin-top:0"><b>이 라운드는 학생 모두 결과가 있어요.</b> 빠진 게 있으면 위의 조 카드나 '직접 입력한 결과' 칸에서 고치세요.</p>`}
-    <p class="hint">[한 조로 만들기]는 그 학생들의 <b>조 카드</b>를, [한 명씩 입력]은 위쪽의 <b>'직접 입력한 결과'</b> 칸을 만들어요. 조 카드가 아직 남아 있으면 그 카드에서 바로 입력해도 돼요.</p></div></details>`;
+    <button class="btn pri" data-act="mkOpen" style="width:100%; min-height:54px">👤 선택한 학생을 한 명씩 입력</button>
+    <p class="hint">위쪽에 <b>'직접 입력한 결과'</b> 칸이 생겨요. 학생마다 순위(1~5위)와 함께 던진 인원(3~5명)을 누르고, 알고 있으면 점수도 적으세요.</p>` : `<p class="hint" style="margin-top:0"><b>이 라운드는 학생 모두 결과가 있어요.</b> 빠진 게 있으면 위의 조 카드나 '직접 입력한 결과' 칸에서 고치세요.</p>`}
+    <h3>② 조 구성을 알 때</h3>
+    <p class="hint" style="margin-top:0">조 카드로 입력하면 조 인원과 순위가 자동으로 맞아요.<br>· 라운드 전체: <button class="btn sm" data-act="mkRound">✍ 조 편성부터 전체 입력</button><br>· 일부 조만: 위 목록에서 그 조 학생을 체크 → <button class="btn sm" data-act="mkGroup">👥 한 조로 만들기</button> (조마다 반복)</p></div></details>`;
   const mkNow = !VIEW && GRP == null && Object.keys(rr.mk || {}).length ? card(cls, st, "mk", Object.keys(rr.mk), rr.mk, "직접 입력한 결과") : "";   // 조가 없는 라운드에서도 직접 입력한 결과 칸은 보인다
   const pair = (ui.bigCls || []).filter(c => S.rosters[c]);
   if (VIEW && stuOK && !liveOf(cls)) return joinBox(cls) + `<p class="wait">⏳ 경기 시작을 기다리는 중</p>`;
