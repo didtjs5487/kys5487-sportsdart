@@ -742,9 +742,9 @@
   .clsRow.run{border-color:var(--pri)} .clsRow.run em, .clsRow.ready em{color:var(--pri)} .clsRow.done em{color:var(--good)}
   .clsRow.wait{background:#FFF6E5; border-color:#F3D9A4} .clsRow.wait em{color:#B45F06}
   @media (min-width:701px){ .clsList{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))} }
-  .gTiles{flex:1 1 100%; display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px}
-  .gT{display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:0; min-height:52px; padding:4px 2px; border-radius:12px; background:var(--priSoft); color:var(--pri); font-style:normal; font-size:17px; font-weight:800; line-height:1.2}
-  .gT small{font-size:15px; font-weight:700} .gT.done{background:var(--goodSoft); color:var(--good)} .gT[data-act]{cursor:pointer}
+  .gTiles{flex:1 1 100%; display:flex; flex-direction:column; gap:6px}
+  .gT{display:flex; flex-direction:row; align-items:center; justify-content:space-between; min-width:0; min-height:56px; padding:6px 16px; border-radius:14px; background:var(--priSoft); color:var(--pri); font-style:normal; font-size:20px; font-weight:800; line-height:1.2}
+  .gT small{font-size:19px; font-weight:800} .gT.done{background:var(--goodSoft); color:var(--good)} .gT[data-act]{cursor:pointer}
   .startBtn.waitIn{background:#FFF1D6; color:#7A4300; box-shadow:0 6px 16px rgba(180,95,6,.18); animation:none}
   .startBtn.waitIn .ico{background:#F3D9A4; color:#7A4300} .startBtn.waitIn .sb1, .startBtn.waitIn .sb2{color:#7A4300; opacity:1}
   /* 작은 화면: 시작 단추는 탭 막대 바로 위에 붙인다 — 한 손 엄지가 닿는 자리 */
@@ -1710,7 +1710,7 @@ const brdShort = (c, gi, n) => `${boardOf(c, gi, n)}번${Math.ceil((n || 1) / us
 function leftGroups(c, L) { const gs = groupsOf(c, L.st, L.r), rr = roundRes(c, L.st, L.r); return gs.map((g, gi) => cardDone(c, g, rr, "g" + gi, L.st, L.r) ? -1 : gi).filter(gi => gi >= 0); }
 function grpTiles(c, L) {
   const gs = groupsOf(c, L.st, L.r), left = leftGroups(c, L);
-  return `<div class="gTiles">${gs.map((g, gi) => { const d = !left.includes(gi); return `<i class="gT ${d ? "done" : ""}" ${c === ui.cls ? `data-act="goCard" data-c="${esc(c)}" data-v="${gi}"` : ""}>${esc(brdShort(c, gi, gs.length))}<small>${d ? "✔ 저장" : "아직"}</small></i>`; }).join("")}</div>`;
+  return `<div class="gTiles">${gs.map((g, gi) => { const d = !left.includes(gi); return `<i class="gT ${d ? "done" : ""}" ${c === ui.cls ? `data-act="goCard" data-c="${esc(c)}" data-v="${gi}"` : ""}><span>${esc(brdShort(c, gi, gs.length))} ${esc(chOf(boardOf(c, gi, gs.length))[1])}</span><small>${d ? "✔ 저장" : "아직"}</small></i>`; }).join("")}</div>`;
 }
 function clsBar() {
   if (VIEW) return "";
