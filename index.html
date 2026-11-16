@@ -2473,9 +2473,8 @@ document.addEventListener("click", e => {
         if (sel.length < 2) { toast("한 반은 선택되어 있어야 해요"); break; }
         const keep = sel.find(x => x !== v);
         ui.pairOn = false; ui.bigCls = [keep]; ui.bigDay = today(); ui.cls = keep;
-      } else {   // 눌린 반이 보는 반이 된다. 이미 둘이 선택돼 있으면 지금 보던 반은 두고 다른 한 반이 빠진다
-        const old = ui.cls; ui.pairOn = true; ui.bigCls = [v, old]; ui.bigDay = today(); ui.cls = v;
-      }
+      } else if (sel.length >= 2) { toast("이미 두 반이 선택돼 있어요. 빼려는 반을 먼저 눌러 주세요"); break; }   // 어느 반이 빠질지 헷갈리지 않게 막는다
+      else { const old = ui.cls; ui.pairOn = true; ui.bigCls = [v, old]; ui.bigDay = today(); ui.cls = v; }   // 눌린 반이 보는 반이 된다
       focusGame(ui.cls); ui.open = {}; ui.focus = null; ui.sel = null; saveUI(); render(); break;
     }
     case "pickCls": { if (v !== ui.cls) { ui.bigCls = [v, ui.cls]; ui.bigDay = today(); ui.cls = v; focusGame(v); ui.focus = null; ui.sel = null; } render(); break; }
