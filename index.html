@@ -420,6 +420,7 @@
   .prow.x301{display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px}
   .prow.x301 .who{flex:1 1 55%; min-width:0} .prow.x301 .rkBadge{flex:none; order:2; margin-left:auto}
   .prow.x301 .vin{order:3; flex:1 1 40%; min-width:120px} .prow.x301 .winBtn{order:4; white-space:nowrap}
+  .oldRk{font-size:16px; font-weight:700; color:var(--sub)}
   .toScore{margin:10px 0 2px; min-height:50px; width:100%}
   .winBtn{flex:none; min-height:50px; padding:0 14px; border:2px solid var(--line2); border-radius:14px; background:var(--panel); color:var(--sub); font-size:17px; font-weight:800; cursor:pointer}
   .winBtn.on{border-color:var(--good); background:var(--goodSoft); color:var(--good)}
@@ -1933,7 +1934,7 @@ function card(cls, st, gk, members, res, title) {
   const ranked = live.length && live.every(s => res[s] && res[s].r >= 1) && !needTn;
   const okWait = ranked && R0.by && R0.by !== "T" && !R0.ok, okDone = ranked && !!R0.ok, done = ranked && !okWait;
   const turnBox = winner ? `<div class="turnBox"><span class="tq">🥇 <b>${winners.map(w => esc((sm[w] || {}).name || "?")).join(" · ")}</b> 몇 라운드 만에 끝냈나요?</span><span class="tin2"><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" enterkeyhint="done" autocomplete="off" placeholder="?" value="${res[winner].tn || ""}" ${RO ? "disabled" : ""} data-g="${key}" data-s="${winner}" class="tin"> 라운드</span></div>` : "";
-  const rows = tap301 && !rem301 ? tapGrid(cls, key, tapIds, res, n, RO) + turnBox + (RO ? "" : `<button class="btn sm toScore" data-act="toScore" data-g="${key}">✏ 남은 점수로 순위 다시 정하기</button>`) : (simpleCU && !RO ? `<p class="tapHint">✏️ 최종 점수를 적으면 순위가 저절로 정해져요</p>` : rem301 && !RO ? `<p class="tapHint">🥇 <b>누가 끝냈으면</b> 그 학생은 [끝냄]을 누르고 몇 라운드인지 적고, 나머지는 <b>남은 점수</b>를 적어요.<br>⏱ <b>정해진 라운드까지 아무도 못 끝냈으면</b> 모두 남은 점수를 적어요(가장 낮은 점수가 1위). 같은 점수는 같은 순위예요.</p>` : "") + ids.filter(s => !(simpleCU && res[s] && res[s].out)).map(s => {
+  const rows = tap301 && !rem301 ? tapGrid(cls, key, tapIds, res, n, RO) + turnBox + (RO ? "" : `<button class="btn sm toScore" data-act="toScore" data-g="${key}">✏ 수정 (점수를 적어 순위 바로잡기)</button>`) : (simpleCU && !RO ? `<p class="tapHint">✏️ 최종 점수를 적으면 순위가 저절로 정해져요</p>` : rem301 && !RO ? `<p class="tapHint">🥇 <b>누가 끝냈으면</b> 그 학생은 [끝냄]을 누르고 몇 라운드인지 적고, 나머지는 <b>남은 점수</b>를 적어요.<br>⏱ <b>정해진 라운드까지 아무도 못 끝냈으면</b> 모두 남은 점수를 적어요(가장 낮은 점수가 1위). 같은 점수는 같은 순위예요.</p>` : "") + ids.filter(s => !(simpleCU && res[s] && res[s].out)).map(s => {
     const x = sm[s] || { no: "?", name: "(명렬 없음)" }, r = res[s] || {};
     if (elsewhere[s]) return `<div class="prow abs"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)} · 이번 라운드는 ${esc(kName(elsewhere[s]))}에서 기록</div></div>`;
     const a = isAbs(cls, s) && !res[s];
@@ -1942,7 +1943,7 @@ function card(cls, st, gk, members, res, title) {
     if (rem301) return `<div class="prow cu1 x301 ${a ? "abs" : ""}"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)}${sexBadge(x)}${a ? " · 결석" : ""}</div>
       <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" enterkeyhint="next" autocomplete="off" placeholder="남은 점수" value="${typeof r.v === "number" ? r.v : ""}" ${RO || a ? "disabled" : ""} data-g="${key}" data-s="${s}" class="vin">
       <button class="winBtn ${r.v === 0 ? "on" : ""}" ${RO || a ? "disabled" : `data-act="winTog" data-g="${key}" data-s="${s}"`} aria-pressed="${r.v === 0}">🥇 끝냄</button>
-      <span class="rkBadge ${r.r === 1 ? "r1" : ""}">${r.r ? `${r.r}위<small>+${ptsOf(r.r, n)}</small>` : ""}</span></div>`;
+      <span class="rkBadge ${r.r === 1 ? "r1" : ""}">${r.r ? `${r.r}위<small>+${ptsOf(r.r, n)}</small>` : r.or ? `<span class="oldRk">기존 ${r.or}위</span>` : ""}</span></div>`;
     if (simpleCU) return `<div class="prow cu1 ${a ? "abs" : ""}"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)}${sexBadge(x)}${a ? " · 결석" : ""}</div>
       <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" enterkeyhint="next" autocomplete="off" placeholder="최종 점수" value="${typeof r.v === "number" ? r.v : ""}" ${RO || a ? "disabled" : ""} data-g="${key}" data-s="${s}" class="vin">
       <span class="rkBadge ${r.r === 1 ? "r1" : ""}">${r.r ? `${r.r}위<small>+${ptsOf(r.r, n)}</small>` : ""}</span></div>`;
@@ -2321,8 +2322,9 @@ function writeCard(gk, res) {
     const tn = Object.values(res).map(x => x && x.tn).find(Boolean);
     Object.values(res).forEach(x => { if (x) delete x.tn; });
     if (tn) Object.values(res).forEach(x => { if (x && x.r === 1 && x.v === 0) x.tn = tn; else if (x && x.r === 1 && typeof x.v !== "number") x.tn = tn; });   // 공동 1위(같이 끝냄)면 모두
+    Object.values(res).forEach(x => { if (x && x.r >= 1) delete x.or; });   // 새 순위가 정해졌으면 기존 순위 표시는 지운다
   }
-  Object.keys(res).forEach(s => { const x = res[s]; if (x.r == null && typeof x.v !== "number" && !x.out && gk !== "mk") delete res[s]; });
+  Object.keys(res).forEach(s => { const x = res[s]; if (x.r == null && typeof x.v !== "number" && !x.out && x.or == null && gk !== "mk") delete res[s]; });
   put(P(ui.cls, "games", ui.stage, "r" + ui.round, gk), Object.keys(res).length ? res : null);
   stampRoles(gk, R => { delete R.ok; });
 }
@@ -2592,9 +2594,9 @@ document.addEventListener("click", e => {
       writeCard(gk, res); break;
     }
     case "toScore": {   // 예전 방식(이름 누르기) 기록 → 남은 점수 입력 방식으로. 1위는 [끝냄]으로 남고, 나머지는 점수를 새로 적는다
-      if (!confirm("지금 순위를 지우고, 남은 점수를 적어서 순위를 다시 정할까요?\n(1위는 '끝냄'으로 남고 라운드 수도 그대로예요. 나머지 학생의 남은 점수를 적으면 순위가 정해져요.)")) break;
+      if (!confirm("남은 점수를 적어서 순위를 바로잡을까요?\n(기존 순위는 점수를 다 적을 때까지 그대로 보여요. 1위는 '끝냄'으로 남고 라운드 수도 그대로예요.)")) break;
       const gk = b.dataset.g, res = curCard(gk);
-      Object.values(res).forEach(x => { if (!x) return; if (x.r === 1) x.v = 0; delete x.r; delete x.m; });
+      Object.values(res).forEach(x => { if (!x) return; if (x.r >= 1) x.or = x.r; if (x.r === 1) x.v = 0; delete x.r; delete x.m; });   // 기존 순위(or)는 점수를 다 적을 때까지 화면에 남는다
       writeCard(gk, res); break;
     }
     case "winTog": {
