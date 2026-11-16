@@ -733,6 +733,7 @@
   .pp{display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:50%; font-style:normal; font-size:16px; font-weight:800; background:var(--soft); color:var(--sub)} .pp.done{background:var(--good); color:#fff} .pp.now{background:var(--pri); color:#fff}
   @media (max-width:520px){ .clsCards.two{grid-template-columns:1fr} }
   .clsTools{display:flex; gap:8px; align-items:center} .clsMore{flex:1; min-height:50px; border:0; border-radius:999px; background:var(--soft); color:var(--ink); font-size:17px; font-weight:800; cursor:pointer}
+  .verLine{margin:18px 2px 8px; font-size:17px; font-weight:700; color:var(--sub)} .verLine b{color:var(--ink)} .verLine .bad{color:var(--bad)}
   .clsList{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:8px 0 10px; animation:tabIn .3s var(--ease)}
   .clsRow{display:grid; grid-template-columns:auto 1fr; align-items:baseline; gap:0 8px; min-height:62px; padding:8px 12px; border:1px solid var(--line2); border-radius:14px; background:var(--panel); color:var(--ink); text-align:left; cursor:pointer}
   .clsRow b{font-size:22px; font-weight:800} .clsRow b small{font-size:15px; color:var(--sub); margin-left:1px}
@@ -1538,7 +1539,7 @@ function render() {
   const fn = { roster: scRoster, groups: scGroups, entry: scEntry, stand: scStand, grade: scGrade, set: scSet }[ui.tab] || scSet;
   $("main").innerHTML = (!VIEW && GRP == null && ui.cls ? clsBar() : "") + ((!ui.cls && ui.tab !== "set" && ui.tab !== "grade") ? VIEW ? `<h2>아직 등록된 반이 없어요</h2><p class="hint">선생님이 명렬을 등록하면 여기에 조 편성과 경기 결과가 나옵니다.</p>` : `<h2>먼저 반을 등록하세요</h2><p class="hint"><b>설정</b> 탭의 <b>명렬</b>에서 명렬표를 붙여넣으면 됩니다.</p><button class="btn pri big" data-act="tab" data-v="set">명렬 등록하러 가기</button>` : fn());
   if (ui._lastTab !== ui.tab) { const m = $("main"); m.classList.remove("tabIn"); void m.offsetWidth; if (ui._lastTab) m.classList.add("tabIn"); ui._lastTab = ui.tab; }
-  if (ui.tab === "set") drawQR();
+  if (ui.tab === "set") { drawQR(); updVer(); }
   if (teacher && secret.day === today() && classNames().some(c => !(secret.pins || {})[c])) ensurePins();
   if (teacher && serverSeen && JSON.stringify((S.meta || {}).classes || []) !== JSON.stringify(classNames())) put("meta/classes", classNames().length ? classNames() : null, true);
   if ($("big").classList.contains("show") && !ui.inBig) { ui.inBig = true; try { showBig(); } finally { ui.inBig = false; } }
@@ -2236,6 +2237,16 @@ function rulesTable() {
 }
 
 /* ⚙ 설정 */
+/* 앱 버전 — 배포할 때마다 sw.js 의 CACHE 와 같은 번호로 올린다(설정 탭 맨 아래에 보여 준다) */
+const APP_VER = "v129";
+async function updVer() {
+  const el = $("swVer"); if (!el) return;
+  try {
+    const ks = (await caches.keys()).filter(k => k.startsWith("darts-shell-")).map(k => k.slice(12));
+    el.textContent = ks.length ? ` · 저장된 앱 ${ks.join(", ")}` : "";
+    el.className = ks.length && !ks.includes(APP_VER) ? "bad" : "";
+  } catch (e) {}
+}
 function scSet() {
   // 설정 상자 4개 (2026-10-27): 성적·엑셀 / 명렬 / 다트 / 자료 관리. 입력 코드·학생용 링크는 다트 QR로 바뀌어 뺐다
   const cls = ui.cls;
@@ -2257,7 +2268,10 @@ function scSet() {
       <h3>모든 반 지우기 <small style="font-weight:600;color:var(--sub)">학기 끝</small></h3>
       <div class="row"><button class="btn danger" data-act="wipeGames">경기 기록만 (명렬 남김)</button><button class="btn danger" data-act="wipeAll">명렬까지 모두</button></div>
       <p class="hint">지우면 되돌릴 수 없어요. 엑셀을 먼저 내려받으세요.</p>
-    </div></details>`;
+    </div></details>
+    <p class="verLine">앱 버전 <b>${APP_VER}</b><span id="swVer"></span></p>
+    <button class="btn" data-act="freshApp">최신 버전으로 다시 불러오기</button>
+    <p class="hint">폰 화면이 예전 그대로이면 눌러 보세요. 인터넷이 켜져 있어야 하고, 기록은 지워지지 않아요.</p>`;
 }
 let qrLib = null;
 async function loadQR() {
@@ -2428,6 +2442,18 @@ document.addEventListener("click", e => {
     case "standFull": ui.standFull = !ui.standFull; render(); break;
     case "refSwap": put("settings/refSwap", refSwapOn() ? false : null); break;
     case "nextSame": ui.nextSame = v === "1"; render(); break;
+    case "freshApp": {
+      if (!navigator.onLine) { toast("인터넷이 연결된 곳에서 눌러 주세요"); break; }
+      toast("최신 버전을 받아 오는 중…");
+      (async () => {
+        try {
+          const rs = await navigator.serviceWorker.getRegistrations(); await Promise.all(rs.map(r => r.unregister()));
+          const ks = await caches.keys(); await Promise.all(ks.map(k => caches.delete(k)));
+        } catch (e) {}
+        location.reload();
+      })();
+      break;
+    }
     case "mvTog": ui.mv = !(ui.mv || ui.sel); ui.sel = null; render(); break;
     case "clsMenu": ui.clsMenu = !clsListOpen(); render(); break;
     case "goWait": case "goCard": {
