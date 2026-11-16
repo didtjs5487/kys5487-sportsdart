@@ -741,7 +741,6 @@
   .clsRow em{grid-column:1 / -1; font-style:normal; font-size:16px; font-weight:800; color:var(--sub)}
   .clsRow.run{border-color:var(--pri)} .clsRow.run em, .clsRow.ready em{color:var(--pri)} .clsRow.done em{color:var(--good)}
   .clsRow.wait{background:#FFF6E5; border-color:#F3D9A4} .clsRow.wait em{color:#B45F06}
-  .clsDrop{flex:none; min-height:50px; padding:0 14px; border:0; border-radius:14px; background:var(--soft); color:var(--sub); font-size:16px; font-weight:800; cursor:pointer}
   .clsRow.sel.cur{box-shadow:0 0 0 3px var(--pri)}
   .clsList.cmp{grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px}
   .clsList.cmp .clsRow{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:64px; padding:6px 2px; text-align:center}
@@ -1723,7 +1722,7 @@ function clsBar() {
   const on = pairOn(), sel = (on ? [ui.cls, ...bigPair()] : [ui.cls]).sort(numSort), two = sel.length > 1;
   const CIR = 2 * Math.PI * 22;
   const chips = sel.map(c => { const t = classState(c), nx = ui.tab === "entry" && t.k === "done" && t.L ? `<button class="btn sm pri" data-act="startOne" data-v="${esc(c)}">▶ 다음 경기</button>` : "";
-    return `<div class="clsCard ${t.k} ${c === ui.cls ? "cur" : ""}" ${two ? `role="button" tabindex="0" data-act="pickCls" data-v="${esc(c)}"` : ""}><div class="pgW"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="22" class="pT"/><circle cx="26" cy="26" r="22" class="pB" style="opacity:${t.pct ? 1 : 0}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - t.pct)).toFixed(1)}" transform="rotate(-90 26 26)"/></svg><div class="pgN">${t.num}</div></div><div class="pgT"><b>${esc(shortCls(c))}<small>반</small></b><span>${t.game}</span><small class="cs">${t.txt}</small></div>${two ? `<button class="clsDrop" data-act="dropCls" data-v="${esc(c)}" aria-label="${esc(shortCls(c))}반 빼기">✕ 빼기</button>` : ""}${nx}${pips(c, t.cg)}${t.L ? grpTiles(c, t.L) : ""}</div>`; }).join("");
+    return `<div class="clsCard ${t.k} ${c === ui.cls ? "cur" : ""}" ${two ? `role="button" tabindex="0" data-act="pickCls" data-v="${esc(c)}"` : ""}><div class="pgW"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="22" class="pT"/><circle cx="26" cy="26" r="22" class="pB" style="opacity:${t.pct ? 1 : 0}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - t.pct)).toFixed(1)}" transform="rotate(-90 26 26)"/></svg><div class="pgN">${t.num}</div></div><div class="pgT"><b>${esc(shortCls(c))}<small>반</small></b><span>${t.game}</span><small class="cs">${t.txt}</small></div>${nx}${pips(c, t.cg)}${t.L ? grpTiles(c, t.L) : ""}</div>`; }).join("");
   const cmp = names.length >= 4;   // 반이 많으면 번호 + 짧은 상태만 — 10개 반도 한 화면에 (자세한 상태는 칠한 반의 카드에)
   const shortTxt = (c, t) => t.L ? (t.k === "done" ? "✔" : `${liveStat(c).nd}/${liveStat(c).total}`) : t.k === "wait" ? "이어서" : t.k === "ready" ? "시작" : t.k === "done" ? "끝" : "대기";
   const menu = `<div class="clsList noprint ${cmp ? "cmp" : ""}">${names.slice().sort(numSort).map(c => { const t = classState(c), on1 = sel.includes(c); return `<button class="clsRow ${t.k} ${on1 ? "sel" : ""} ${two && c === ui.cls ? "cur" : ""}" data-act="clsTap" data-v="${esc(c)}" aria-pressed="${on1}" aria-label="${esc(shortCls(c))}반 ${t.game} ${t.txt.replace(/<[^>]*>/g, "")}"><b>${esc(shortCls(c))}<small>반</small></b>${cmp ? "" : `<span>${t.game}</span>`}<em>${cmp ? shortTxt(c, t) : t.txt}</em></button>`; }).join("")}</div>`;
@@ -2243,7 +2242,7 @@ function rulesTable() {
 
 /* ⚙ 설정 */
 /* 앱 버전 — 배포할 때마다 sw.js 의 CACHE 와 같은 번호로 올린다(설정 탭 맨 아래에 보여 준다) */
-const APP_VER = "v130";
+const APP_VER = "v131";
 async function updVer() {
   const el = $("swVer"); if (!el) return;
   try {
@@ -2468,20 +2467,15 @@ document.addEventListener("click", e => {
       ui.tab = "entry"; ui.open = {}; ui.focus = k || "none"; render();
       setTimeout(() => { const el = k && $("card-" + k); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); else scrollTo(0, 0); }, 80); break;
     }
-    case "dropCls": {   // 2학급 수업에서 한 반을 뺀다
-      const sel = pairOn() ? [ui.cls, ...bigPair()] : [ui.cls];
-      if (sel.length < 2 || !sel.includes(v)) break;
-      const keep = sel.find(x => x !== v);
-      ui.pairOn = false; ui.bigCls = [keep]; ui.bigDay = today(); ui.cls = keep;
-      focusGame(ui.cls); ui.open = {}; ui.focus = null; ui.sel = null; saveUI(); render(); break;
-    }
-    case "clsTap": {   // 반 상자: 누르면 색이 칠해지고, 하나 더 누르면 2학급 수업. 칠해진 반을 누르면 그 반을 보는 것으로 바뀐다(빼기는 카드의 [✕ 빼기])
+    case "clsTap": {   // 반 상자: 한 번 누르면 선택(색이 칠해짐), 다시 누르면 빠진다. 두 반이 선택되면 2학급 수업
       const sel = pairOn() ? [ui.cls, ...bigPair()] : [ui.cls];
       if (sel.includes(v)) {
-        if (sel.length < 2 || v === ui.cls) break;
-        ui.bigCls = [v, ui.cls]; ui.bigDay = today(); ui.cls = v;   // 두 반은 그대로, 보는 반만 바꾼다
-      } else if (sel.length === 1) { ui.pairOn = true; ui.bigCls = [ui.cls, v]; ui.bigDay = today(); }
-      else { ui.bigCls = [ui.cls, v]; ui.bigDay = today(); }   // 이미 둘이면 보던 반은 두고 다른 반만 바꾼다
+        if (sel.length < 2) { toast("한 반은 선택되어 있어야 해요"); break; }
+        const keep = sel.find(x => x !== v);
+        ui.pairOn = false; ui.bigCls = [keep]; ui.bigDay = today(); ui.cls = keep;
+      } else {   // 눌린 반이 보는 반이 된다. 이미 둘이 선택돼 있으면 지금 보던 반은 두고 다른 한 반이 빠진다
+        const old = ui.cls; ui.pairOn = true; ui.bigCls = [v, old]; ui.bigDay = today(); ui.cls = v;
+      }
       focusGame(ui.cls); ui.open = {}; ui.focus = null; ui.sel = null; saveUI(); render(); break;
     }
     case "pickCls": { if (v !== ui.cls) { ui.bigCls = [v, ui.cls]; ui.bigDay = today(); ui.cls = v; focusGame(v); ui.focus = null; ui.sel = null; } render(); break; }

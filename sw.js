@@ -2,7 +2,7 @@
    앱 화면은 '새것 먼저(네트워크 우선)'로 받고, 끊겼을 때만 보관본을 보여 준다.
    Firebase 실시간 통신은 건드리지 않는다 — 기록은 항상 최신이어야 한다. */
 /* 배포할 때마다 이 번호를 올리고, index.html 의 APP_VER 도 같은 번호로 맞춘다 */
-const CACHE = "darts-shell-v130";
+const CACHE = "darts-shell-v131";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icon.svg", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
