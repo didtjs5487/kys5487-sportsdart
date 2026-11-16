@@ -1910,7 +1910,7 @@ function scEntry() {
   if (VIEW && stuOK) h += `<div class="lockTag">${STAGES[st].mark} ${STAGES[st].name} · ${ui.round}라운드</div>`;
   else if (!VIEW) h += `<details class="setup noprint" data-k="gpick" ${ui.open.gpick ? "open" : ""}><summary>경기 · 라운드 바꾸기<span class="sp"></span><span class="sumR">${STAGES[st].name} ${ui.round}R</span></summary><div class="card" style="margin-bottom:14px">${gameSeg(cls)}</div></details>`;
   else h += gameSeg(cls);
-  if (!gs.length) return (VIEW ? joinBox(cls) : "") + h + (VIEW ? `<p class="wait">⏳ 조 편성을 기다리는 중</p>` : `<div class="go one"><button class="btn pri big nextBig" data-act="startNext">▶ 경기 시작</button></div>` + mkNow + mkBox);
+  if (!gs.length) return (VIEW ? joinBox(cls) : "") + h + (VIEW ? `<p class="wait">⏳ 조 편성을 기다리는 중</p>` : `<p class="hint noprint" style="margin:6px 0 14px">이 라운드는 아직 조 편성이 없어요. <b>조 편성</b> 탭에서 시작하세요.</p>` + mkNow + mkBox);
   const allDone = gs.every((g, gi) => cardDone(cls, g, rr, "g" + gi)), closed = isClosed(cls, st, ui.round);
   if (!VIEW && GRP == null) {
     h += `<div class="endRow noprint"><small>${closed ? "학생 입력이 잠겼어요" : allDone ? "모두 저장됐어요 · 곧 자동으로 끝나요" : "모두 저장되면 자동으로 끝나요"}</small>${closed ? `<button class="endLink" data-act="reopenRound">다시 열기</button>` : `<button class="endLink" data-act="endRound">지금 종료</button>`}</div>`;
@@ -2242,7 +2242,7 @@ function rulesTable() {
 
 /* ⚙ 설정 */
 /* 앱 버전 — 배포할 때마다 sw.js 의 CACHE 와 같은 번호로 올린다(설정 탭 맨 아래에 보여 준다) */
-const APP_VER = "v131";
+const APP_VER = "v132";
 async function updVer() {
   const el = $("swVer"); if (!el) return;
   try {
