@@ -422,6 +422,8 @@
   .prow.x301 .vin{order:3; flex:1 1 40%; min-width:120px} .prow.x301 .winBtn{order:4; white-space:nowrap}
   .oldRk{font-size:16px; font-weight:700; color:var(--sub)}
   .toScore{margin:10px 0 2px; min-height:50px; width:100%}
+  .mkBox h3, .setup .card h3{margin:14px 0 6px}
+  .mkBtns{display:flex; flex-direction:column; gap:8px; margin-top:4px} .mkBtns .btn{width:100%; min-height:54px}
   .mkList{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:6px 0}
   .mkItem{display:flex; align-items:center; gap:10px; min-height:50px; padding:0 12px; border:1px solid var(--line2); border-radius:12px; background:var(--panel); font-size:18px; font-weight:700; cursor:pointer}
   .mkItem input{width:24px; height:24px; flex:none} .mkItem small{margin-right:6px; font-size:15px; color:var(--pri)}
@@ -1652,7 +1654,7 @@ function mgPanel(cls, st, r) {
   const M = ui.mg, list = roster(cls);
   const sum = () => Array.from({ length: M.n }, (_, i) => { const k = list.filter(x => M.sel[sidOf(x)] === i + 1).length; return `${i + 1}조 ${k}명`; }).join(" · ") + (list.some(x => !M.sel[sidOf(x)]) ? ` · 안 짠 학생 ${list.filter(x => !M.sel[sidOf(x)]).length}명` : "");
   return `<div class="card mgBox noprint"><h3 style="margin-top:0">✍ 직접 편성 · ${STAGES[st].name} ${r}라운드</h3>
-    <p class="hint" style="margin-top:0">학생마다 <b>조 번호</b>를 고르세요. 다른 라운드는 위 [경기 · 라운드 바꾸기]에서 먼저 고르고 오세요. 조 번호가 곧 결과 카드의 순서예요.</p>
+    <p class="hint" style="margin-top:0">학생마다 <b>조 번호</b>를 고르세요. 다른 라운드는 위 [경기 · 라운드 바꾸기]에서 먼저 고르고 오세요. 조 번호가 곧 결과 카드의 순서예요.${ui.mgFromEntry ? " <b>사라진 라운드의 조를 전부 만들어 주세요.</b> 저장하면 결과 탭으로 돌아가 조 카드에 점수를 적을 수 있어요." : ""}</p>
     <div class="row" style="align-items:center; margin-bottom:8px"><b>조 수</b><button class="btn sm" data-act="mgN" data-v="-1" aria-label="조 줄이기">－</button><b style="min-width:28px;text-align:center">${M.n}</b><button class="btn sm" data-act="mgN" data-v="1" aria-label="조 늘리기">＋</button></div>
     ${list.map(x => { const id = sidOf(x); return `<div class="mgRow"><span class="mgNm"><small>${esc(x.no)}</small>${esc(x.name)}</span><select class="mgSel" data-s="${id}" aria-label="${esc(x.name)} 조"><option value="0">—</option>${Array.from({ length: M.n }, (_, i) => `<option value="${i + 1}" ${M.sel[id] === i + 1 ? "selected" : ""}>${i + 1}조</option>`).join("")}</select></div>`; }).join("")}
     <p class="sumline" id="mgSum">${sum()}</p>
@@ -1852,12 +1854,16 @@ function scEntry() {
   let h = "";
   // 빠진 경기 결과 직접 입력 — 이 라운드에서 아직 결과가 없는 학생을 보여 주고, 라운드 전체 또는 일부 경기(그 경기를 던진 학생만)를 골라 입력칸을 연다
   const missing = VIEW ? [] : roster(cls).filter(x => { const sid = sidOf(x); return !Object.keys(rr).some(k => rr[k] && rr[k][sid] && rr[k][sid].r >= 1) && !(rr.mk && rr.mk[sid]); });
-  const mkBox = VIEW ? "" : `<details class="setup noprint" data-k="mkOpen" ${ui.open.mkOpen ? "open" : ""}><summary>✍ 빠진 경기 결과 직접 입력</summary><div class="card"><p class="hint" style="margin-top:0">결과가 사라졌을 때, 갖고 있는 기록(엑셀·종이)을 보고 <b>학생마다 순위 · 점수 · 함께 던진 인원</b>을 직접 적어요. 조 구성은 몰라도 돼요.</p>
-    <p class="hint"><b>① 위에서 ${STAGES[st].name} ${ui.round}라운드가 맞는지 확인</b>하세요(다른 라운드는 [경기 · 라운드 바꾸기]).<br><b>② 입력할 학생을 고르세요.</b> 라운드 전체가 빠졌으면 [전체 선택], 일부 경기만 빠졌으면 <b>그 경기를 던진 학생만</b> 체크하세요.</p>
-    ${missing.length ? `<div class="mkList">${missing.map(x => `<label class="mkItem"><input type="checkbox" data-mk="${sidOf(x)}" checked><span><small>${esc(x.no)}</small>${esc(x.name)}</span></label>`).join("")}</div>
+  const mkBox = VIEW ? "" : `<details class="setup noprint" data-k="mkOpen" ${ui.open.mkOpen ? "open" : ""}><summary>✍ 빠진 경기 결과 직접 입력</summary><div class="card"><p class="hint" style="margin-top:0">결과가 사라졌을 때, 갖고 있는 기록(엑셀·종이)을 보고 직접 적어요. <b>먼저 위에서 ${STAGES[st].name} ${ui.round}라운드가 맞는지 확인</b>하세요(다른 라운드는 [경기 · 라운드 바꾸기]).</p>
+    <h3>① 라운드 전체가 사라졌을 때</h3>
+    <p class="hint" style="margin-top:0">조 편성부터 전부 입력해요. 학생마다 조 번호를 정해 조를 만든 뒤, 조 카드에 점수를 적어요.</p>
+    <button class="btn pri" data-act="mkRound">✍ 조 편성부터 전체 입력</button>
+    <h3>② 일부 조만 사라졌을 때 · ③ 한 명만 빠졌을 때</h3>
+    ${missing.length ? `<p class="hint" style="margin-top:0">결과가 없는 학생이에요. 입력할 학생을 체크하세요.<br>· <b>조별</b>: 그 조 학생을 체크 → [한 조로 만들기] (조마다 반복)<br>· <b>개인별</b>: 그 학생만 체크 → [한 명씩 입력]</p>
+    <div class="mkList">${missing.map(x => `<label class="mkItem"><input type="checkbox" data-mk="${sidOf(x)}"><span><small>${esc(x.no)}</small>${esc(x.name)}</span></label>`).join("")}</div>
     <div class="row" style="margin:6px 0"><button class="btn sm" data-act="mkAll">전체 선택</button><button class="btn sm" data-act="mkNone">모두 해제</button></div>
-    <button class="btn pri" data-act="mkOpen">선택한 학생 입력칸 열기</button>` : `<p class="hint"><b>이 라운드는 학생 모두 결과가 있어요.</b> 빠진 게 있으면 위의 조 카드나 '직접 입력한 결과' 칸에서 고치세요.</p>`}
-    <p class="hint">열면 이 화면 위쪽에 <b>'직접 입력한 결과'</b> 칸이 생겨요. 조 카드가 아직 남아 있으면 그 카드에서 바로 입력해도 돼요.</p></div></details>`;
+    <div class="mkBtns"><button class="btn pri" data-act="mkGroup">👥 선택한 학생을 한 조로 만들기</button><button class="btn" data-act="mkOpen">👤 선택한 학생을 한 명씩 입력</button></div>` : `<p class="hint" style="margin-top:0"><b>이 라운드는 학생 모두 결과가 있어요.</b> 빠진 게 있으면 위의 조 카드나 '직접 입력한 결과' 칸에서 고치세요.</p>`}
+    <p class="hint">[한 조로 만들기]는 그 학생들의 <b>조 카드</b>를, [한 명씩 입력]은 위쪽의 <b>'직접 입력한 결과'</b> 칸을 만들어요. 조 카드가 아직 남아 있으면 그 카드에서 바로 입력해도 돼요.</p></div></details>`;
   const mkNow = !VIEW && GRP == null && Object.keys(rr.mk || {}).length ? card(cls, st, "mk", Object.keys(rr.mk), rr.mk, "직접 입력한 결과") : "";   // 조가 없는 라운드에서도 직접 입력한 결과 칸은 보인다
   const pair = (ui.bigCls || []).filter(c => S.rosters[c]);
   if (VIEW && stuOK && !liveOf(cls)) return joinBox(cls) + `<p class="wait">⏳ 경기 시작을 기다리는 중</p>`;
@@ -2640,8 +2646,19 @@ document.addEventListener("click", e => {
       const L = liveOf(cls); if (!isClosed(cls, st, r) && !(L && L.st === st && L.r === r)) put(P(cls, "closed", st, "r" + r), Date.now(), true);   // 지난 라운드는 끝난 것으로
       ui.focus = "mk"; toast("직접 입력한 결과 칸을 열었어요 — 학생마다 순위와 점수를 적으세요"); render(); setTimeout(() => { const el = $("card-mk"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80); break;
     }
+    case "mkGroup": {
+      const pick = [...document.querySelectorAll("input[data-mk]:checked")].map(c => c.dataset.mk);
+      if (pick.length < 2 || pick.length > CFG.maxGroup) { toast(`한 조는 2~${CFG.maxGroup}명이에요 — 그 조 학생만 체크하세요`); break; }
+      const st = ui.stage, r = ui.round, list = groupsOf(cls, st, r);
+      list.push({ m: pick, tag: "" });
+      saveGroups(cls, st, list, "manual", r);
+      const L = liveOf(cls); if (!isClosed(cls, st, r) && !(L && L.st === st && L.r === r)) put(P(cls, "closed", st, "r" + r), Date.now(), true);   // 지난 라운드는 끝난 것으로
+      ui.focus = "g" + (list.length - 1); toast(`${pick.length}명 조 카드를 만들었어요 — 점수를 적어 주세요`); render();
+      setTimeout(() => { const el = $("card-g" + (list.length - 1)); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80); break;
+    }
     case "mkAll": document.querySelectorAll("input[data-mk]").forEach(c => { c.checked = true; }); break;
     case "mkNone": document.querySelectorAll("input[data-mk]").forEach(c => { c.checked = false; }); break;
+    case "mkRound": ui.tab = "groups"; ui.mgFromEntry = true;   // → 직접 편성 열기(아래)
     case "mgOpen": {   // 지금 조(있으면)를 불러와서 고치거나, 없으면 빈 상태로 시작
       const cur = groupsOf(cls, ui.stage, ui.round), sel = {};
       cur.forEach((g, gi) => g.m.forEach(id => { sel[id] = gi + 1; }));
@@ -2649,7 +2666,7 @@ document.addEventListener("click", e => {
       ui.open.setup = false; render(); setTimeout(() => { const el = document.querySelector(".mgBox"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80); break;
     }
     case "mgN": { const M = ui.mg; if (!M) break; M.n = Math.max(1, Math.min(14, M.n + +v)); Object.keys(M.sel).forEach(id => { if (M.sel[id] > M.n) M.sel[id] = 0; }); render(); break; }
-    case "mgClose": ui.mg = null; render(); break;
+    case "mgClose": ui.mg = null; ui.mgFromEntry = false; render(); break;
     case "mgSave": {
       const M = ui.mg; if (!M) break;
       const list = [];
@@ -2659,6 +2676,10 @@ document.addEventListener("click", e => {
       const nm = `${STAGES[ui.stage].name} ${ui.round}라운드`;
       if (groupsOf(cls, ui.stage).length && !confirm(`${nm}의 조를 이 구성으로 바꿀까요?\n(이미 입력한 결과는 지우지 않아요. 조 번호 순서가 바뀌면 결과 카드의 위치가 달라질 수 있어요.)${miss ? `\n\n⚠ 조를 정하지 않은 학생이 ${miss}명 있어요.` : ""}`)) break;
       saveGroups(cls, ui.stage, list, "manual", ui.round); ui.mg = null;
+      if (ui.mgFromEntry) {   // 사라진 라운드를 다시 입력하는 중 — 지난 라운드는 끝난 것으로 두고 결과 탭으로 돌아가 조 카드에 점수를 적는다
+        ui.mgFromEntry = false; const L = liveOf(cls); if (!isClosed(cls, ui.stage, ui.round) && !(L && L.st === ui.stage && L.r === ui.round)) put(P(cls, "closed", ui.stage, "r" + ui.round), Date.now(), true);
+        ui.tab = "entry"; ui.focus = "g0"; toast(`${nm} ${list.length}개 조를 만들었어요 — 조 카드에 점수를 적어 주세요`); render(); scrollTo(0, 0); break;
+      }
       toast(`${nm} ${list.length}개 조를 저장했어요 — 결과 탭에서 결과를 넣을 수 있어요`); render(); break;
     }
     case "winTog": {
