@@ -417,6 +417,12 @@
   .tapBtn{position:relative; min-width:0; min-height:66px; border:1px solid var(--line2); border-radius:14px; background:var(--soft); font-size:19px; font-weight:700; display:flex; align-items:center; gap:8px; padding:0 10px; text-align:left; color:var(--ink)}
   .tapBtn .ord{width:40px; height:40px; border-radius:50%; background:var(--panel); border:2px dashed var(--line2); display:flex; align-items:center; justify-content:center; font-family:"Pretendard Variable",Pretendard,sans-serif; font-size:24px; flex:none}
   .tapBtn .tn{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .prow.x301{display:flex; flex-wrap:wrap; align-items:center; gap:8px 10px}
+  .prow.x301 .who{flex:1 1 55%; min-width:0} .prow.x301 .rkBadge{flex:none; order:2; margin-left:auto}
+  .prow.x301 .vin{order:3; flex:1 1 40%; min-width:120px} .prow.x301 .winBtn{order:4; white-space:nowrap}
+  .winBtn{flex:none; min-height:50px; padding:0 14px; border:2px solid var(--line2); border-radius:14px; background:var(--panel); color:var(--sub); font-size:17px; font-weight:800; cursor:pointer}
+  .winBtn.on{border-color:var(--good); background:var(--goodSoft); color:var(--good)}
+  .winBtn:disabled{opacity:.5; cursor:default}
   .tapBtn small{position:absolute; top:3px; right:8px; color:var(--pri); font-size:15px; font-family:"Pretendard Variable",Pretendard,sans-serif}
   .tapBtn.on{background:var(--priSoft); border-color:var(--pri)}
   .tapBtn.on .ord{background:var(--pri); color:#fff; border:0}
@@ -1918,17 +1924,24 @@ function card(cls, st, gk, members, res, title) {
   const simpleCU = gk !== "mk" && st === "cu", tap301 = gk !== "mk" && st === "x3";
   const tapIds = ids.filter(s => !elsewhere[s] && (!isAbs(cls, s) || res[s]) && !(res[s] && res[s].out));
   // 301: 1위가 몇 라운드 만에 끝냈나 (학년 순위 = 가장 적은 라운드)
-  const winner = tap301 ? tapIds.find(s => res[s] && res[s].r === 1) : null;
+  // 301 새 방식: 끝낸 학생은 [끝냄](남은 점수 0), 나머지는 남은 점수를 적는다. 예전에 이름을 눌러 기록한 카드는 그 방식 그대로 보인다
+  const oldTap = tap301 && ids.some(s => res[s] && res[s].r >= 1) && !ids.some(s => res[s] && typeof res[s].v === "number");
+  const rem301 = tap301 && !oldTap;
+  const winners = tap301 ? tapIds.filter(s => res[s] && res[s].r === 1 && (oldTap || res[s].v === 0)) : [], winner = winners[0] || null;
   const needTn = tap301 && !!winner && !(res[winner].tn >= 1);
   const ranked = live.length && live.every(s => res[s] && res[s].r >= 1) && !needTn;
   const okWait = ranked && R0.by && R0.by !== "T" && !R0.ok, okDone = ranked && !!R0.ok, done = ranked && !okWait;
-  const turnBox = winner ? `<div class="turnBox"><span class="tq">🥇 <b>${esc((sm[winner] || {}).name || "?")}</b> 몇 라운드 만에 끝냈나요?</span><span class="tin2"><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" enterkeyhint="done" autocomplete="off" placeholder="?" value="${res[winner].tn || ""}" ${RO ? "disabled" : ""} data-g="${key}" data-s="${winner}" class="tin"> 라운드</span></div>` : "";
-  const rows = tap301 ? tapGrid(cls, key, tapIds, res, n, RO) + turnBox : (simpleCU && !RO ? `<p class="tapHint">✏️ 최종 점수를 적으면 순위가 저절로 정해져요</p>` : "") + ids.filter(s => !(simpleCU && res[s] && res[s].out)).map(s => {
+  const turnBox = winner ? `<div class="turnBox"><span class="tq">🥇 <b>${winners.map(w => esc((sm[w] || {}).name || "?")).join(" · ")}</b> 몇 라운드 만에 끝냈나요?</span><span class="tin2"><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="2" enterkeyhint="done" autocomplete="off" placeholder="?" value="${res[winner].tn || ""}" ${RO ? "disabled" : ""} data-g="${key}" data-s="${winner}" class="tin"> 라운드</span></div>` : "";
+  const rows = tap301 && !rem301 ? tapGrid(cls, key, tapIds, res, n, RO) + turnBox : (simpleCU && !RO ? `<p class="tapHint">✏️ 최종 점수를 적으면 순위가 저절로 정해져요</p>` : rem301 && !RO ? `<p class="tapHint">🥇 먼저 끝낸 학생은 [끝냄], 나머지는 <b>남은 점수</b>를 적어요. 같은 점수는 같은 순위예요.</p>` : "") + ids.filter(s => !(simpleCU && res[s] && res[s].out)).map(s => {
     const x = sm[s] || { no: "?", name: "(명렬 없음)" }, r = res[s] || {};
     if (elsewhere[s]) return `<div class="prow abs"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)} · 이번 라운드는 ${esc(kName(elsewhere[s]))}에서 기록</div></div>`;
     const a = isAbs(cls, s) && !res[s];
     const rk = Array.from({ length: n }, (_, i) => i + 1).map(k => `<button class="${r.r === k ? "on" : ""} ${k === 1 ? "r1" : ""}" ${RO ? "disabled" : `data-act="rank" data-g="${key}" data-s="${s}" data-v="${k}"`}>${k}위</button>`).join("");
     const hasRes = typeof r.v === "number" || r.r >= 1;
+    if (rem301) return `<div class="prow cu1 x301 ${a ? "abs" : ""}"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)}${sexBadge(x)}${a ? " · 결석" : ""}</div>
+      <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" enterkeyhint="next" autocomplete="off" placeholder="남은 점수" value="${typeof r.v === "number" ? r.v : ""}" ${RO || a ? "disabled" : ""} data-g="${key}" data-s="${s}" class="vin">
+      <button class="winBtn ${r.v === 0 ? "on" : ""}" ${RO || a ? "disabled" : `data-act="winTog" data-g="${key}" data-s="${s}"`} aria-pressed="${r.v === 0}">🥇 끝냄</button>
+      <span class="rkBadge ${r.r === 1 ? "r1" : ""}">${r.r ? `${r.r}위<small>+${ptsOf(r.r, n)}</small>` : ""}</span></div>`;
     if (simpleCU) return `<div class="prow cu1 ${a ? "abs" : ""}"><div class="who"><small>${esc(x.no)}</small>${esc(x.name)}${sexBadge(x)}${a ? " · 결석" : ""}</div>
       <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="4" enterkeyhint="next" autocomplete="off" placeholder="최종 점수" value="${typeof r.v === "number" ? r.v : ""}" ${RO || a ? "disabled" : ""} data-g="${key}" data-s="${s}" class="vin">
       <span class="rkBadge ${r.r === 1 ? "r1" : ""}">${r.r ? `${r.r}위<small>+${ptsOf(r.r, n)}</small>` : ""}</span></div>`;
@@ -1937,7 +1950,7 @@ function card(cls, st, gk, members, res, title) {
       <div class="ranks">${rk}<span class="pts">${r.r ? "+" + ptsOf(r.r, gk === "mk" ? (r.n || 4) : n) + "점" : ""}</span></div>
       ${gk === "mk" ? `<div class="ranks"><span style="font-size:15px;font-weight:700;color:var(--sub)">함께 던진 조</span>${[3, 4, 5].map(k => `<button class="${(r.n || 4) === k ? "on" : ""}" ${RO ? "disabled" : `data-act="mkn" data-s="${s}" data-v="${k}"`}>${k}명</button>`).join("")}</div>` : ""}</div>`;
   }).join("");
-  const rowsShown = needRef ? `<p class="memHead">이번 조 · 심판이 정해지면 점수 칸이 열려요</p><div class="memList">${live.map(s => `<span>${esc((sm[s] || {}).name || "?")}</span>`).join("")}</div>` : rows;
+  const rowsShown = needRef ? `<p class="memHead">이번 조 · 심판이 정해지면 점수 칸이 열려요</p><div class="memList">${live.map(s => `<span>${esc((sm[s] || {}).name || "?")}</span>`).join("")}</div>` : rows + (rem301 ? turnBox : "");
   const stepNow = needRef ? 1 : okDone ? 4 : ranked ? 3 : 2;
   const stepBar = !canTeach() && stuOK && !takenByOther && !isClosed(cls, st, ui.round) && gk !== "mk"
     ? `<ol class="steps" aria-label="입력 순서">${[["심판 고르기"], [tap301 ? "순위 누르기" : "점수 적기"], ["저장하기"]].map((x, i) => `<li class="${stepNow > i + 1 ? "done" : stepNow === i + 1 ? "now" : ""}"><i>${stepNow > i + 1 ? "✔" : i + 1}</i><span>${x[0]}</span></li>`).join("")}</ol>` : "";
@@ -2299,12 +2312,14 @@ function writeCard(gk, res) {
   // 보충 경기는 다른 조에 끼어 던진 순위를 선생님이 직접 누른다 — 혼자 1위가 되지 않게 자동 순위를 쓰지 않는다
   // 카운트업은 최종 점수로만 순위를 정한다(같은 점수는 같은 순위)
   if (gk !== "mk" && ui.stage === "cu") Object.values(res).forEach(x => { if (x) delete x.m; });
+  // 301: 끝낸 학생은 남은 점수 0, 나머지는 남은 점수 — 점수가 하나라도 있으면 점수로 자동 순위(같은 점수는 같은 순위, 낮을수록 위)
+  if (gk !== "mk" && ui.stage === "x3" && Object.values(res).some(x => x && typeof x.v === "number")) Object.values(res).forEach(x => { if (x) delete x.m; });
   if (gk !== "mk" && !Object.values(res).some(x => x && x.m)) autoRank(res, STAGES[ui.stage].better);
   // 301: 1위 라운드 수는 늘 지금 1위에게 붙인다
   if (gk !== "mk" && ui.stage === "x3") {
-    const tn = Object.values(res).map(x => x && x.tn).find(Boolean), w = Object.values(res).find(x => x && x.r === 1);
+    const tn = Object.values(res).map(x => x && x.tn).find(Boolean);
     Object.values(res).forEach(x => { if (x) delete x.tn; });
-    if (tn && w) w.tn = tn;
+    if (tn) Object.values(res).forEach(x => { if (x && x.r === 1 && x.v === 0) x.tn = tn; else if (x && x.r === 1 && typeof x.v !== "number") x.tn = tn; });   // 공동 1위(같이 끝냄)면 모두
   }
   Object.keys(res).forEach(s => { const x = res[s]; if (x.r == null && typeof x.v !== "number" && !x.out && gk !== "mk") delete res[s]; });
   put(P(ui.cls, "games", ui.stage, "r" + ui.round, gk), Object.keys(res).length ? res : null);
@@ -2574,6 +2589,11 @@ document.addEventListener("click", e => {
         res[s] = { ...x, r: next, m: true };
       }
       writeCard(gk, res); break;
+    }
+    case "winTog": {
+      const gk = b.dataset.g, s = b.dataset.s, res = curCard(gk), x = res[s] || {};
+      if (x.v === 0) delete x.v; else x.v = 0;
+      res[s] = x; writeCard(gk, res); break;
     }
     case "rank": {
       const gk = b.dataset.g, s = b.dataset.s, res = curCard(gk), x = res[s] || {};
