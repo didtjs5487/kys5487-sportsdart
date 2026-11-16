@@ -422,6 +422,10 @@
   .prow.x301 .vin{order:3; flex:1 1 40%; min-width:120px} .prow.x301 .winBtn{order:4; white-space:nowrap}
   .oldRk{font-size:16px; font-weight:700; color:var(--sub)}
   .toScore{margin:10px 0 2px; min-height:50px; width:100%}
+  .mgBox{margin:12px 0}
+  .mgRow{display:flex; align-items:center; gap:10px; min-height:56px; border-bottom:1px solid var(--line)}
+  .mgRow .mgNm{flex:1; min-width:0; font-size:19px; font-weight:700} .mgRow .mgNm small{margin-right:8px; font-size:16px; color:var(--pri)}
+  .mgRow .mgSel{flex:none; width:110px; min-height:50px; font-size:18px; font-weight:700}
   .winBtn{flex:none; min-height:50px; padding:0 14px; border:2px solid var(--line2); border-radius:14px; background:var(--panel); color:var(--sub); font-size:17px; font-weight:800; cursor:pointer}
   .winBtn.on{border-color:var(--good); background:var(--goodSoft); color:var(--good)}
   .winBtn:disabled{opacity:.5; cursor:default}
@@ -1601,9 +1605,11 @@ function scGroups() {
       ${gs.length ? `<div class="acts3"><button class="btn soft" data-act="resetRound">이 라운드 리셋</button></div>` : ""}
       <div class="sumline">${n0 ? `<b>${n0}명</b> → <b>${sz0.length}개 조</b> <span>(${sz0.join("·")}명)</span>` : "참여 학생 없음"}</div>
       <button class="btn pri big wide" data-act="make">${gs.length ? "다시 편성" : "편성하기"}</button>
+      <button class="btn" data-act="mgOpen" style="width:100%; margin-top:8px">✍ 직접 편성하기 (조를 손으로 짜기)</button>
       ${gs.length ? `<button class="linkBtn danger" data-act="clrGroups">이 라운드 조 지우기</button>` : r > 1 && groupsOf(cls, st, r - 1).length ? `<button class="linkBtn" data-act="copyPrev">${r - 1}라운드 조 그대로 쓰기</button>` : ""}
     </div></details>`;
   }
+  if (!VIEW && ui.mg) h += mgPanel(cls, st, r);
   // 두 반 함께면 두 반의 조 편성을 위아래로 모두 보이고, 어느 반이든 이름을 눌러 고친다 (2026-10-29)
   const lists = isPair ? pairSel.map(c => { if (c === cls) return { c, st, r }; const L = liveOf(c), g = L ? { st: L.st, r: L.r } : (curGame(c) || { st, r }); return { c, st: g.st, r: g.r }; }) : [{ c: cls, st, r }];
   if (!lists.some(x => groupsOf(x.c, x.st, x.r).length)) return h;
@@ -1637,6 +1643,17 @@ function resumeNote(c, act) {
   const u = unfinished(c); if (!u) return "";
   const names = u.left.map(g => (g + 1) + "조").join(" · ");
   return `<div class="resumeNote noprint"><b>지난 시간에 끝내지 못한 경기가 있어요</b><span>${esc(c)}반 ${STAGES[u.st].name} ${u.r}라운드 — ${u.swap ? u.wave + "차 경기 · " : ""}아직 입력이 안 된 조: ${names}</span><button class="btn pri" data-act="${act}">▶ 이어서 시작</button></div>`;
+}
+/* 직접 편성 — 학생마다 조 번호를 골라 이 라운드의 조를 손으로 짠다. 날아간 라운드를 엑셀 기록으로 복원하거나 조를 바로잡을 때 쓴다 */
+function mgPanel(cls, st, r) {
+  const M = ui.mg, list = roster(cls);
+  const sum = () => Array.from({ length: M.n }, (_, i) => { const k = list.filter(x => M.sel[sidOf(x)] === i + 1).length; return `${i + 1}조 ${k}명`; }).join(" · ") + (list.some(x => !M.sel[sidOf(x)]) ? ` · 안 짠 학생 ${list.filter(x => !M.sel[sidOf(x)]).length}명` : "");
+  return `<div class="card mgBox noprint"><h3 style="margin-top:0">✍ 직접 편성 · ${STAGES[st].name} ${r}라운드</h3>
+    <p class="hint" style="margin-top:0">학생마다 <b>조 번호</b>를 고르세요. 다른 라운드는 위 [경기 · 라운드 바꾸기]에서 먼저 고르고 오세요. 조 번호가 곧 결과 카드의 순서예요.</p>
+    <div class="row" style="align-items:center; margin-bottom:8px"><b>조 수</b><button class="btn sm" data-act="mgN" data-v="-1" aria-label="조 줄이기">－</button><b style="min-width:28px;text-align:center">${M.n}</b><button class="btn sm" data-act="mgN" data-v="1" aria-label="조 늘리기">＋</button></div>
+    ${list.map(x => { const id = sidOf(x); return `<div class="mgRow"><span class="mgNm"><small>${esc(x.no)}</small>${esc(x.name)}</span><select class="mgSel" data-s="${id}" aria-label="${esc(x.name)} 조"><option value="0">—</option>${Array.from({ length: M.n }, (_, i) => `<option value="${i + 1}" ${M.sel[id] === i + 1 ? "selected" : ""}>${i + 1}조</option>`).join("")}</select></div>`; }).join("")}
+    <p class="sumline" id="mgSum">${sum()}</p>
+    <div class="row"><button class="btn pri" data-act="mgSave">이 조로 저장</button><button class="btn" data-act="mgClose">닫기</button></div></div>`;
 }
 /* 한 반의 조 목록 (선생님 화면) — 이름을 누르면 고르고, 같은 반의 다른 이름을 누르면 서로 바꾼다 */
 function groupBlock(c, st, r, head) {
@@ -1869,7 +1886,7 @@ function scEntry() {
   } else h += `<div class="entryGrid">${cards.map(({ g, gi }) => card(cls, st, gi, g.m, rr["g" + gi] || {}, `${grpLabel(cls, gi)}${g.tag ? " · " + g.tag : ""}`)).join("")}`;
   if (GRP == null) {
     const mk = rr.mk || {};
-    if (Object.keys(mk).length) h += card(cls, st, "mk", Object.keys(mk), mk, "보충 경기");
+    if (Object.keys(mk).length) h += card(cls, st, "mk", Object.keys(mk), mk, "복원·보충 기록");
   }
   h += `</div>`;
   if (!VIEW && GRP == null && pairOn()) bigPair().forEach(c => { h += entryMini(c); });   // 두 반 함께: 다른 반 다트도 함께 보인다
@@ -2180,6 +2197,8 @@ function scSet() {
     <details class="setup" data-k="s-data" ${ui.open["s-data"] ? "open" : ""}><summary>자료 관리<span class="sp"></span><span class="sumR">엑셀 · 백업 · 지우기</span></summary><div class="card">
       <p class="hint" style="margin-top:0">${serverDenied || !fdb ? "⚠ 지금은 <b>이 기기에만</b> 저장돼요." : "기록은 서버에 저장되어 어느 기기에서 열어도 같아요."} 내려받은 엑셀·백업 파일에는 학생 정보가 있으니 교사 PC에만 두세요.</p>
       <div class="row"><button class="btn pri" data-act="xlsx">⬇ 엑셀 (모든 반)</button><button class="btn" data-act="backup">⬇ 전체 백업</button><label class="btn" style="display:inline-flex;align-items:center">⬆ 백업 불러오기<input type="file" accept=".json" id="restore" hidden></label></div>
+      <div class="row" style="margin-top:8px"><label class="btn" style="display:inline-flex;align-items:center">📥 엑셀에서 경기 결과 복원<input type="file" accept=".xlsx" id="xlsxRestore" hidden></label></div>
+      <p class="hint">기록이 날아갔을 때, 앞서 내려받아 둔 엑셀(스포츠다트_수행평가_….xlsx)을 고르면 비어 있는 라운드의 결과가 되살아나요. 이미 있는 기록은 건드리지 않아요.</p>
       ${cls ? `<h3>${esc(cls)}반 지우기</h3><div class="row"><button class="btn danger" data-act="resetGames">경기 결과·과제수행</button><button class="btn danger" data-act="resetGroups">조 편성</button></div>` : ""}
       <h3>모든 반 지우기 <small style="font-weight:600;color:var(--sub)">학기 끝</small></h3>
       <div class="row"><button class="btn danger" data-act="wipeGames">경기 기록만 (명렬 남김)</button><button class="btn danger" data-act="wipeAll">명렬까지 모두</button></div>
@@ -2599,6 +2618,25 @@ document.addEventListener("click", e => {
       Object.values(res).forEach(x => { if (!x) return; if (x.r >= 1) x.or = x.r; if (x.r === 1) x.v = 0; delete x.r; delete x.m; });   // 기존 순위(or)는 점수를 다 적을 때까지 화면에 남는다
       writeCard(gk, res); break;
     }
+    case "mgOpen": {   // 지금 조(있으면)를 불러와서 고치거나, 없으면 빈 상태로 시작
+      const cur = groupsOf(cls, ui.stage, ui.round), sel = {};
+      cur.forEach((g, gi) => g.m.forEach(id => { sel[id] = gi + 1; }));
+      ui.mg = { n: Math.max(cur.length, Math.ceil(roster(cls).length / CFG.size), 1), sel };
+      ui.open.setup = false; render(); setTimeout(() => { const el = document.querySelector(".mgBox"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80); break;
+    }
+    case "mgN": { const M = ui.mg; if (!M) break; M.n = Math.max(1, Math.min(14, M.n + +v)); Object.keys(M.sel).forEach(id => { if (M.sel[id] > M.n) M.sel[id] = 0; }); render(); break; }
+    case "mgClose": ui.mg = null; render(); break;
+    case "mgSave": {
+      const M = ui.mg; if (!M) break;
+      const list = [];
+      for (let i = 1; i <= M.n; i++) { const m = roster(cls).filter(x => M.sel[sidOf(x)] === i).map(sidOf); if (m.length) list.push({ m, tag: "" }); }
+      if (!list.length) { toast("조에 넣은 학생이 없어요"); break; }
+      const miss = roster(cls).filter(x => !M.sel[sidOf(x)] && !isAbs(cls, sidOf(x))).length;
+      const nm = `${STAGES[ui.stage].name} ${ui.round}라운드`;
+      if (groupsOf(cls, ui.stage).length && !confirm(`${nm}의 조를 이 구성으로 바꿀까요?\n(이미 입력한 결과는 지우지 않아요. 조 번호 순서가 바뀌면 결과 카드의 위치가 달라질 수 있어요.)${miss ? `\n\n⚠ 조를 정하지 않은 학생이 ${miss}명 있어요.` : ""}`)) break;
+      saveGroups(cls, ui.stage, list, "manual", ui.round); ui.mg = null;
+      toast(`${nm} ${list.length}개 조를 저장했어요 — 결과 탭에서 결과를 넣을 수 있어요`); render(); break;
+    }
     case "winTog": {
       const gk = b.dataset.g, s = b.dataset.s, res = curCard(gk), x = res[s] || {};
       if (x.v === 0) delete x.v; else x.v = 0;
@@ -2671,9 +2709,15 @@ document.addEventListener("change", e => {
   const t = e.target;
   if (t.id === "clsSel") { ui.cls = t.value; ui.sel = null; render(); return; }
   if (t.id === "restore") { restore(t.files[0]); return; }
+  if (t.id === "xlsxRestore") { restoreFromXLSX(t.files[0]); t.value = ""; return; }
   if (t.classList.contains("refOther") && t.value) { claimRef(t.dataset.g, t.value); return; }
   if (t.classList.contains("bdSel") && t.value) { ui.bdA = t.value; ui.open.setup = true; render(); return; }
   if (t.classList.contains("roleAdd") && t.value) { const s = t.value; stampRoles(t.dataset.g, R => { (R.x ||= {})[s] = 1; }); return; }
+  if (t.classList.contains("mgSel")) {   // 직접 편성: 조 번호 고르기 (화면은 그대로 두고 합계만 바꾼다)
+    if (ui.mg) { ui.mg.sel[t.dataset.s] = +t.value; const list = roster(ui.cls), el = $("mgSum");
+      if (el) el.textContent = Array.from({ length: ui.mg.n }, (_, i) => `${i + 1}조 ${list.filter(x => ui.mg.sel[sidOf(x)] === i + 1).length}명`).join(" · ") + (list.some(x => !ui.mg.sel[sidOf(x)]) ? ` · 안 짠 학생 ${list.filter(x => !ui.mg.sel[sidOf(x)]).length}명` : ""); }
+    return;
+  }
   if (t.classList.contains("tin")) {   // 301 1위 라운드 수
     const res = curCard(t.dataset.g), x = res[t.dataset.s]; if (!x) return;
     const raw = t.value.replace(/\D/g, ""), n = Math.round(+raw);
@@ -2800,6 +2844,56 @@ async function downloadXLSX() {
   });
   X.writeFile(wb, `스포츠다트_수행평가_${today()}.xlsx`);
   toast("엑셀을 내려받았습니다");
+}
+/* 엑셀에서 경기 결과 복원 — 내려받아 둔 '스포츠다트_수행평가_*.xlsx'로 날아간 라운드의 결과를 되살린다.
+   조 구성은 엑셀에 없으므로 '보충 경기' 칸(학생마다 순위·함께 던진 인원 저장)에 넣는다 → 승점·영역 점수는 그대로 맞는다.
+   이미 결과가 있는 학생·라운드는 건드리지 않는다. */
+async function restoreFromXLSX(file) {
+  if (!file) return;
+  let X; try { X = await loadXLSX(); } catch (e) { toast("엑셀 도구를 불러오지 못했습니다 — 인터넷 연결을 확인하세요"); return; }
+  let wb; try { wb = X.read(await file.arrayBuffer(), { type: "array" }); } catch (e) { toast("엑셀 파일을 읽지 못했습니다"); return; }
+  const plan = [], tasks = [], note = { names: 0, exist: 0, sheets: 0 };
+  const sheetOf = c => String(c).replace(/[\[\]:*?\/\\]/g, "-").slice(0, 28) + "반";
+  wb.SheetNames.forEach(sn => {
+    const cls = classNames().find(c => sheetOf(c) === sn); if (!cls) return;
+    const rows = X.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: "" }); if (rows.length < 3) return;
+    note.sheets++;
+    const top = rows[0], sub = rows[1], blocks = [], taskCols = {};
+    top.forEach((t, ci) => {
+      const a = String(t).match(/카운트 업 (\d)R/), b = String(t).match(/301 (\d)R/);
+      if (a) blocks.push({ st: "cu", r: +a[1], c: ci, k: { v: 0, rank: 1, n: 2 } });
+      if (b) blocks.push({ st: "x3", r: +b[1], c: ci, k: { rank: 0, v: 1, n: 2 } });
+      if (String(t).includes("과제수행")) for (let j = ci; j < ci + 5; j++) { const nm = String(sub[j] || ""); const key = nm === "준비·정리" ? "p" : nm === "경기 진행" ? "j" : nm === "심판" ? "s" : null; if (key) taskCols[key] = j; }
+    });
+    const stus = roster(cls);
+    rows.slice(2).forEach(row => {
+      const stu = stus.find(x => String(x.no) === String(row[0])); if (!stu) return;
+      if (String(stu.name).trim() !== String(row[1]).trim()) { note.names++; return; }
+      const sid = sidOf(stu);
+      blocks.forEach(B => {
+        const rk = row[B.c + B.k.rank], n = row[B.c + B.k.n], v = row[B.c + B.k.v];
+        if (!(typeof rk === "number" && rk >= 1 && typeof n === "number" && n >= 2 && n <= CFG.maxGroup)) return;   // '결석'·빈 칸은 건너뜀
+        const ex = record(cls, B.st, sid).rounds[B.r - 1];
+        if (ex && !ex.fill) { note.exist++; return; }   // 이미 기록이 있으면 그대로 둔다
+        plan.push({ cls, st: B.st, r: B.r, sid, rank: rk, n, v: typeof v === "number" ? v : undefined });
+      });
+      Object.entries(taskCols).forEach(([k, j]) => { if (row[j] === 1 && !taskOn(cls, sid, k)) tasks.push({ cls, sid, k }); });
+    });
+  });
+  if (!plan.length && !tasks.length) { toast(note.sheets ? "복원할 새 기록이 없어요 (이미 모두 들어 있어요)" : "이 파일에서 반 시트를 찾지 못했어요 — 앱에서 내려받은 엑셀인가요?"); return; }
+  const by = {}; plan.forEach(x => { const k = `${x.cls}반 ${STAGES[x.st].name} ${x.r}R`; by[k] = (by[k] || 0) + 1; });
+  const lines = Object.entries(by).map(([k, v]) => `· ${k}: ${v}명`);
+  if (!confirm(`엑셀에서 아래 기록을 복원할까요?\n\n${lines.join("\n") || "(경기 결과 없음)"}${tasks.length ? `\n· 과제수행 ${tasks.length}건` : ""}\n\n이미 기록이 있는 칸은 건드리지 않아요.${note.names ? `\n(이름이 달라 건너뛴 학생 ${note.names}명)` : ""}`)) return;
+  const groups = {};
+  plan.forEach(x => { (groups[`${x.cls}|${x.st}|${x.r}`] ||= []).push(x); });
+  Object.entries(groups).forEach(([key, list]) => {
+    const [cls, st, r] = key.split("|"), cur = ((((C(cls).games || {})[st]) || {})["r" + r] || {}).mk || {}, mk = { ...cur };
+    list.forEach(x => { mk[x.sid] = { r: x.rank, n: x.n, m: true, ...(x.v !== undefined ? { v: x.v } : {}) }; });
+    put(P(cls, "games", st, "r" + r, "mk"), mk, true);
+    if (!isClosed(cls, st, +r)) put(P(cls, "closed", st, "r" + r), Date.now(), true);
+  });
+  tasks.forEach(x => put(P(x.cls, "task", x.sid, x.k), 1, true));
+  toast(`복원했어요 — 경기 결과 ${plan.length}건${tasks.length ? `, 과제수행 ${tasks.length}건` : ""}. 결과 탭의 '복원·보충 기록'에서 볼 수 있어요`); render();
 }
 /* 구글 시트 자동 연동 — 선생님이 만든 Apps Script 웹 앱 주소로 성적 시트를 보낸다.
    성적이 바뀔 때마다(앱이 열려 있으면 1분 안, 닫혀 있었다면 다음에 열 때 바로) 자동으로 보낸다. 비밀 코드는 쓰지 않는다(예전에 정한 코드가 저장돼 있으면 그대로 함께 보냄). */
