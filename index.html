@@ -424,8 +424,14 @@
   .toScore{margin:10px 0 2px; min-height:50px; width:100%}
   .mkBox h3, .setup .card h3{margin:14px 0 6px}
   .mkBtns{display:flex; flex-direction:column; gap:8px; margin-top:4px} .mkBtns .btn{width:100%; min-height:54px}
+  .wz .wzH{font-size:20px; margin:4px 0 8px}
+  .wzRow{display:flex; flex-wrap:wrap; align-items:center; gap:6px; margin:8px 0} .wzRow b{flex:none; min-width:74px; font-size:17px}
+  .wzChip{min-height:52px; padding:0 14px; border:2px solid var(--line2); border-radius:14px; background:var(--panel); color:var(--ink); font-size:17px; font-weight:800; cursor:pointer} .wzChip.on{border-color:var(--pri); background:var(--priSoft); color:var(--pri)}
+  .wzNow{margin:10px 0; font-size:17px}
+  .wzBig{display:flex; flex-direction:column; align-items:flex-start; gap:2px; width:100%; min-height:64px; margin:8px 0; padding:10px 16px; text-align:left} .wzBig b{font-size:19px} .wzBig small{font-size:16px; font-weight:600}
+  .wzNext{width:100%; min-height:54px}
   .mkList{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:6px 0}
-  .mkItem{display:flex; align-items:center; gap:10px; min-height:50px; padding:0 12px; border:1px solid var(--line2); border-radius:12px; background:var(--panel); font-size:18px; font-weight:700; cursor:pointer}
+  .mkItem{display:flex; align-items:center; gap:6px; min-height:50px; padding:0 8px; border:1px solid var(--line2); border-radius:12px; background:var(--panel); font-size:18px; font-weight:700; cursor:pointer}
   .mkItem input{width:24px; height:24px; flex:none} .mkItem small{margin-right:6px; font-size:15px; color:var(--pri)}
   .mgBox{margin:12px 0}
   .mgRow{display:flex; align-items:center; gap:10px; min-height:56px; border-bottom:1px solid var(--line)}
@@ -1895,15 +1901,38 @@ function scEntry() {
   let h = "";
   // 빠진 경기 결과 직접 입력 — 이 라운드에서 아직 결과가 없는 학생을 보여 주고, 라운드 전체 또는 일부 경기(그 경기를 던진 학생만)를 골라 입력칸을 연다
   const missing = VIEW ? [] : roster(cls).filter(x => { const sid = sidOf(x); return !Object.keys(rr).some(k => rr[k] && rr[k][sid] && rr[k][sid].r >= 1) && !(rr.mk && rr.mk[sid]); });
-  const mkBox = VIEW ? "" : `<details class="setup noprint" data-k="mkOpen" ${ui.open.mkOpen ? "open" : ""}><summary>✍ 빠진 경기 결과 직접 입력</summary><div class="card"><p class="hint" style="margin-top:0">결과가 사라졌을 때, 갖고 있는 기록(엑셀·종이)을 보고 직접 적어요. <b>먼저 위에서 ${STAGES[st].name} ${ui.round}라운드가 맞는지 확인</b>하세요(다른 라운드는 [경기 · 라운드 바꾸기]).</p>
-    <h3>① 조 구성은 모르고 순위·인원만 알 때 (가장 쉬워요)</h3>
-    ${missing.length ? `<p class="hint" style="margin-top:0">학생마다 <b>순위 · 함께 던진 인원</b>만 적으면 승점이 저절로 계산돼요(승점은 따로 적지 않아요). 입력할 학생을 체크하세요. <b>라운드 전체</b>가 사라졌으면 [전체 선택], 일부만이면 그 학생만, 한 명이면 그 한 명만 체크하세요.</p>
-    <div class="mkList">${missing.map(x => `<label class="mkItem"><input type="checkbox" data-mk="${sidOf(x)}"><span><small>${esc(x.no)}</small>${esc(x.name)}</span></label>`).join("")}</div>
+  // 빠진 경기 결과 넣기 — 한 화면씩 안내(2026-11-17): ① 어느 경기 → ② 조를 아는지 → ③ 입력
+  const wzStep = missing.length && ["1", "2", "3a", "3b"].includes(ui.wzStep) ? ui.wzStep : "1";
+  const wzDone = (k, n) => { const r2 = roundRes(cls, k, n), ros = roster(cls); return ros.length > 0 && ros.every(x => { const sid = sidOf(x); return Object.keys(r2).some(g => r2[g] && r2[g][sid] && r2[g][sid].r >= 1) || (r2.mk && r2.mk[sid]); }); };
+  const wzList = list => `<div class="mkList">${list.map(x => `<label class="mkItem"><input type="checkbox" data-mk="${sidOf(x)}"><span><small>${esc(x.no)}</small>${esc(x.name)}</span></label>`).join("")}</div>`;
+  const grouped = new Set(gs.flatMap(g => g.m)), free = missing.filter(x => !grouped.has(sidOf(x)));
+  const wzBody = wzStep === "1" ? `<h3 class="wzH">① 어느 경기 결과를 넣을까요?</h3>
+    <p class="hint" style="margin-top:0">넣을 경기와 라운드를 누르세요. 라운드 옆 ✔는 모든 학생의 결과가 이미 있다는 뜻이에요.</p>
+    ${["cu", "x3"].map(k => `<div class="wzRow"><b>${STAGES[k].name}</b>${Array.from({ length: CFG.rounds }, (_, i) => i + 1).map(n => `<button class="wzChip ${k === st && n === ui.round ? "on" : ""}" data-act="wzRound" data-s="${k}" data-v="${n}">${n}라운드${wzDone(k, n) ? " ✔" : ""}</button>`).join("")}</div>`).join("")}
+    <p class="wzNow">고른 것: <b>${STAGES[st].name} ${ui.round}라운드</b> · 결과가 없는 학생 <b>${missing.length}명</b></p>
+    ${missing.length ? `<button class="btn pri wzNext" data-act="wzGo" data-v="2">다음 ▶</button>` : `<p class="hint"><b>이 라운드는 학생 모두 결과가 있어요.</b> 다른 라운드를 골라 보세요.</p>`}`
+    : wzStep === "2" ? `<h3 class="wzH">② 그 경기에서 누가 어느 조였는지 아시나요?</h3>
+    <p class="hint" style="margin-top:0">${STAGES[st].name} ${ui.round}라운드 · 결과가 없는 학생 ${missing.length}명</p>
+    <button class="btn pri wzBig" data-act="wzGo" data-v="3a"><b>👥 네, 조를 알아요</b><small>조마다 학생을 골라 조를 만들고, 점수를 넣어요</small></button>
+    <button class="btn wzBig" data-act="wzGo" data-v="3b"><b>👤 아니요, 순위만 알아요</b><small>학생마다 순위와 함께 던진 인원만 넣어요</small></button>
+    <button class="btn ghost" data-act="wzGo" data-v="1">◀ 이전</button>`
+    : wzStep === "3a" ? `<h3 class="wzH">③ ${gs.length + 1}조 학생을 체크하세요</h3>
+    <p class="hint" style="margin-top:0">같은 조였던 학생 2~${CFG.maxGroup}명을 체크하고 <b>[이 조 만들기]</b>를 누르세요. 조가 여러 개면 한 조씩 반복해요.</p>
+    ${gs.length ? `<p class="wzNow">지금까지 만든 조 <b>${gs.length}개</b> — 위쪽에 조 카드가 생겨요</p>` : ""}
+    ${free.length ? `${wzList(free)}
+    <div class="row" style="margin:6px 0"><button class="btn sm" data-act="mkNone">모두 해제</button></div>
+    <button class="btn pri wzBig" data-act="wzGroup"><b>이 조 만들기</b><small>체크한 학생들이 ${gs.length + 1}조가 돼요</small></button>` : `<p class="hint"><b>남은 학생이 없어요.</b> 모든 학생의 조를 만들었어요.</p>`}
+    ${gs.length ? `<button class="btn ${free.length ? "" : "pri"} wzBig" data-act="wzScore"><b>⬆ 조 카드에 점수 넣으러 가기</b><small>카드를 열고 학생마다 점수를 적으면 순위가 저절로 정해져요</small></button>` : ""}
+    <p class="hint">점수는 모르고 순위만 안다면 [◀ 이전]으로 돌아가 '순위만 알아요'를 고르세요.</p>
+    <button class="btn ghost" data-act="wzGo" data-v="2">◀ 이전</button>`
+    : `<h3 class="wzH">③ 순위를 넣을 학생을 고르세요</h3>
+    <p class="hint" style="margin-top:0">그 라운드가 통째로 빠졌으면 <b>[전체 선택]</b>을 누르세요. 일부만 빠졌으면 그 학생만 체크하세요.</p>
+    ${wzList(missing)}
     <div class="row" style="margin:6px 0"><button class="btn sm" data-act="mkAll">전체 선택</button><button class="btn sm" data-act="mkNone">모두 해제</button></div>
-    <button class="btn pri" data-act="mkOpen" style="width:100%; min-height:54px">👤 선택한 학생을 한 명씩 입력</button>
-    <p class="hint">위쪽에 <b>'직접 입력한 결과'</b> 칸이 생겨요. 학생마다 순위(1~5위)와 함께 던진 인원(3~5명)을 누르고, 알고 있으면 점수도 적으세요.</p>` : `<p class="hint" style="margin-top:0"><b>이 라운드는 학생 모두 결과가 있어요.</b> 빠진 게 있으면 위의 조 카드나 '직접 입력한 결과' 칸에서 고치세요.</p>`}
-    <h3>② 조 구성을 알 때</h3>
-    <p class="hint" style="margin-top:0">조 카드로 입력하면 조 인원과 순위가 자동으로 맞아요.<br>· 라운드 전체: <button class="btn sm" data-act="mkRound">✍ 조 편성부터 전체 입력</button><br>· 일부 조만: 위 목록에서 그 조 학생을 체크 → <button class="btn sm" data-act="mkGroup">👥 한 조로 만들기</button> (조마다 반복)</p></div></details>`;
+    <button class="btn pri wzBig" data-act="mkOpen"><b>👤 선택한 학생 입력 칸 열기</b><small>위쪽에 '직접 입력한 결과' 칸이 열려요</small></button>
+    <p class="hint">칸이 열리면 학생마다 <b>순위</b>(1~5위)와 <b>함께 던진 인원</b>(3~5명)을 누르세요. 승점은 저절로 계산돼요. 마지막에 <b>[✔ 모두 확인 · 저장]</b>을 누릅니다.</p>
+    <button class="btn ghost" data-act="wzGo" data-v="2">◀ 이전</button>`;
+  const mkBox = VIEW ? "" : `<details class="setup noprint" data-k="mkOpen" ${ui.open.mkOpen ? "open" : ""}><summary>✍ 빠진 경기 결과 넣기<span class="sp"></span><span class="sumR">단계별 안내</span></summary><div class="card wz" id="wz">${wzBody}</div></details>`;
   const mkNow = !VIEW && GRP == null && Object.keys(rr.mk || {}).length ? card(cls, st, "mk", Object.keys(rr.mk), rr.mk, "직접 입력한 결과") : "";   // 조가 없는 라운드에서도 직접 입력한 결과 칸은 보인다
   const pair = (ui.bigCls || []).filter(c => S.rosters[c]);
   if (VIEW && stuOK && !liveOf(cls)) return joinBox(cls) + `<p class="wait">⏳ 경기 시작을 기다리는 중</p>`;
@@ -2242,7 +2271,7 @@ function rulesTable() {
 
 /* ⚙ 설정 */
 /* 앱 버전 — 배포할 때마다 sw.js 의 CACHE 와 같은 번호로 올린다(설정 탭 맨 아래에 보여 준다) */
-const APP_VER = "v132";
+const APP_VER = "v133";
 async function updVer() {
   const el = $("swVer"); if (!el) return;
   try {
@@ -2706,6 +2735,28 @@ document.addEventListener("click", e => {
       Object.values(res).forEach(x => { if (!x) return; if (x.r >= 1) x.or = x.r; if (x.r === 1) x.v = 0; delete x.r; delete x.m; });   // 기존 순위(or)는 점수를 다 적을 때까지 화면에 남는다
       writeCard(gk, res); break;
     }
+    case "wzGo": case "wzRound": {   // 빠진 경기 결과 넣기: 단계 이동 · 경기/라운드 고르기
+      if (act === "wzRound") { ui.stage = b.dataset.s; ui.round = +v; ui.focus = null; ui.sel = null; ui.wzStep = "1"; }
+      else ui.wzStep = v;
+      ui.open.mkOpen = true; render();
+      setTimeout(() => { const el = $("wz"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60); break;
+    }
+    case "wzGroup": {   // 체크한 학생들로 조를 하나 만든다(같은 화면에 머물러 다음 조를 이어서 만든다)
+      const pick = [...document.querySelectorAll("input[data-mk]:checked")].map(c => c.dataset.mk);
+      if (pick.length < 2 || pick.length > CFG.maxGroup) { toast(`한 조는 2~${CFG.maxGroup}명이에요 — 같은 조였던 학생만 체크하세요`); break; }
+      const st = ui.stage, r = ui.round, list = groupsOf(cls, st, r);
+      list.push({ m: pick, tag: "" });
+      saveGroups(cls, st, list, "manual", r);
+      const L = liveOf(cls); if (!isClosed(cls, st, r) && !(L && L.st === st && L.r === r)) put(P(cls, "closed", st, "r" + r), Date.now(), true);   // 지난 라운드는 끝난 것으로
+      ui.open.mkOpen = true; toast(`${list.length}조를 만들었어요 (${pick.length}명)`); render();
+      setTimeout(() => { const el = $("wz"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80); break;
+    }
+    case "wzScore": {   // 아직 점수가 없는 첫 조 카드를 열어 준다
+      const st = ui.stage, r = ui.round, gs2 = groupsOf(cls, st, r), rr2 = roundRes(cls, st, r);
+      const gi = Math.max(0, gs2.findIndex((g, i) => !cardDone(cls, g, rr2, "g" + i, st, r)));
+      ui.focus = "g" + gi; render();
+      setTimeout(() => { const el = $("card-g" + gi); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80); break;
+    }
     case "mkOpen": {   // 이 라운드에서 결과가 없는 학생 전체를 '복원·보충 기록' 칸에 올린다(기본 4명 조)
       const st = ui.stage, r = ui.round, rr = roundRes(cls, st, r), mk = { ...(rr.mk || {}) };
       const pick = [...document.querySelectorAll("input[data-mk]:checked")].map(c => c.dataset.mk);   // 체크한 학생만(라운드 전체면 전체 선택)
@@ -2713,7 +2764,7 @@ document.addEventListener("click", e => {
       pick.forEach(sid => { if (!mk[sid]) mk[sid] = { n: 4 }; });
       put(P(cls, "games", st, "r" + r, "mk"), mk, true);
       const L = liveOf(cls); if (!isClosed(cls, st, r) && !(L && L.st === st && L.r === r)) put(P(cls, "closed", st, "r" + r), Date.now(), true);   // 지난 라운드는 끝난 것으로
-      ui.focus = "mk"; toast("직접 입력한 결과 칸을 열었어요 — 학생마다 순위와 점수를 적으세요"); render(); setTimeout(() => { const el = $("card-mk"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80); break;
+      ui.focus = "mk"; toast("직접 입력한 결과 칸을 열었어요 — 학생마다 순위와 함께 던진 인원을 누르세요"); render(); setTimeout(() => { const el = $("card-mk"); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); }, 80); break;
     }
     case "mkGroup": {
       const pick = [...document.querySelectorAll("input[data-mk]:checked")].map(c => c.dataset.mk);
