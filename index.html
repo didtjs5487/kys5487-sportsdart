@@ -734,13 +734,14 @@
   @media (max-width:520px){ .clsCards.two{grid-template-columns:1fr} }
   .clsTools{display:flex; gap:8px; align-items:center} .clsMore{flex:1; min-height:50px; border:0; border-radius:999px; background:var(--soft); color:var(--ink); font-size:17px; font-weight:800; cursor:pointer}
   .verLine{margin:18px 2px 8px; font-size:17px; font-weight:700; color:var(--sub)} .verLine b{color:var(--ink)} .verLine .bad{color:var(--bad)}
-  .clsList{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:8px 0 10px; animation:tabIn .3s var(--ease)}
+  .clsList{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; margin:0 0 10px; animation:tabIn .3s var(--ease)}
   .clsRow{display:grid; grid-template-columns:auto 1fr; align-items:baseline; gap:0 8px; min-height:62px; padding:8px 12px; border:1px solid var(--line2); border-radius:14px; background:var(--panel); color:var(--ink); text-align:left; cursor:pointer}
   .clsRow b{font-size:22px; font-weight:800} .clsRow b small{font-size:15px; color:var(--sub); margin-left:1px}
   .clsRow span{font-size:16px; font-weight:700; color:var(--sub); text-align:right; white-space:nowrap}
   .clsRow em{grid-column:1 / -1; font-style:normal; font-size:16px; font-weight:800; color:var(--sub)}
   .clsRow.run{border-color:var(--pri)} .clsRow.run em, .clsRow.ready em{color:var(--pri)} .clsRow.done em{color:var(--good)}
   .clsRow.wait{background:#FFF6E5; border-color:#F3D9A4} .clsRow.wait em{color:#B45F06}
+  .clsRow.sel{background:var(--ink); border-color:var(--ink); color:#fff} .clsRow.sel b small, .clsRow.sel span, .clsRow.sel em{color:#fff}
   @media (min-width:701px){ .clsList{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))} }
   .gTiles{flex:1 1 100%; display:flex; flex-direction:column; gap:6px}
   .gT{display:flex; flex-direction:row; align-items:center; justify-content:space-between; min-width:0; min-height:56px; padding:6px 16px; border-radius:14px; background:var(--priSoft); color:var(--pri); font-style:normal; font-size:20px; font-weight:800; line-height:1.2}
@@ -922,7 +923,7 @@ if (PIN_BOARD) ui.board = PIN_BOARD;
 if (GRP != null) ui.tab = "entry";
 // 편성 기본은 랜덤 (2026-10-07) — 예전에 저장된 기기도 한 번 랜덤으로 맞춘다
 if (ui.mver !== 2) { ui.method = { cu: "random", x3: "random" }; ui.mver = 2; }
-const saveUI = () => lsSet(LSU, { nextSame: ui.nextSame, mver: ui.mver, tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gst: ui.gst, bigCls: ui.bigCls, bigDay: ui.bigDay, fit: ui.fit, board: ui.board, boardKey: ui.boardKey });
+const saveUI = () => lsSet(LSU, { nextSame: ui.nextSame, mver: ui.mver, tab: ui.tab, cls: ui.cls, stage: ui.stage, round: ui.round, method: ui.method, sort: ui.sort, gst: ui.gst, bigCls: ui.bigCls, bigDay: ui.bigDay, pairOn: ui.pairOn === true, fit: ui.fit, board: ui.board, boardKey: ui.boardKey });
 
 function getAt(o, path) { for (const k of path.split("/")) { if (o == null) return undefined; o = o[k]; } return o; }
 function setAt(o, path, v) {
@@ -1701,10 +1702,8 @@ function groupBlock(c, st, r, head) {
   return h;
 }
 /* 반 고르기 단추 + 두 반 함께 수업 (2026-10-27): 화면에서 반을 바로 누른다. 두 반 함께를 켜고 두 반을 고르면 다트를 반씩 나눠 한 번에 시작 */
-const pairOn = () => ui.pairOn === true;   // 이 화면에서 두 반 함께를 켰을 때만 (새로 열면 꺼짐)
+const pairOn = () => ui.pairOn === true && ui.bigDay === today();   // 반 상자를 두 개 눌렀을 때(오늘만)
 const shortCls = c => { const t = String(c); return t.includes("-") ? t.split("-").pop() : t; };   // 1-7 → 7
-/* 다른 반 목록은 지금 반이 경기 중이 아니면 펼쳐 둔다(수업 시작 때 반을 바로 찾게). 한 번 누르면 그 뒤로는 누른 대로 */
-const clsListOpen = () => ui.clsMenu == null ? !classState(ui.cls).L : !!ui.clsMenu;
 /* 경기 중인 반 카드에 넣는 조별 저장 표시 — 초록 저장 · 파랑 아직 */
 const brdShort = (c, gi, n) => `${boardOf(c, gi, n)}번${Math.ceil((n || 1) / useN(c, n)) > 1 ? ` ${waveOf(c, gi, n)}차` : ""}`;
 function leftGroups(c, L) { const gs = groupsOf(c, L.st, L.r), rr = roundRes(c, L.st, L.r); return gs.map((g, gi) => cardDone(c, g, rr, "g" + gi, L.st, L.r) ? -1 : gi).filter(gi => gi >= 0); }
@@ -1718,11 +1717,9 @@ function clsBar() {
   const on = pairOn(), sel = (on ? [ui.cls, ...bigPair()] : [ui.cls]).sort(numSort), two = sel.length > 1;
   const CIR = 2 * Math.PI * 22;
   const chips = sel.map(c => { const t = classState(c), nx = ui.tab === "entry" && t.k === "done" && t.L ? `<button class="btn sm pri" data-act="startOne" data-v="${esc(c)}">▶ 다음 경기</button>` : "";
-    return `<div class="clsCard ${t.k} ${c === ui.cls ? "cur" : ""}" role="button" tabindex="0" data-act="${two ? "pickCls" : "clsMenu"}" data-v="${esc(c)}"><div class="pgW"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="22" class="pT"/><circle cx="26" cy="26" r="22" class="pB" style="opacity:${t.pct ? 1 : 0}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - t.pct)).toFixed(1)}" transform="rotate(-90 26 26)"/></svg><div class="pgN">${t.num}</div></div><div class="pgT"><b>${esc(shortCls(c))}<small>반</small></b><span>${t.game}</span><small class="cs">${t.txt}</small></div>${nx}${pips(c, t.cg)}${t.L ? grpTiles(c, t.L) : ""}</div>`; }).join("");
-  const others = names.filter(c => !sel.includes(c)).map(c => ({ c, t: classState(c) })), hot = x => x.t.k === "wait" || !!x.t.L;
-  const openList = clsListOpen(), shown = others.filter(x => openList || hot(x)).sort((a, b) => (hot(b) - hot(a)) || numSort(a.c, b.c));
-  const menu = shown.length ? `<div class="clsList noprint">${shown.map(({ c, t }) => `<button class="clsRow ${t.k}" data-act="clsTap" data-v="${esc(c)}"><b>${esc(shortCls(c))}<small>반</small></b><span>${t.game}</span><em>${t.txt}</em></button>`).join("")}</div>` : "";
-  return `<div class="clsBar noprint"><div class="clsCards ${two ? "two" : ""}">${chips}</div><div class="clsTools"><button class="clsMore ${openList ? "open" : ""}" data-act="clsMenu" aria-expanded="${openList}">다른 반 ${openList ? "접기 ▴" : "보기 ▾"}</button><button class="pairTog ${on ? "on" : ""}" data-act="pairTog" aria-pressed="${on}"><span class="pIco">${on ? "✓" : "＋"}</span>두 반 함께</button></div></div>${menu}${on && !two ? `<p class="hint noprint" style="margin:-4px 0 8px">함께할 반을 하나 더 눌러 주세요</p>` : ""}`;
+    return `<div class="clsCard ${t.k} ${c === ui.cls ? "cur" : ""}" ${two ? `role="button" tabindex="0" data-act="pickCls" data-v="${esc(c)}"` : ""}><div class="pgW"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="22" class="pT"/><circle cx="26" cy="26" r="22" class="pB" style="opacity:${t.pct ? 1 : 0}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - t.pct)).toFixed(1)}" transform="rotate(-90 26 26)"/></svg><div class="pgN">${t.num}</div></div><div class="pgT"><b>${esc(shortCls(c))}<small>반</small></b><span>${t.game}</span><small class="cs">${t.txt}</small></div>${nx}${pips(c, t.cg)}${t.L ? grpTiles(c, t.L) : ""}</div>`; }).join("");
+  const menu = `<div class="clsList noprint">${names.slice().sort(numSort).map(c => { const t = classState(c), on1 = sel.includes(c); return `<button class="clsRow ${t.k} ${on1 ? "sel" : ""}" data-act="clsTap" data-v="${esc(c)}" aria-pressed="${on1}"><b>${esc(shortCls(c))}<small>반</small></b><span>${t.game}</span><em>${t.txt}</em></button>`; }).join("")}</div>`;
+  return `<div class="clsBar noprint">${menu}<div class="clsCards ${two ? "two" : ""}">${chips}</div></div>`;
 }
 /* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
 /* 두 반 함께: 반마다 큰 단추 하나씩 — 반의 진도에 맞게 이어서 시작 · 조 편성 · 경기 시작 · 다음 경기 */
@@ -2455,7 +2452,6 @@ document.addEventListener("click", e => {
       break;
     }
     case "mvTog": ui.mv = !(ui.mv || ui.sel); ui.sel = null; render(); break;
-    case "clsMenu": ui.clsMenu = !clsListOpen(); render(); break;
     case "goWait": case "goCard": {
       const c = (act === "goCard" ? b.dataset.c : v) || ui.cls;
       if (c !== ui.cls) { if (pairOn()) { ui.bigCls = [c, ui.cls]; ui.bigDay = today(); } ui.cls = c; ui.sel = null; }
@@ -2464,20 +2460,17 @@ document.addEventListener("click", e => {
       ui.tab = "entry"; ui.open = {}; ui.focus = k || "none"; render();
       setTimeout(() => { const el = k && $("card-" + k); if (el) el.scrollIntoView({ behavior: "smooth", block: "center" }); else scrollTo(0, 0); }, 80); break;
     }
-    case "clsTap": {
-      if (pairOn()) {
-        const sel = [ui.cls, ...bigPair()];
-        if (v === ui.cls) break;
-        if (sel.includes(v)) { ui.bigCls = [v, ui.cls]; ui.cls = v; }   // 함께하는 다른 반을 보던 반으로
-        else { ui.bigCls = [ui.cls, v]; ui.bigDay = today(); }
-      } else ui.cls = v;
-      focusGame(ui.cls);
-      ui.open = {}; ui.focus = null; ui.sel = null;
-      if (!pairOn() || [ui.cls, ...bigPair()].length === 2) ui.clsMenu = false;   // 반을 다 고르면 목록을 접는다
-      render(); break;
+    case "clsTap": {   // 반 상자: 누르면 색이 칠해지고, 하나 더 누르면 2학급 수업. 칠해진 반을 다시 누르면 빠진다
+      const sel = pairOn() ? [ui.cls, ...bigPair()] : [ui.cls];
+      if (sel.includes(v)) {
+        if (sel.length < 2) break;
+        const keep = sel.find(x => x !== v);
+        ui.pairOn = false; ui.bigCls = [keep]; ui.bigDay = today(); ui.cls = keep;
+      } else if (sel.length === 1) { ui.pairOn = true; ui.bigCls = [ui.cls, v]; ui.bigDay = today(); }
+      else { ui.bigCls = [ui.cls, v]; ui.bigDay = today(); }   // 이미 둘이면 보던 반은 두고 다른 반만 바꾼다
+      focusGame(ui.cls); ui.open = {}; ui.focus = null; ui.sel = null; saveUI(); render(); break;
     }
     case "pickCls": { if (v !== ui.cls) { ui.bigCls = [v, ui.cls]; ui.bigDay = today(); ui.cls = v; focusGame(v); ui.focus = null; ui.sel = null; } render(); break; }
-    case "pairTog": { const on = !pairOn(); ui.pairOn = on; ui.bigCls = [ui.cls]; ui.bigDay = today(); ui.clsMenu = on; render(); break; }
     case "startPair": startPair(); break;
     case "startOne": { const o = [ui.cls, ...bigPair()].find(c => c !== v); if (o && pairOn()) pairBoards(...[v, o].sort(numSort)); ui.cls = v; ui.bigCls = [v, ...bigPair().filter(c => c !== v)].slice(0, 2); ui.bigDay = today(); startNext(v); break; }
     case "clrRound": {
