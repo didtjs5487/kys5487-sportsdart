@@ -743,6 +743,10 @@
   .clsRow.wait{background:#FFF6E5; border-color:#F3D9A4} .clsRow.wait em{color:#B45F06}
   .clsDrop{flex:none; min-height:50px; padding:0 14px; border:0; border-radius:14px; background:var(--soft); color:var(--sub); font-size:16px; font-weight:800; cursor:pointer}
   .clsRow.sel.cur{box-shadow:0 0 0 3px var(--pri)}
+  .clsList.cmp{grid-template-columns:repeat(5,minmax(0,1fr)); gap:6px}
+  .clsList.cmp .clsRow{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; min-height:64px; padding:6px 2px; text-align:center}
+  .clsList.cmp .clsRow b{font-size:22px; line-height:1.1} .clsList.cmp .clsRow em{font-size:16px; line-height:1.1; white-space:nowrap}
+  @media (min-width:701px){ .clsList.cmp{grid-template-columns:repeat(5,minmax(0,1fr))} }
   .clsRow.sel{background:var(--ink); border-color:var(--ink); color:#fff} .clsRow.sel b small, .clsRow.sel span, .clsRow.sel em{color:#fff}
   @media (min-width:701px){ .clsList{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))} }
   .gTiles{flex:1 1 100%; display:flex; flex-direction:column; gap:6px}
@@ -1720,7 +1724,9 @@ function clsBar() {
   const CIR = 2 * Math.PI * 22;
   const chips = sel.map(c => { const t = classState(c), nx = ui.tab === "entry" && t.k === "done" && t.L ? `<button class="btn sm pri" data-act="startOne" data-v="${esc(c)}">▶ 다음 경기</button>` : "";
     return `<div class="clsCard ${t.k} ${c === ui.cls ? "cur" : ""}" ${two ? `role="button" tabindex="0" data-act="pickCls" data-v="${esc(c)}"` : ""}><div class="pgW"><svg viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="22" class="pT"/><circle cx="26" cy="26" r="22" class="pB" style="opacity:${t.pct ? 1 : 0}" stroke-dasharray="${CIR.toFixed(1)}" stroke-dashoffset="${(CIR * (1 - t.pct)).toFixed(1)}" transform="rotate(-90 26 26)"/></svg><div class="pgN">${t.num}</div></div><div class="pgT"><b>${esc(shortCls(c))}<small>반</small></b><span>${t.game}</span><small class="cs">${t.txt}</small></div>${two ? `<button class="clsDrop" data-act="dropCls" data-v="${esc(c)}" aria-label="${esc(shortCls(c))}반 빼기">✕ 빼기</button>` : ""}${nx}${pips(c, t.cg)}${t.L ? grpTiles(c, t.L) : ""}</div>`; }).join("");
-  const menu = `<div class="clsList noprint">${names.slice().sort(numSort).map(c => { const t = classState(c), on1 = sel.includes(c); return `<button class="clsRow ${t.k} ${on1 ? "sel" : ""} ${two && c === ui.cls ? "cur" : ""}" data-act="clsTap" data-v="${esc(c)}" aria-pressed="${on1}"><b>${esc(shortCls(c))}<small>반</small></b><span>${t.game}</span><em>${t.txt}</em></button>`; }).join("")}</div>`;
+  const cmp = names.length >= 4;   // 반이 많으면 번호 + 짧은 상태만 — 10개 반도 한 화면에 (자세한 상태는 칠한 반의 카드에)
+  const shortTxt = (c, t) => t.L ? (t.k === "done" ? "✔" : `${liveStat(c).nd}/${liveStat(c).total}`) : t.k === "wait" ? "이어서" : t.k === "ready" ? "시작" : t.k === "done" ? "끝" : "대기";
+  const menu = `<div class="clsList noprint ${cmp ? "cmp" : ""}">${names.slice().sort(numSort).map(c => { const t = classState(c), on1 = sel.includes(c); return `<button class="clsRow ${t.k} ${on1 ? "sel" : ""} ${two && c === ui.cls ? "cur" : ""}" data-act="clsTap" data-v="${esc(c)}" aria-pressed="${on1}" aria-label="${esc(shortCls(c))}반 ${t.game} ${t.txt.replace(/<[^>]*>/g, "")}"><b>${esc(shortCls(c))}<small>반</small></b>${cmp ? "" : `<span>${t.game}</span>`}<em>${cmp ? shortTxt(c, t) : t.txt}</em></button>`; }).join("")}</div>`;
   return `<div class="clsBar noprint">${menu}<div class="clsCards ${two ? "two" : ""}">${chips}</div></div>`;
 }
 /* 두 반 함께: 반마다 지금 라운드 입력 현황과 따로 넘기는 [다음 경기] */
